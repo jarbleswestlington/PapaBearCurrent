@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+   <head>
+       <style>
+
+		body, canvas{
+		
+			padding:0px;
+			margin:0px;
+			background:white;
+			overflow-y:hidden;
+			font-family:Helvetica;
+		
+		}
+	
+		canvas{
+			position:fixed;
+			top:0px;
+			z-index:1;
+		}
+
+       </style>
+       <script src='//code.jquery.com/jquery-1.7.2.min.js'></script>
+       <script src='socket.io/socket.io.js'></script>
+       <script>
+
+           var socket = io.connect(window.location.hostname);
+
+           socket.on('connect', function(data) { });
+		   
+           socket.on('error', function() { console.error(arguments) });
+           socket.on('message', function() { console.log(arguments) });
+       </script>
+   </head>
+   <body>
+    <br>
+         <script src="js/game.js"></script>
+       <div class = "infobox"></div>
+   </body>
+</html>
