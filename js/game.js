@@ -38,8 +38,8 @@ document.body.appendChild(canvas);
 //upload all images
 {
 
-playerShadow = new Image();
-playerShadow.src = "images/playerShadow.png"
+playershadow = new Image();
+playershadow.src = "images/playershadow.png"
 
 bearImage = new Image();
 bearImage.src = "images/bear.png";
@@ -1647,7 +1647,7 @@ var render = function () {
 	for(i=0; i < players.length; i++){
 		//shadows
 	//if (players[i].direction == "L"){
-		ctx.drawImage(playerShadow, players[i].x + camera.x -1 , players[i].y + camera.y + 11, 41,36);
+		ctx.drawImage(playershadow, players[i].x + camera.x -1 , players[i].y + camera.y + 11, 41,36);
 	//}	
 
 		//CHARACTER DRAWING
