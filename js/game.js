@@ -1,12 +1,15 @@
 //testing123
 
 var swipeX;
+var backX;
+var backY;
 var swipeY;
 var offsetSwipeY = 1;
 var swipeStart = 0;
 var swiping = false;
 var swipage = false;
 var preSwiping = false;
+var hitting = false;
 //var swipeVisible = false;
 
 //donetesting
@@ -35,6 +38,9 @@ document.body.appendChild(canvas);
 //upload all images
 {
 
+playerShadow = new Image();
+playerShadow.src = "images/playerShadow.png"
+
 bearImage = new Image();
 bearImage.src = "images/bear.png";
 
@@ -45,12 +51,29 @@ if(!threeteams){
 
 }
 
-//testing123
+swordR = new Image();
+swordR.src = "images/swordR.png";
+
+swordL = new Image();
+swordL.src = "images/swordL.png";
+
+swordD = new Image();
+swordD.src = "images/swordD.png";
+
+swordU = new Image();
+swordU.src = "images/swordU.png";
+
+counter = new Image();
+counter.src = "images/counter.png";
+
+pileImage = new Image();
+pileImage.src = "images/pile.png";
+
+pileImage2 = new Image();
+pileImage2.src = "images/pile2.png";
 
 backpackImage = new Image();
 backpackImage.src = "images/backpacks.png";
-
-//donetesting
 
 backgroundImage = new Image();
 backgroundImage.src = "images/background.png";
@@ -285,15 +308,10 @@ score = {
 	yellow:0
 }
 
-//testing123
-
 var swipe = {
 
 	radius: 55,
 }
-
-//donetesting
-
 
 var weapon = {
 
@@ -578,13 +596,22 @@ var update = function (modifier) {
 		if(shiftPressable && swiping == false){
 			
 			shiftPressable = false;
-			
+				
+				preSwiping = true;
+				swipeStart = Date.now();
+				
+				setTimeout(function() { 
+					swiping = true;
+					preSwiping = false;
+		
+			 }, 400);
+
 
 			//insert preswiping phase
 
-			swiping = true;
+			//swiping = true;
 			
-			swipeStart = Date.now();
+			//swipeStart = Date.now();
 			
 		}
 		
@@ -595,24 +622,26 @@ var update = function (modifier) {
 
 
 
-	if(Date.now() > swipeStart + 100 && swiping){
+	if(Date.now() > swipeStart + 100 && swiping == true){
 		
 		illegal = true;
 		swipage = true;
+		//hitting = true;
 		
-		if(Date.now() > swipeStart + 700){
+		if(Date.now() > swipeStart + 800 && swiping == true){
 			
 			swiping = false;
 			swipage = false;
+			//hitting = false;
 		}
 		
 	}
 
-		if(swipage = true && !illegal && !players[playerNumber].dead){
+		if(swipage == true && !players[playerNumber].dead){
 		
-		amount = 256 * modifier;
+			amount = 256 * modifier;
 
-			if (16 in keysDown){
+			//if (16 in keysDown){
 
 				if (players[playerNumber].direction == "U"){
 							
@@ -765,9 +794,9 @@ var update = function (modifier) {
 					if(hit){
 				
 						socket.emit('player_killed', {number: i});
-				
+					
 					}
-				}
+				//}
 			}
 		//endtesting
 
@@ -865,6 +894,25 @@ var update = function (modifier) {
 		
 	}
 	
+
+	//testing123
+	//BASECOLLISION
+
+			if(checkCollision(check, blueBase, 41, 36, 161, 94, 0, 0) && !players[playerNumber].dead){
+				illegal = true;
+				if(checkCollision({x: players[playerNumber].x, y: players[playerNumber].y}, {x: blueBase.x + 2, y: blueBase.y + 2}, 41, 36, 159, 92, 0, 0)){
+					illegal = false;
+					socket.emit('quick_kill', {number: playerNumber});
+
+				}
+		}
+
+
+
+
+	//donetesting
+
+
 	treeText = false;
 	
 	for(i = 0; i < trees.length; i++){
@@ -1334,7 +1382,7 @@ var update = function (modifier) {
 		}
 	
 		if(checkCollision(players[playerNumber], redBase, 41, 36, 161, 94, -25, -25)){
-		
+
 			if(players[playerNumber].team == redBase.team){
 			
 				depLog();
@@ -1357,6 +1405,7 @@ var update = function (modifier) {
 
 	
 		if(checkCollision(players[playerNumber], blueBase, 41, 36, 161, 94, -25, -25)){
+
 		
 			if(players[playerNumber].team == blueBase.team){
 			
@@ -1381,6 +1430,7 @@ var update = function (modifier) {
 		}
 	
 		if(checkCollision(players[playerNumber], greenBase, 41, 36, 161, 94, -25, -25)){
+
 		
 			if(players[playerNumber].team == greenBase.team){
 			
@@ -1421,15 +1471,20 @@ var update = function (modifier) {
 var render = function () {
 	
 
+
+	//tiled background
+
 	for(q = 0; q < 6; q++){
 	
 		for(r = 0; r < 6; r++){
 
-		ctx.drawImage(backgroundImage, q * 1000 + camera.x, r * 999 + camera.y);
-
+		ctx.drawImage(backgroundImage, q * 944 + camera.x, r * 807 + camera.y);
 
 		}
 	}
+
+
+
 	if(playerNumber != 0){
 	
 		camera.y = canvas.height/2 - players[playerNumber].y;
@@ -1439,7 +1494,75 @@ var render = function () {
 	
 	ctx.fillStyle = "rgb(255,0,0)";
 
-	
+	//testing123
+
+	//ctx.drawImage(counter, blueBase.x + camera.x - 5, blueBase.y + camera.y + 40);
+
+
+	if(score.blue > 0){
+
+	ctx.drawImage(pileImage2, blueBase.x + camera.x - 53, blueBase.y + camera.y + 61);
+	}
+	if(score.blue > 150){
+
+			ctx.drawImage(pileImage2, blueBase.x + camera.x - 77, blueBase.y + camera.y + 61);
+	}
+	if(score.blue > 300){
+
+			ctx.drawImage(pileImage2, blueBase.x + camera.x - 70, blueBase.y + camera.y + 47);
+	}
+	if(score.blue > 450){
+
+			ctx.drawImage(pileImage2, blueBase.x + camera.x - 101, blueBase.y + camera.y + 61);
+	}
+	if(score.blue > 600){
+
+			ctx.drawImage(pileImage2, blueBase.x + camera.x - 100, blueBase.y + camera.y + 61);
+	}
+	if(score.blue > 750){
+
+			ctx.drawImage(pileImage2, blueBase.x + camera.x - 93, blueBase.y + camera.y + 47);
+
+	}
+	if(score.blue > 900){
+
+			ctx.drawImage(pileImage2, blueBase.x + camera.x - 124, blueBase.y + camera.y + 61);
+
+	}
+	if(score.blue > 1050){
+
+			ctx.drawImage(pileImage2, blueBase.x + camera.x - 117, blueBase.y + camera.y + 47);
+
+	}
+	if(score.blue > 1200){
+
+			ctx.drawImage(pileImage2, blueBase.x + camera.x - 148, blueBase.y + camera.y + 61);
+
+	}
+	if(score.blue > 1350){
+
+			ctx.drawImage(pileImage2, blueBase.x + camera.x - 141, blueBase.y + camera.y + 47);
+
+	}
+	if(score.blue > 1500){
+
+		ctx.drawImage(pileImage2, blueBase.x + camera.x - 75, blueBase.y + camera.y + 33);
+
+	}
+	if(score.blue > 1650){
+
+		ctx.drawImage(pileImage2, blueBase.x + camera.x - 99, blueBase.y + camera.y + 33);
+
+	}
+	if(score.blue > 1650){
+
+	ctx.drawImage(pileImage2, blueBase.x + camera.x - 123, blueBase.y + camera.y + 33);
+
+	}
+
+	//donetesting
+
+
 	//bases & score
 	if(!threeteams){
 		
@@ -1450,7 +1573,11 @@ var render = function () {
 	}
 	
 	ctx.drawImage(blueBaseImage, blueBase.x + camera.x, blueBase.y + camera.y);
-	ctx.fillText(score.blue,  blueBase.x + camera.x, blueBase.y + camera.y);
+	ctx.fillStyle = "white";
+	ctx.font="11px Georgia";
+	ctx.drawImage(counter, blueBase.x + camera.x - 8, blueBase.y + camera.y + 50);
+	ctx.fillText(score.blue,  blueBase.x + camera.x - 3, blueBase.y + camera.y + 65);
+
 	
 	ctx.drawImage(greenBaseImage, greenBase.x + camera.x, greenBase.y + camera.y);
 	ctx.fillText(score.green,  greenBase.x + camera.x, greenBase.y + camera.y);
@@ -1476,24 +1603,24 @@ var render = function () {
 
 			case 1:
 			
-				ctx.drawImage(pinesImage, 0, 0, 95, 95, trees[i].x + camera.x - 9, trees[i].y + camera.y - 9, 95, 95);
+				ctx.drawImage(pinesImage, 0, 0, 111, 131, trees[i].x + camera.x - 9, trees[i].y + camera.y - 9, 111, 131);
 
 			break;
 
 			
 			case 2:
-				ctx.drawImage(pinesImage, 96, 0, 191, 95, trees[i].x + camera.x - 9, trees[i].y + camera.y - 9, 191, 95);
+				ctx.drawImage(pinesImage, 114, 0, 220, 131, trees[i].x + camera.x - 9, trees[i].y + camera.y - 9, 220, 131);
 
 			break;
 
 			case 3:
-				ctx.drawImage(pinesImage, 0, 96, 95, 191, trees[i].x + camera.x - 9, trees[i].y + camera.y - 9, 95, 191);
+				ctx.drawImage(pinesImage, 0, 131, 111, 257, trees[i].x + camera.x - 9, trees[i].y + camera.y - 9, 111, 257);
 
 			break;
 
 			
 			case 4:
-				ctx.drawImage(pinesImage, 96, 96, 191, 191, trees[i].x + camera.x - 9, trees[i].y + camera.y - 9, 191, 191);
+				ctx.drawImage(pinesImage, 114, 132, 220, 257, trees[i].x + camera.x - 9, trees[i].y + camera.y - 9, 220, 257);
 
 			break;
 
@@ -1518,7 +1645,11 @@ var render = function () {
 	}
 		
 	for(i=0; i < players.length; i++){
-		
+		//shadows
+	//if (players[i].direction == "L"){
+		ctx.drawImage(playerShadow, players[i].x + camera.x -1 , players[i].y + camera.y + 11, 41,36);
+	//}	
+
 		//CHARACTER DRAWING
 		if(players[i].dead){
 			
@@ -1723,6 +1854,7 @@ var render = function () {
 	
 		}
 		
+
 		//chat drawing
 	    ctx.font = '20px Calibri';
 		
@@ -1737,11 +1869,39 @@ var render = function () {
 		if(players[i].dead == false){
 
 			//testing123
-	
-			if (!swipage){
+			if (preSwiping){
+
+					if (players[i].direction == "L"){
+						ctx.drawImage(swordL, players[i].x + camera.x + 10, players[i].y + camera.y - 42);
+					}
+						if (players[i].direction == "R"){
+						ctx.drawImage(swordR, players[i].x + camera.x + 10, players[i].y + camera.y + 38);
+					}
+						if (players[i].direction == "D"){
+						ctx.drawImage(swordU, players[i].x + camera.x - 42, players[i].y + camera.y + 12);
+					}
+						if (players[i].direction == "U"){
+						ctx.drawImage(swordD, players[i].x + camera.x + 41, players[i].y + camera.y + 12);
+					}
+			}
+
+			if (swipage){
+
+						if (players[i].direction == "R"){
+						ctx.drawImage(swordL, players[i].x + camera.x + 10, players[i].y + camera.y - 42);
+					}
+						if (players[i].direction == "L"){
+						ctx.drawImage(swordR, players[i].x + camera.x + 10, players[i].y + camera.y + 38);
+					}
+						if (players[i].direction == "U"){
+						ctx.drawImage(swordU, players[i].x + camera.x - 42, players[i].y + camera.y + 12);
+					}
+						if (players[i].direction == "D"){
+						ctx.drawImage(swordD, players[i].x + camera.x + 41, players[i].y + camera.y + 12);
+					}
+
 
 				swipeArch = ctx.fillStyle = "rgb(255,255,0)"
-
 
 
 				 if (players[i].direction == "U"){

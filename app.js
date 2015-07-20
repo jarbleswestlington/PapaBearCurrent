@@ -257,7 +257,7 @@ io.sockets.on('connection', function(socket) {
 
 		  spawnX = 1300 + (50 * blueTeam);
 
-		  spawnY = 1400;
+		  spawnY = 1500;
 
   
 
@@ -576,6 +576,48 @@ socket.on('player_killed', function(data){
 	  
 
 });
+
+socket.on('quick_kill', function(data){
+	
+	//console.log('player killed');
+	
+	players[data.number].dead = true;	
+	
+	do{
+		
+		free = true;
+		
+		spawn[data.number] = getSpawnXY(data.number);
+		
+		for(i = 0; i < players.length; i++){
+		
+			if(i != data.number){
+		
+				if(checkCollision(spawn[data.number], players[i], 41, 36, 41, 36, 0, 0)){
+				
+					free = false;
+		
+				}
+			
+			}
+		}
+		
+		
+	}while(!free);
+	
+	setTimeout(function() { 
+		players[data.number].x = spawn[data.number].x;
+		players[data.number].y = spawn[data.number].y;
+		players[data.number].dead = false;
+		players[data.number].PAPABEAR = false;
+		//players[data.number].swordBearer = false;
+		
+	 }, 100);
+	  
+
+});
+
+
 
    socket.on('move_input', function(data){
 	   
