@@ -1,52 +1,28 @@
-var http = require('http');
-var q = require('q');
+var http = require('http'),
+q = require('q'),
+express = require("express"),
+app = express(),
+util = require('util')
+fs   = require('fs'),
+game = require('./server.js');
 
-var express = require("express"),
-   app = express(),
-   //formidable = require('formidable'),
-   util = require('util')
-   fs   = require('fs-extra'),
-   qt   = require('quickthumb'),
-   fsog = require('fs'),
+app.use(express.static(__dirname + '/public'));
 
-   index = fsog.readFileSync(__dirname + '/index.html');
+var index = fs.readFileSync('index.html');
 
-
-var server = app.listen(process.env.PORT || 3000);
-
-var io = require('socket.io').listen(server);
-
-// Use quickthumb
-app.use(qt.static(__dirname + '/'));
-
-//index
 app.get('/', function (req, res){
 
    res.writeHead(200, {'content-type': 'text/html'});
 
    res.write(index);
-   //res.write(countdown);
 
    res.end();
 
 });
-var treeNum = 1;
-var joined = 0;
-var playerCount = 0;
 
-var players = [];
-var check = [];
-var illegal = [];
+var server = app.listen(process.env.PORT || 3000);
+var io = require('socket.io').listen(server);
 
-
-var started = false;
-
-var arr = [];
-for (var i = 0; i < 1000; i++) {
-
-	arr.push(Math.round(Math.random() * 3));
-	
-}
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -65,291 +41,241 @@ function checkCollision(item, shark, itemWidth, itemHeight, sharkWidth, sharkHei
    }
 }
 
-function getSpawnXY(playerNumber){
 
- 
-spawnX = 0;
+var Game = function(){
 
-spawnY = 0;
-
-
-if (players[playerNumber].team == "blue") {
-
- 
-
-  spawnX = 1300 + (100 * Math.random() * 4);
-
-  spawnY = 1300 + (100 * Math.random() * 4);
-
-    
-
-}else if (players[playerNumber].team == "red") {
-
- 
-
-  spawnX = 3400 - (100 * Math.random() * 4);
-
-  spawnY = 2300 + (100 * Math.random() * 4);
-
- 
-
-  }
-
-else if (players[playerNumber].team == "green") {
-
- 
-
-  spawnX = 1300 + (100 * Math.random() * 4);
-
-  spawnY = 3400 - (100 * Math.random() * 4); 
-
-
-  }
-
-else{
-
-
-  spawnX = 3120 - (100 * Math.random() * 4);
-
-  spawnY = 3120 - (100 * Math.random() * 4);
- 
-
-  }
-
-
-  return {x: spawnX, y: spawnY};
-
-}
- 
-
-
-var trees = [];
-var notes = [];
-
-for(i = 0; i < 60; i++){
+	this.teams = {},
+	this.check = [],
+	this.illegal = [],
 	
-	for(j = 0; j < 60; j++){
-		
-		if((j < 15 || i < 15) || (j > 45 || i > 45)){
+	this.master = undefined,
+	
+	this.treeNum = 1,
+	this.joined = 0,
+	this.playerCount = 0,
+	
+	this.started = false,
 
-			chance = Math.random() * 100;
+	this.trees = [],
+	this.notes = [],
+	this.currentTeamMax = 1,
+};
+
+Game.prototype.spawnNotesAndTrees = function(){
+	
+	for(var i = 0; i < 60; i++){
 		
-			if(chance <= 65){
+		for(var j = 0; j < 60; j++){
 			
-				trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
+			if((j < 15 || i < 15) || (j > 45 || i > 45)){
+
+				var chance = Math.random() * 100;
 			
+				if(chance <= 65){
+				
+					this.trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
+				
+				
+				}
+				if(chance > 65 && chance <= 68){
+				
+					this.notes.push({x: i * 78, y: j * 78, removed: false});
+				
+				
+				}
+				if(chance > 68){
+				
+				
+				}
 			
 			}
-			if(chance > 65 && chance <= 68){
+			if(j > 14 && i > 14 && j < 46 && i < 46){
+
+				if(j > 14 && i > 19 && j < 24 && i < 46){
+
+						var chance = Math.random() * 100;
 			
-				notes.push({x: i * 78, y: j * 78, removed: false});
+						if(chance <= 40){
+						
+							this.trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
+						
+						
+						}
+						if(chance > 89 && chance <= 90){
+						
+							this.notes.push({x: i * 78, y: j * 78, removed: false});
+						}
+
+				}else if (j > 23 && i > 14 && j < 38 && i < 41) {
+
+						var chance = Math.random() * 100;
 			
+						if(chance <= 40){
+						
+							this.trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
+						
+						
+						}
+						if(chance > 89 && chance <= 90){
+						
+							this.notes.push({x: i * 78, y: j * 78, removed: false});
+						}
+
+				}else if (j > 37 && i > 19 && j < 46 && i < 46) {
+
+						var chance = Math.random() * 100;
 			
-			}
-			if(chance > 68){
-			
-			
-			}
+						if(chance <= 40){
+						
+							this.trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
+						
+						
+						}
+						if(chance > 89 && chance <= 90){
+						
+							this.notes.push({x: i * 78, y: j * 78, removed: false});
+						}
+
+				}
 		
+			}	
 		}
-		if(j > 14 && i > 14 && j < 46 && i < 46){
-
-			if(j > 14 && i > 19 && j < 24 && i < 46){
-
-					chance = Math.random() * 100;
-		
-					if(chance <= 40){
-					
-						trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
-					
-					
-					}
-					if(chance > 89 && chance <= 90){
-					
-						notes.push({x: i * 78, y: j * 78, removed: false});
-					}
-
-			}else if (j > 23 && i > 14 && j < 38 && i < 41) {
-
-					chance = Math.random() * 100;
-		
-					if(chance <= 40){
-					
-						trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
-					
-					
-					}
-					if(chance > 89 && chance <= 90){
-					
-						notes.push({x: i * 78, y: j * 78, removed: false});
-					}
-
-			}else if (j > 37 && i > 19 && j < 46 && i < 46) {
-
-					chance = Math.random() * 100;
-		
-					if(chance <= 40){
-					
-						trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
-					
-					
-					}
-					if(chance > 89 && chance <= 90){
-					
-						notes.push({x: i * 78, y: j * 78, removed: false});
-					}
-
-			}
-	
-		}	
 	}
-}
-
-score = {
 	
-	red: 0,
-	blue: 0,
-	yellow: 0,
-	green: 0
 }
 
-var blueTeam=0;
-var redTeam=0;
-var greenTeam=0;
-var yellowTeam=0;
+var Player = function(args){
+	
+	this.x = 0,
+	this.y = 0,
+	this.team = args.team,
+	this.renderteam = args.team,
+	this.name = args.name,
+	this.direction = "D",
+	
+	this.attacking = false,
+	this.slashing = false,
+	this.character = Math.floor((Math.random() * 3) + 1),
+	
+	this.canDisguise = false,
+	this.swordBearer = false,
+	this.chosenOne = false,
+	this.PAPABEAR = false,
+	
+	this.dead = false,
+	
+	this.chatting = false,
+	this.chatText =  "",
+	this.illegal = false,
+};
 
-teamToSend = "";
-spawnX = 0;
-spanwY = 0;
+Player.prototype.spawn = function(){
+	
+	var spawnX = 0;
 
-var spawn = [];
+	var spawnY = 0;
 
-var startsecond = 0;
+	if (this.team.name == "blue") {
 
-var threeteams = true;
+		spawnX = 1300 + (100 * Math.random() * 4);
 
+		spawnY = 1300 + (100 * Math.random() * 4);
+
+	}else if (this.team.name == "red") {
+
+		spawnX = 3400 - (100 * Math.random() * 4);
+
+		spawnY = 2300 + (100 * Math.random() * 4);
+
+	}else if (this.team.name == "green") {
+
+		spawnX = 1300 + (100 * Math.random() * 4);
+
+		spawnY = 3400 - (100 * Math.random() * 4); 
+
+	}
+
+	this.x = spawnX;
+	this.y = spawnY;
+
+}
+
+Game.prototype.addPlayer = function(name, master){
+	
+	
+	if(master){
+		
+		var joiningPlayer = {name: name, team: this};
+
+		joiningPlayer.team = this;
+		
+		this.master = new Player(joiningPlayer);
+
+	}else{ 
+		
+		var allMax = true;
+		var aTeam = "";
+		
+		for(var tName in this.teams){
+			
+			var tLength = this.teams[tName].players.length;
+			
+			//check if all teams are at max
+			if(tLength !== this.currentTeamMax) allMax = false;
+			else aTeam = tName;
+			
+			if(tLength < this.currentTeamMax){
+				
+				this.teams[tName].addPlayer(name);
+				
+				break;
+				
+			}
+		}
+		
+		//if all teams are at max
+		if(allMax && aTeam != ""){
+			
+			this.currentTeamMax++;
+			
+			this.teams[aTeam].addPlayer(name);
+		}
+
+	}
+
+}
+
+
+var Team = function(game, name, coord){
+	
+	this.score = 0,
+	this.name = name,
+	this.players = [],
+	this.baseX = coord.x,
+	this.baseY = coord.y,
+
+	game.teams[name] = this;
+};
+
+Team.prototype.addPlayer(name){
+	
+	var newPlayer = new Player({name: name, team: this});
+	
+	newPlayer.spawn();
+	
+	this.players.push(newPlayer);
+}
+
+var game = new Game();
+
+var blueTeam = new Team(game, 'blue', {1300, 1500});
+
+var redteam = new Team(game, "red", {3400, 2300});
+
+var greenTeam = new Team(game, "green", {1300, 3400});
 
 io.sockets.on('connection', function(socket) {
 	
-
-	if(playerCount == 0){
-
- 
-		teamToSend = "master";
-
-		spawnX = 0;
-
-		spawnY = 0;
-
- 
-
-	}else{
-
- 
-
-	if (blueTeam <= redTeam) {
-
- 
-
-		  teamToSend = "blue";
-
-		  blueTeam = blueTeam + 1;
-
-		  spawnX = 1300 + (50 * blueTeam);
-
-		  spawnY = 1500;
-
-  
-
-	}else if (redTeam < greenTeam) {
-
- 
-
-		  teamToSend = "red";
-
-		  redTeam = redTeam + 1;
-
- 
-
-		  spawnX = 3400 - (50 * redTeam);
-
-		  spawnY = 2300;
-
- 
-
-	  }
-
-	else if (greenTeam < yellowTeam || threeteams) { 
-
- 
-
-		  teamToSend = "green";
-
-		  greenTeam = greenTeam + 1;
-
- 
-
-		  spawnX = 1300 + (50 * greenTeam);
-
-		  spawnY = 3400;
-
- 
-
-	}
-
-	else{
-
-
-		    teamToSend= "yellow";
-
-		    yellowTeam = yellowTeam + 1;
-
- 
-
-		    spawnX = 3120 + (50 * yellowTeam);
-
-		    spawnY = 3120;
-
- 
-
-		  }
-
- 
-
-	  }
-	
-	  players.push({
-		  x: spawnX, 
-		  y: spawnY,
-		direction: "D",
-		attacking: false,
-		slashing: false,
-		character: Math.floor((Math.random() * 3) + 1),
-		team: teamToSend,
-		renderteam:teamToSend,
-		canDisguise: false,
-		swordBearer: false,
-		chosenOne: false,
-		PAPABEAR: false,
-		dead: false,
-		  chatting: false,
-		  chatText: ""
-		  
-	  });
-	  
-	  check.push({x: spawnX, y: spawnY});
-	  
-	  illegal.push(false);
-	  
-	  socket.emit('set_player',  {number: playerCount, players: players});
-	  
-	  socket.on('player_added', function(){
-	  	
-		  playerCount++;
-		
-	  });
-	
-	  
 	  socket.on('stealWood', function(data){
 		  
 		 woodTotal = 250;
