@@ -32,8 +32,6 @@ var Game = function(){
 	this.trees = [];
 	this.notes = [];
 	this.currentTeamMax = 1;
-
-
 }
 
 Game.prototype.forAllPlayers = function(func){
@@ -184,11 +182,6 @@ Game.prototype.addPlayer = function(name, master){
 		}
 
 	}
-
-}
-
-Game.playerReturn = function(name){
-
 
 }
 

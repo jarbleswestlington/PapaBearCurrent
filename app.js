@@ -17,7 +17,6 @@ var redteam = new Team(game, "red", {x:3400, y:2300});
 
 var greenTeam = new Team(game, "green", {x:1300, y:3400});
 
-
 //setUp Routes
 app.use(express.static(__dirname + '/public'));
 
@@ -191,47 +190,50 @@ io.sockets.on('connection', function(socket) {
 	});
 	
    socket.on('move_input', function(data){
-	   
-		check[data.number].x = players[data.number].x;
-		check[data.number].y = players[data.number].y;
-	   
-	   illegal[data.number] = false;
-	   
-	   if(data.direction == "up"){
-		   
-		   check[data.number].y = players[data.number].y - data.amount;
-		   
-		   players[data.number].direction = "U";
 
-	   }
-	   if(data.direction == "down"){
-	   	
-		   check[data.number].y = players[data.number].y + data.amount;
-		   players[data.number].direction = "D";
-		
-	   }
-	   if(data.direction == "left"){
-	   	
-		   check[data.number].x = players[data.number].x - data.amount;
-		   players[data.number].direction = "L";
-		
-	   }
-	   if(data.direction == "right"){
-	   	
-		   check[data.number].x = players[data.number].x + data.amount;
-		   players[data.number].direction = "R";
+   	var dummy = {};
+	var player = game.findPlayerByName(data.player.name);
 
-	   }
+	dummy.x = player.x;
+	dummy.y = player.y;
+
+	var illegal = false;
+	   	   
+   if(data.direction == "up"){
+	   
+	   dummy.y = players[data.number].y - data.amount;
+	   
+	   player.direction = "U";
+
+   }
+   if(data.direction == "down"){
+   	
+	   dummy.y = player.y + data.amount;
+	   player.direction = "D";
+	
+   }
+   if(data.direction == "left"){
+   	
+	   dummy.x = player.x - data.amount;
+	   player.direction = "L";
+	
+   }
+   if(data.direction == "right"){
+   	
+	   dummy.x = player.x + data.amount;
+	   player.direction = "R";
+
+   }
    	
 	illegal[data.number] = false;
 	
-	if(!players[data.number].PAPABEAR){
+	if(!player.PAPABEAR){
 	
 	   	for(i = 0; i < players.length; i++){
 				
 	   		if(i != data.number && !players[i].dead){
 		
-   				if(!players[i].PAPABEAR && checkCollision(check[data.number], players[i], 41, 36, 41, 36, 0, 0)){
+   				if(!players[i].PAPABEAR && checkCollision(dummy, players[i], 41, 36, 41, 36, 0, 0)){
 			
    					illegal[data.number] = true;
 					
@@ -247,9 +249,9 @@ io.sockets.on('connection', function(socket) {
 		
 		if(trees[i].removed == false){
 		
-			if(players[data.number].PAPABEAR){
+			if(player.PAPABEAR){
 			
-				if(checkCollision(check[data.number], trees[i], 63, 63, 78, 78, 0, 0)){
+				if(checkCollision(dummy, trees[i], 63, 63, 78, 78, 0, 0)){
 		
 					illegal[data.number] = true;
 			
@@ -257,7 +259,7 @@ io.sockets.on('connection', function(socket) {
 		
 			}else{
 			
-				if(checkCollision(check[data.number], trees[i], 41, 36, 78, 78, 0, 0)){
+				if(checkCollision(dummy, trees[i], 41, 36, 78, 78, 0, 0)){
 		
 					illegal[data.number] = true;
 			
@@ -268,10 +270,10 @@ io.sockets.on('connection', function(socket) {
 		
    	}
 	
-   	if(!illegal[data.number]){
+   	if(!illegal){
 		
-		players[data.number].x = check[data.number].x;
-		players[data.number].y = check[data.number].y;
+		player.x = dummy.x;
+		player.y = dummy.y;
 		
    	}
 	 
