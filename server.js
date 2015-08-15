@@ -247,6 +247,9 @@ var Player = function(args){
 	this.illegal = false;
 };
 
+
+Player.prototype.checkCollision
+
 Player.prototype.spawn = function(func){
 
 	var spawnCoords = {};
