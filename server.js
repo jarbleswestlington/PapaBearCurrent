@@ -2,19 +2,6 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function checkCollision(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
-
-   if( (item.x >= shark.x + paddingX && item.x <= shark.x + sharkWidth - paddingX) || (item.x + itemWidth >= shark.x + paddingX && item.x + itemWidth <= shark.x + sharkWidth - paddingX) ){
-
-       if( (item.y >= shark.y + paddingY && item.y <= shark.y + sharkHeight - paddingY) || (item.y + itemHeight >= shark.y + paddingY && item.y + itemHeight <= shark.y + sharkHeight - paddingY) ){
-
-           return true;
-
-       }
-
-   }
-}
-
 var Game = function(){
 
 	this.teams = {};
@@ -32,7 +19,24 @@ var Game = function(){
 	this.trees = [];
 	this.notes = [];
 	this.currentTeamMax = 1;
+	
+	this.bearX = 22;
+	this.bearY = 27;
+};
+
+Game.prototype.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
+
+   if( (item.x >= shark.x + paddingX && item.x <= shark.x + sharkWidth - paddingX) || (item.x + itemWidth >= shark.x + paddingX && item.x + itemWidth <= shark.x + sharkWidth - paddingX) ){
+
+       if( (item.y >= shark.y + paddingY && item.y <= shark.y + sharkHeight - paddingY) || (item.y + itemHeight >= shark.y + paddingY && item.y + itemHeight <= shark.y + sharkHeight - paddingY) ){
+
+           return true;
+
+       }
+
+   }
 }
+
 
 Game.prototype.forAllPlayers = function(func){
 
@@ -53,6 +57,18 @@ Game.prototype.forAllOtherPlayers = function(player, func){
 		for(var i = 0; i < this.teams[name].players.length; i++){
 
 			if(player !== this.teams[name].players[i]) func(this.teams[name].players[i]);
+		}
+	}
+
+}
+
+Game.prototype.forAllOtherAlivePlayers = function(player, func){
+
+	for(var name in this.teams){
+
+		for(var i = 0; i < this.teams[name].players.length; i++){
+
+			if(player !== this.teams[name].players[i] && !this.teams[name].players[i].dead) func(this.teams[name].players[i]);
 		}
 	}
 
@@ -185,7 +201,7 @@ Game.prototype.addPlayer = function(name, master){
 
 }
 
-Game.findPlayerByName = function(name){
+Game.prototype.findPlayerByName = function(name){
 
 	return this.forAllPlayers(function(player){
 
@@ -196,7 +212,7 @@ Game.findPlayerByName = function(name){
 	return false;
 }
 
-Game.hasPlayer = function(name){
+Game.prototype.hasPlayer = function(name){
 
 	if(!this.findPlayerByName(name)) return true;
 	else return false;
@@ -222,6 +238,40 @@ Team.prototype.addPlayer = function(name){
 	this.players.push(newPlayer);
 }
 
+var Weapon (owner, horiz, vertic){
+	
+	this.owner = owner;
+	this.hwidth = horiz.width,
+	this.hheight = horiz.height,
+	this.vwidth = vertic.width,
+	this.vheight = vertic.height,
+	
+	this.getWidth = function(){
+		if (this.owner.direction == "U" || this.owner.direction == "D"){
+			return this.vwidth;
+		}else if (this.owner.direction == "L" || this.owner.direction == "R"){
+			return this.hwidth;
+		}
+	},
+	this.getHeight: function(){
+		if (this.owner.direction == "U" || this.owner.direction == "D"){
+			return this.vheight;
+		}else if (this.owner.direction == "L" || this.owner.direction == "R"){
+			return this.hheight;
+		}
+	}
+	
+}
+
+Weapon.prototype.toPower(){
+	
+	this.hwidth = 45;
+	this.hheight = 7;
+	this.vwidth = 7;
+	this.vheight = 45;
+}
+
+
 var Player = function(args){
 	
 	this.x = 0;
@@ -245,10 +295,13 @@ var Player = function(args){
 	this.chatting = false;
 	this.chatText =  "";
 	this.illegal = false;
+	
+	this.weapon = new Weapon(this, {width:30, height:5}, {width:5, height:30});
+
 };
 
 
-Player.prototype.checkCollision
+
 
 Player.prototype.spawn = function(func){
 

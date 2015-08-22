@@ -1,189 +1,93 @@
+//connect to sockets on server
 var socket = io.connect(window.location.hostname);
+socket.on('connect', function(data) { });
+socket.on('error', function() { console.error(arguments) });
+socket.on('message', function() { console.log(arguments) });  
 
-
-var swipeX;
-var backX;
-var backY;
-var swipeY;
-var offsetSwipeY = 1;
-var swipeStart = 0;
-var swiping = false;
-var swipage = false;
-var preSwiping = false;
-var hitting = false;
-//var swipeVisible = false;
-
-
-//state control variables
-var timeLimit = 720;
-var gameState = "load";
-var gogo = false;
-var messageReset = false;
-var lastMessage = 0;
-var threeteams = true;
-var sCooldown = false;
-
-var treeNum = 1;
-// Create the canvas
+// Create the canvas in the html
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 canvas.setAttribute("id", "game");
-
-
 document.body.appendChild(canvas);
 
-//upload all images
-{
+//check for keyInputs
+var inputManager = {};
 
-playershadow = new Image();
-playershadow.src = "images/playershadow.png"
-
-bearImage = new Image();
-bearImage.src = "images/bear.png";
-
-if(!threeteams){
-
-	yellowImage = new Image();
-	yellowImage.src = "images/yellowteam.png";
-
-}
-
-swordR = new Image();
-swordR.src = "images/swordR.png";
-
-swordL = new Image();
-swordL.src = "images/swordL.png";
-
-swordD = new Image();
-swordD.src = "images/swordD.png";
-
-swordU = new Image();
-swordU.src = "images/swordU.png";
-
-counter = new Image();
-counter.src = "images/counter.png";
-
-pileImage = new Image();
-pileImage.src = "images/pile.png";
-
-pileImage2 = new Image();
-pileImage2.src = "images/pile2.png";
-
-backpackImage = new Image();
-backpackImage.src = "images/backpacks.png";
-
-backgroundImage = new Image();
-backgroundImage.src = "images/background.png";
-
-blueImage = new Image();
-blueImage.src = "images/blueteam.png";
-
-greenImage = new Image();
-greenImage.src = "images/greenteam.png";
-
-redImage = new Image();
-redImage.src = "images/redteam.png";
-
-redBaseImage = new Image();
-redBaseImage.src = "images/housered.png";
-
-blueBaseImage = new Image();
-blueBaseImage.src = "images/houseblue.png";
-
-greenBaseImage = new Image();
-greenBaseImage.src = "images/housegreen.png";
-
-notesImage = new Image();
-notesImage.src = "images/notes.jpg";
-
-pinesImage = new Image();
-pinesImage.src = "images/pines.png";
-
-blueCorpse = new Image();
-blueCorpse.src = "images/bluecorpse.png";
-redCorpse = new Image();
-redCorpse.src = "images/redcorpse.png";
-greenCorpse = new Image();
-greenCorpse.src = "images/greencorpse.png";
-
-if(!threeteams){
-
-yellowBaseImage = new Image();
-yellowBaseImage.src = "images/houseyellow.png";
-
-}
-
-}
-
-//Set up array and listeners for key inputs
-keysDown = [];
-
+inputManager.keys = [];
 addEventListener("keydown", function (e) {
-	keysDown[e.keyCode] = true;
+	inputManager.keys[e.keyCode] = true;
 }, false);
 
 addEventListener("keyup", function (e) {
-	delete keysDown[e.keyCode];
+	delete inputManager.keys[e.keyCode];
 }, false);
 
-//a bunch of functions...
+inputManager.pressable = {
+	enter:true,
+	z:true,
+	k:true,
+};
 
-function checkCollision(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
+//setUp Game object;
+var game = {
+	connected:false,
+	gameState:"init",
+	timeLimit:720,
+	illegal: false,
+	server:{
+		hasPape = false;
+		hasSword = false;
+	}
+
+};
+
+game.game.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
 
    if( (item.x >= shark.x + paddingX && item.x <= shark.x + sharkWidth - paddingX) || (item.x + itemWidth >= shark.x + paddingX && item.x + itemWidth <= shark.x + sharkWidth - paddingX) ){
 
        if( (item.y >= shark.y + paddingY && item.y <= shark.y + sharkHeight - paddingY) || (item.y + itemHeight >= shark.y + paddingY && item.y + itemHeight <= shark.y + sharkHeight - paddingY) ){
 
-
            return true;
-
        }
 
    }
+   
+   return false;
 }
 
-function checkIfPapa(){
-		
-	for(i = 0; i < players.length; i++){
-		
-		if(players[i].PAPABEAR){
-
-			return true;
-		}
-		
+//setUp users user
+var user = {
+	messageReset:false,
+	lastMessage:0,
+	weapon:{
+		has:false;
+		power:false;
+	}
+	log:{
+		has: false,
+		stolen: false,
+		stolenFrom: "",
+		wood: 0,
+	},
+	dashing:false,
+	dashStart:0,
+	server:{
+		attacking:false;
 	}
 	
-	return false;
-	
-}
+};
 
-function checkIfSwordBearer(){
+user.stealWood = function(team){
 	
-	for(i = 0; i < players.length; i++){
-		
-		if(players[i].swordBearer){
-			
-			return true;
-		}
-	}
-	
-	return false;
-}
-
-stolenFrom = "";
-stolen = false;
-
-function stealWood(team){
-	
-	if(hasLog == false){
+	if(this.log.has == false){
 				
-		hasLog = true;
+		this.log.has = true;
 		
-		stolen = true;
+		this.log.stolen = true;
 		
-		stolenFrom = team;
+		this.log.stolenFrom = team;
 		
 	    socket.emit('stealWood', {team: team});
 				
@@ -191,68 +95,101 @@ function stealWood(team){
 	
 }
 
-woodTotal = 50;
-
-function chopTree(treeNumber){
+user.chopTree = function(treename){
 		
-	if(hasLog == false){
+	if(this.log.has == false){
 		
-	 	trees[treeNumber].removed = true;
+		this.log.has = true;
 		
-	 	//trees.splice(treeNumber, 1);
+		this.log.stolen = false;
 		
-		hasLog = true;
+		this.log.wood = 50;
 		
-		stolen = false;
-		
-		woodTotal = 50;
-		
-	    socket.emit('chopTree', {number: treeNumber});
+	    socket.emit('chopTree', {name: treename});
 				
  	}
 		
-}
+};
 
-function getNote(noteNumber){
-	
- 	notes[noteNumber].removed = true;
-	
+user.getNote = function(notename){
+			
+	socket.emit('getNote', {name: notename});
 		
-	socket.emit('getNote', {number: noteNumber});
+};
+
+user.depLog = function(){
 	
+	if(this.log.has){
 		
-}
+		this.log.has = false;
 
-
-function depLog(){
-	
-	if(hasLog){
-		
-		hasLog = false;
-
-	   	socket.emit('depLog', {team: players[playerNumber].team, amount: woodTotal});
+	   	socket.emit('depLog', {team: this.team, amount: this.log.wood});
 	
 	}
+};
+
+user.givePower = function(power){
+	socket.emit('give_power', {name: this.name, power: power});
+};
+
+
+//setUp Renderer
+var renderer = {
+	refs:{},
+	camera : {
+	
+		x:0,
+		y:0
+	},
+	
+	treeText: false,
+	stealText: false,
+	
+	noteMessage : {
+	line1:"",
+	line2:"",
+	line3:"",
+	line4:"",
+	line5:"Press X to close"
+	
+	},
+	
+	showNote: false,
+};
+
+renderer.upload = function(src){
+	var newImg = new Image();
+	newImg.src = "images/" + ref + ".png";
+	this.refs[src] = newImg;
 }
 
-function moveTowards(leader, follower, speed, modifier){
 
-	if(leader.x >= follower.x + 20 + 1){
-		
-		follower.x += speed * modifier;
-		
-	}
-	
-	if(leader.x <= follower.x + 20 - 1){
-		
-		follower.x -= speed * modifier;
-		
-	}
+//upload all images
+[
+"usershadow",
+"bear",
+"swordR",
+"swordL",
+"swordD",
+"swordU",
+"counter",
+"pile",
+"backpacks",
+"background",
+"blueteam",
+"greenteam",
+"redteam",
+"housered",
+"houseblue",
+"housegreen",
+"pines",
+"bluecorpse",
+"redcorpse",
+"greencorpse",
+].forEach(function(image){
+	renderer.upload(image);
+})
 
-	
-	follower.y -= speed * modifier;
-
-}
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -262,610 +199,217 @@ function getRandomArbitrary( numone,  numtwo) {
 	return Math.floor(Math.random() * (numtwo - numone) + 1);
 }
 
-function GiveCanDisguise(playerToGive){
-	playerToGive.canDisguise = true;
-	socket.emit('givechangeteam', {number: playerNumber, canDisguise: true});
-}
-function GiveWeapon(playerToGive){
-	playerToGive.hasWeapon = true;
-	socket.emit('giveWeapon', {number: playerNumber, hasWeapon: true});
-}
-function GivePowerSword(playerToGive){
-	playerToGive.swordBearer=true;
-	socket.emit('givesword', {number: playerNumber, swordBearer: true});
-}
-function GivePowerChosen(playerToGive){
-	playerToGive.chosenOne=true;
-	socket.emit('makechosen', {number: playerNumber, chosenOne: true});
+
+var chatController = {
 	
-}
-function GivePapa(playerToGive, noteNumb){
-	playerToGive.PAPABEAR=true;
-	socket.emit('makepapa', {number: playerNumber, PAPABEAR: true, noteNumb: noteNumb});
-}
+	this.started = false;
+};
 
-//gameplay variables
-trees = [];
-notes = [];
-
-moved = false;
-movePlayer = "";
-
-playerNumber = 0;
-
-started = false;
-players = [];
-
-hasLog = false;
-hasWeapon = false;
-
-score = {
-	
-	red:0,
-	green:0,
-	blue:0,
-	yellow:0
-}
-
-var swipe = {
-
-	radius: 55,
-}
-
-var weapon = {
-
-	hwidth: 30,
-	hheight: 5,
-	vwidth: 5,
-	vheight: 30,
-	getWidth: function(playerNumber){
-		if (players[playerNumber].direction == "U" || players[playerNumber].direction == "D"){
-			return this.vwidth;
-		}else if (players[playerNumber].direction == "L" || players[playerNumber].direction == "R"){
-			return this.hwidth;
-		}
-	},
-	getHeight: function(playerNumber){
-		if (players[playerNumber].direction == "U" || players[playerNumber].direction == "D"){
-			return this.vheight;
-		}else if (players[playerNumber].direction == "L" || players[playerNumber].direction == "R"){
-			return this.hheight;
-		}
-		
+chatController.process = function(){
+	if(!this.started){
+		this.show();
+	}else{
+		this.submit();
 	}
-};
 
-camera = {
+}
+
+chatController.show = function(){
+
+	this.started = true;
+
+	$('#chatView').show();
+	$('#chatInput').focus();
+}
+
+chatController.submit = function(){
 	
-	x:0,
-	y:0
-}
+	this.started = false;
 
-check = {
+	$('#chatView').hide();
 	
-	x:0,
-	y:0
-}
+	//$('#game').focus();
 
- 
-
-blueBase = {
-
- 
-
-x: 1350,
-
-y: 1350,
-
-team: "blue"
-
-}
-
-redBase = {
-
- 
-
-x: 3280,
-
-y: 2300,
-
-team: "red"
-
-}
-
-greenBase = {
-
- 
-
-x: 1350,
-
-y: 3350,
-
-team: "green"
+	chatMessage = $('#chatInput').val();
+	
+	$('#chatInput').attr('value','');
+	
+	socket.emit("sendChat", {message: chatMessage, user: user.name});
 	
 }
 
-if(!threeteams){
-
-yellowBase = {
+inputManager.processInput = function(){
 	
-	x: 2800,
-	y: 2800,
-	team: "yellow"
-}
-
-}
-
-
-illegal = false;
-var treeText = false;
-stealText = false;
-var messageNum = 0;
-
-//render notes
-showNote = false;
-noteMessage = {
-	line1:"",
-	line2:"",
-	line3:"",
-	line4:"",
-	line5:"Press X to close"
-	
-};
-
-var startChat = false;
-
-var dashStart = 0;
-
-var dashing = false;
-
-var enterPressable = true;
-// Update game objects
-var update = function (modifier) {
-	
-	if(13 in keysDown){
+	if(13 in inputManager.keys){
 		
-		if(enterPressable){
+		if(inputManager.pressable.enter){
 			
-			enterPressable = false;	
+			inputManager.pressable.enter = false;	
 		
-			if(!startChat){
-			
-				startChat = true;
-			
-				$('#chatView').show();
-				$('#chatInput').focus();
-			
-			
-			}else{
-			
-				startChat = false;
-			
-				$('#chatView').hide();
-				
-				//$('#game').focus();
-			
-				chatMessage = $('#chatInput').val();
-				
-				$('#chatInput').attr('value','');
-				
-				socket.emit("sendChat", {message: chatMessage, player: playerNumber});
-				
-			}
-		
-	
+			chatController.process();
 		}
 		
 	}else{
 		
-		enterPressable = true;
+		inputManager.pressable.enter = true;
 		
 	}
 	
-	
-	
-	
-	////////
-	///////
-	/////
-	/////
-	/////
-	
-	if (90 in keysDown) { // Player holding z
+	if (90 in inputManager.keys) { // user holding z
 		
-		if(zpressable && dashing == false){
+		if(inputManager.pressable.z && user.dashing == false){
 			
-			zpressable = false;
+			inputManager.pressable.z = false;
 			
-			dashing = true;
+			user.dashing = true;
 			
-			dashStart = Date.now();
-			
+			user.dashStart = Date.now();
 		}
 		
 	}else{
 		
-		zpressable = true;
+		inputManager.pressable.z = true;
 	}
-
-	
-	check.x = players[playerNumber].x;
-	check.y = players[playerNumber].y;
 
 	//Check key inputs
-	moved = false;
+	user.moved = false;
+	user.direction = "";
 	
-	if (38 in keysDown) { // Player holding up
+	if (38 in inputManager.keys) 
+		user.direction = "up";
+		user.moved = true;
 		
-		check.y = players[playerNumber].y - 256 * modifier;
+	if (40 in inputManager.keys)
+		user.direction = "down";
+		user.moved = true;
+	
+	if (37 in inputManager.keys)
+		user.direction = "left";
+		user.moved = true;
+	
+	if (39 in inputManager.keys)
+		user.direction = "right";
+		user.moved = true;
 		
-		movePlayer = "up";
-		moved = true;
-		
+	if(88 in inputManager.keys){
+		renderer.showNote = false;
 	}
 	
-	if (40 in keysDown) { // Player holding down
-		
-//		camera.y -= 256 * modifier;
-		check.y = players[playerNumber].y + 256 * modifier;
-		
-		movePlayer = "down";
-		moved = true;
-		
-	}
-	
-	if (37 in keysDown) { // Player holding left
-				
-//		camera.x += 256 * modifier;
-		
-		check.x = players[playerNumber].x - 256 * modifier;
-		
-		movePlayer = "left";
-		moved = true;
-		
-		
-	}
-	
-	if (39 in keysDown) { // Player holding right
+	//equip sword
+	if (75 in inputManager.keys) {		
+		if(inputManager.pressable.k && user.weapon.has == true){
+			inputManager.pressable.k = false;
 			
-//		camera.x -= 256 * modifier;
+			if (user.attacking == false) {
 
-		check.x = players[playerNumber].x + 256 * modifier;
+			    socket.emit('arm', {name: user.name armed: true});
 
-		movePlayer = "right";
-		moved = true;
-		
-	}
-	
-	//COLLISIONS
-
-
-			
-
-
-
-	///
-	///
-	///Weapon height change
-	if(players[playerNumber].swordBearer==true){
-
-		weapon.hwidth = 45;
-		weapon.hheight = 7;
-		weapon.vwidth = 7;
-		weapon.vheight = 45;
-
+			}else {
+			    socket.emit('arm', {name: user.name, armed: false});
+			}
+		}
 	}else{
-		weapon.hwidth = 30;
-		weapon.hheight = 5;
-		weapon.vwidth = 5;
-		weapon.vheight = 30;
-
+		inputManager.pressable.k = true;	
 	}
-	///
 	
-	illegal = false;
-	
-	for(i = 0; i < players.length; i++){
-		
-		hit = false;
-		
-		if(i != playerNumber && !players[playerNumber].dead && !players[i].dead){
 
-			
-			if(!players[playerNumber].PAPABEAR){
+
+	if (48 in inputManager.keys) {
+	
+		socket.emit('user_killed', {name: user.name});
+	
+	}
+	
+	
+	//special ability: change color
+	if (77 in inputManager.keys) { // change color of character
+		if (users[username].canDisguise == true){// has ability
 		
-				if(!players[i].PAPABEAR && checkCollision(check, players[i], 41, 36, 41, 36, 0, 0)){
-				
-					illegal = true;
-				
-					//console.log('it was fuckin illegal');
+			//pick team
+			if (66 in inputManager.keys) {
+				socket.emit('changeteam', {name: user.name, canDisguise: false, team: "blue"});
+			}
+			if (82 in inputManager.keys) {
+				socket.emit('changeteam', {name: user.name, canDisguise: false, team: "red"});
+			} 
+			if (71 in inputManager.keys) {
+				socket.emit('changeteam', {name: user.name, canDisguise: false, team: "green"});
+			} 
+		}
+	}	
+}
+
+// Update game objects
+var update = function (modifier) {
+
+	inputManager.processInput();
+	
+	hit = false;
+	
+	game.forAllOtherAlivePlayers(function(oPlayer){
+
+		if(player.PAPABEAR){
+						
+			if(game.checkCollision(oPlayers, player, 41, 36, 63, 63, 0, 0)){
+					
+				socket.emit('user_killed', {name: i});
 		
-				}
-			
 			}
 
-
-
-
-
-
-			//testing123
-	if (16 in keysDown) { // Player holding shift
+		}else{
 		
-		if(shiftPressable && swiping == false){
-			
-			shiftPressable = false;
+			if(player.attacking){
 				
-				preSwiping = true;
-				swipeStart = Date.now();
-				
-				setTimeout(function() { 
-					swiping = true;
-					preSwiping = false;
-		
-			 }, 400);
-
-
-			//insert preswiping phase
-
-			//swiping = true;
-			
-			//swipeStart = Date.now();
-			
-		}
-		
-	}else{
-		
-		shiftPressable = true;
-	}
-
-
-
-	if(Date.now() > swipeStart + 100 && swiping == true){
-		
-		illegal = true;
-		swipage = true;
-		//hitting = true;
-		
-		if(Date.now() > swipeStart + 800 && swiping == true){
-			
-			swiping = false;
-			swipage = false;
-			//hitting = false;
-		}
-		
-	}
-
-		if(swipage == true && !players[playerNumber].dead){
-		
-			amount = 256 * modifier;
-
-			//if (16 in keysDown){
-
-				if (players[playerNumber].direction == "U"){
-							
-								if(checkCollision(players[i], {x: players[playerNumber].x - 35 + 20.5, y: players[playerNumber].y - 30}, 41, 36, 70, 50, 0, 0)){
-									
-								hit = true;
-					
-							}
-								
-								if(checkCollision({x: players[playerNumber].x - 33.5, y: players[playerNumber].y - 9}, players[i], 19, 29, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-
-								if(checkCollision({x: players[playerNumber].x - 7, y: players[playerNumber].y - 35}, players[i],  9, 5, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-								if(checkCollision({x: players[playerNumber].x + 2, y: players[playerNumber].y - 35}, players[i],  35, 9, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-
-								if(checkCollision({x: players[playerNumber].x + 53, y: players[playerNumber].y - 35}, players[i],  9, 5, 41, 36, 0, 0)){
-								
-								hit = true;
-							}
-								if(checkCollision({x: players[playerNumber].x + 54, y: players[playerNumber].y - 9}, players[i], 19, 29, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-
-
-				}
-
-				if (players[playerNumber].direction == "D"){
-							
-								if(checkCollision(players[i], {x: players[playerNumber].x - 35 + 20.5, y: players[playerNumber].y + 20}, 41, 36, 70, 50, 0, 0)){
-									
-								hit = true;
-					
-							}
-								
-								if(checkCollision({x: players[playerNumber].x - 33.5, y: players[playerNumber].y + 20}, players[i], 19, 29, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-
-								if(checkCollision({x: players[playerNumber].x - 7, y: players[playerNumber].y + 70}, players[i],  9, 5, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-								if(checkCollision({x: players[playerNumber].x + 2, y: players[playerNumber].y + 70}, players[i],  35, 9, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-
-								if(checkCollision({x: players[playerNumber].x + 53, y: players[playerNumber].y + 70}, players[i],  9, 5, 41, 36, 0, 0)){
-								
-								hit = true;
-							}
-								if(checkCollision({x: players[playerNumber].x + 54, y: players[playerNumber].y + 20}, players[i], 19, 29, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-						}
-
-
-						if (players[playerNumber].direction == "L"){
-							
-								if(checkCollision(players[i], {x: players[playerNumber].x - 30, y: players[playerNumber].y - 18}, 41, 36, 50, 70, 0, 0)){
-									
-								hit = true;
-					
-							}
-								
-								if(checkCollision({x: players[playerNumber].x - 9, y: players[playerNumber].y + 53}, players[i], 29, 19, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-
-								if(checkCollision({x: players[playerNumber].x - 35, y: players[playerNumber].y - 35}, players[i],  5, 9, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-								if(checkCollision({x: players[playerNumber].x - 39, y: players[playerNumber].y}, players[i],  9, 35, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-
-								if(checkCollision({x: players[playerNumber].x - 35, y: players[playerNumber].y - 9}, players[i],  9, 5, 41, 36, 0, 0)){
-								
-								hit = true;
-							}
-								if(checkCollision({x: players[playerNumber].x - 9, y: players[playerNumber].y - 37}, players[i], 29, 19, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-						}
-
-							if (players[playerNumber].direction == "R"){
-							
-								if(checkCollision(players[i], {x: players[playerNumber].x + 20, y: players[playerNumber].y - 18}, 41, 36, 50, 70, 0, 0)){
-									
-								hit = true;
-					
-							}
-								
-								if(checkCollision({x: players[playerNumber].x + 20, y: players[playerNumber].y + 53}, players[i], 29, 19, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-
-								if(checkCollision({x: players[playerNumber].x + 70, y: players[playerNumber].y - 35}, players[i],  5, 9, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-								if(checkCollision({x: players[playerNumber].x + 70, y: players[playerNumber].y}, players[i], 9, 35, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-
-								if(checkCollision({x: players[playerNumber].x + 70, y: players[playerNumber].y - 9}, players[i],  9, 5, 41, 36, 0, 0)){
-								
-								hit = true;
-							}
-								if(checkCollision({x: players[playerNumber].x + 20, y: players[playerNumber].y - 37}, players[i], 29, 19, 41, 36, 0, 0)){
-								
-								hit = true;
-					
-							}
-						}
-
-						
-					if(hit){
-				
-						socket.emit('player_killed', {number: i});
-					
+				var directions = {
+					U:{
+						x: 36,
+						y: -22,
+					},
+					D:{
+						x:0,
+						y:20
+					},
+					R:{
+						x:36,
+						y:22
+					},
+					L:{
+						x:-26,
+						y:+22
 					}
-				//}
-			}
-		//endtesting
-
-
-
-
-
-
-
-
-			
-			if(players[playerNumber].PAPABEAR){
-							
-				if(checkCollision(players[i], players[playerNumber], 41, 36, 63, 63, 0, 0)){
-						
-					hit = true;
-			
-				}
-				
-				if(hit){
-			
-					socket.emit('player_killed', {number: i});
-			
-				}
 	
+				}
 				
-			}else{
-			
-			if(players[playerNumber].attacking){
-
-				if(players[i].PAPABEAR && !players[playerNumber].swordBearer){ }else{
+				
+					game.checkCollision({x: player.x + directions[player.direction].x, y: player.y + directions[player.direction].x}, oPlayer, player.weapon.getWidth(), player.weapon.getHeight(), oPlayer.PAPABEAR ? 41 + game.bearX : 41, oPlayer.PAPABEAR ? 36 + game.bearX : 36, 0, 0)
 					
-					if(players[i].PAPABEAR){
-						
-						bearX = 22;
-						bearY = 27;
-					}else{
-						
-						bearX = 0;
-						bearY = 0;
-					}
-
-
-					if (players[playerNumber].direction == "U"){
+					if (player.direction == "U"){
 				
-						if(checkCollision({x: players[playerNumber].x + 36, y: players[playerNumber].y - 22}, players[i], weapon.getWidth(playerNumber), weapon.getHeight(playerNumber), 41 + bearX, 36 + bearY, 0, 0)){
+						if(){
 							
 							hit = true;
 				
 						}
-				
-					}else if (players[playerNumber].direction == "D"){
+				oPlayer.PAPABEAR ? 41 + game.bearX : 41
+					}else if (player.direction == "D"){
 
-						if(checkCollision({x: players[playerNumber].x, y: players[playerNumber].y + 20}, players[i], weapon.getWidth(playerNumber), weapon.getHeight(playerNumber), 41 + bearX, 36 + bearY, 0, 0)){
+						if(game.checkCollision({x: player.x, y: player.y + 20}, oPlayer, player.weapon.getWidth(), player.weapon.getHeight(), 41 + game.bearX, 36 + game.bearY, 0, 0)){
 			
 							hit = true;
 			
 						}
 
-					}else if (players[playerNumber].direction == "R"){
+					}else if (player.direction == "R"){
 
-						if(checkCollision({x: players[playerNumber].x + 36, y: players[playerNumber].y + 22}, players[i], weapon.getWidth(playerNumber), weapon.getHeight(playerNumber), 41 + bearX, 36 + bearY, 0, 0)){
+						if(game.checkCollision({x: player.x + 36, y: player.y + 22}, oPlayer, player.weapon.getWidth(), player.weapon.getHeight(), 41 + game.bearX, 36 + game.bearY, 0, 0)){
 			
 							hit = true;
 				
 						}
 				
-					}else if (players[playerNumber].direction == "L") {
+					}else if (player.direction == "L") {
 				
-						if(checkCollision({x: players[playerNumber].x - 26, y: players[playerNumber].y + 22}, players[i], weapon.getWidth(playerNumber), weapon.getHeight(playerNumber), 41 + bearX, 36 + bearY, 0, 0)){
+						if(game.checkCollision({x: player.x - 26, y: player.y + 22}, oPlayer, player.weapon.getWidth(), player.weapon.getHeight(), 41 + game.bearX, 36 + game.bearY, 0, 0)){
 			
 							hit = true;
 				
@@ -877,106 +421,45 @@ var update = function (modifier) {
 				
 				if(hit){
 			
-					socket.emit('player_killed', {number: i});
-			
+					oPlayer.dead = true;	
+
+					oPlayer.spawn(function(spawn){
+
+						setTimeout(function() { 
+							oPlayer.x = spawn.x;
+							oPlayer.y = spawn.y;
+							oPlayer.dead = false;
+							oPlayer.PAPABEAR = false;
+							
+						 }, 8000);
+
+					});
 				}
-				
-				
+			
 			}
-			
-			}
-			
-
-		
 		
 		}
 		
 	}
-	
 
-	//testing123
-	//BASECOLLISION
-
-			if(checkCollision(check, blueBase, 41, 36, 161, 94, 0, 0) && !players[playerNumber].dead){
-				illegal = true;
-				if(checkCollision({x: players[playerNumber].x, y: players[playerNumber].y}, {x: blueBase.x + 2, y: blueBase.y + 2}, 41, 36, 159, 92, 0, 0)){
-					illegal = false;
-					socket.emit('quick_kill', {number: playerNumber});
-
-				}
-		}
-
-
-
-
-	//donetesting
-
-
-	treeText = false;
-	
-	for(i = 0; i < trees.length; i++){
+	if(Date.now() > user.dashStart + 100 && user.dashing){
 		
-		if(trees[i].removed == false && !players[playerNumber].dead){
+		user.moved = false;
 		
-			if(players[playerNumber].PAPABEAR){
-				
-				if(checkCollision(check, trees[i], 63, 63, 78, 78, 0, 0)){
+		if(Date.now() > user.dashStart + 700){
 			
-					illegal = true;
-				
-				}
-		
-			}else{
-			
-				if(checkCollision(check, trees[i], 41, 36, 78, 78, 0, 0)){
-			
-					illegal = true;
-			
-	
-				}
-			
-				if(checkCollision(players[playerNumber], trees[i], 41, 36, 78, 78, -25, -25)){
-			
-					treeText = true;		
-		
-					if(32 in keysDown){
-			
-						chopTree(i);
-			
-					}	
-				
-				}
-			
-			}	
-		
-		}
-		
-		
-	}
-
-	
-
-	if(Date.now() > dashStart + 100 && dashing){
-		
-		illegal = true;
-		
-		if(Date.now() > dashStart + 700){
-			
-			dashing = false;
+			user.dashing = false;
 		}
 		
 	}
 
-
-	
-	if((moved || dashing) && !illegal && !players[playerNumber].dead){
+	if((user.moved || user.dashing) && !user.dead){
 		
 		amount = 256 * modifier;
 		
-		if(players[playerNumber].PAPABEAR){
+		if(users.PAPABEAR){
 			
 			amount = amount * 1.2;
-			
 		}
 		
 		if(dashing){
@@ -984,90 +467,48 @@ var update = function (modifier) {
 			amount = amount * 5;
 		}
 		
-		
-		
-	    socket.emit('move_input', {direction: movePlayer, number: playerNumber, amount: amount});
-		
+		socket.emit('move_input', {direction: user.direction, name: user.name, amount: amount});
 	}
 	//
 	//
 	//COLLISIONS END
 	
 	
-	if(88 in keysDown){
-		
-		showNote = false;
-	}
+	renderer.treeText = false;
 	
-	//equip sword
-	if (75 in keysDown) {		
-		if(!kDown && hasWeapon == true){
-			kDown = true;
-			if (players[playerNumber].attacking == false) {
-				players[playerNumber].attacking = true;
-			    socket.emit('arm', {number: playerNumber, armed: true});
-
-				
-			}else {
-			    socket.emit('arm', {number: playerNumber, armed: false});
+	for(i = 0; i < game.server.trees.length; i++){
+		
+		if(game.server.trees[i].removed == false && !user.dead && !user.PAPABEAR){
+		
+			if(game.checkCollision(user, trees[i], 41, 36, 78, 78, -25, -25)){
+		
+				renderer.treeText = true;		
+	
+				if(32 in inputManager.keys){
+		
+					user.chopTree(i);
+		
+				}	
+			
 			}
+
 		}
-	}else{
-		kDown = false;	
-	}
-	
-
-				
-
-
-	if (48 in keysDown) {
-	
-		socket.emit('player_killed', {number: playerNumber});
-	
-	}
-	
-	
-	//special ability: change color
-	if (77 in keysDown) { // change color of character
-		if (players[playerNumber].canDisguise == true){// has ability
-		//	var startTimer = 0;
-		//	startTimer += modifier * 1000;
-		//	if (startTimer > 3){
-				if (66 in keysDown) {
-					players[playerNumber].team = "blue";
-					socket.emit('changeteam', {number: playerNumber, canDisguise: false, team: "blue"});
-				}
-				if (89 in keysDown && !threeteams) {
-					players[playerNumber].team = "yellow";
-					socket.emit('changeteam', {number: playerNumber, canDisguise: false, team: "yellow"});
-				} 
-				if (82 in keysDown) {
-					players[playerNumber].team = "red";
-					socket.emit('changeteam', {number: playerNumber, canDisguise: false, team: "red"});
-				} 
-				if (71 in keysDown) {
-					players[playerNumber].team = "green";
-					socket.emit('changeteam', {number: playerNumber, canDisguise: false, team: "green"});
-				} 
-
-		//	}
-		}
+		
 	}
 		
 
-	
 	//messages
-	if(players[playerNumber].PAPABEAR == false){
+	if(users[username].PAPABEAR == false){
 		//messages
 		//messages
 		for (var z = 0; z < notes.length; z++){
 			
 
-			if(notes[z].removed == false){
+			if(notes[z].reuser.moved == false){
 		
-				if ((checkCollision({x: notes[z].x + 29, y: notes[z].y + 29}, players[playerNumber], 20, 20, 41, 36, 0, 0)) || (messageReset == true)){
+				if ((game.checkCollision({x: notes[z].x + 29, y: notes[z].y + 29}, users[username], 20, 20, 41, 36, 0, 0)) || (game.messageReset == true)){
 					
-					messageReset = false;
+					game.messageReset = false;
 
 					noteMessage.line1 = ""
 					noteMessage.line2 = "";
@@ -1090,50 +531,50 @@ var update = function (modifier) {
 
 					switch (messageNum){
 					case 1:
-						if (lastMessage == messageNum){
-						messageReset = true;
+						if (game.lastMessage == messageNum){
+						game.messageReset = true;
 						}
 						else{
 						noteMessage.line1 = "If you manage to steal your opponent's wood, there is a considerable payoff.";
 						noteMessage.line2 = "";
 						noteMessage.line3 = "";
 						noteMessage.line4 = "";
-						lastMessage = messageNum;
+						game.lastMessage = messageNum;
 						}
 					break;
 					case 2:
-						if (lastMessage == messageNum){
-							messageReset = true;
+						if (game.lastMessage == messageNum){
+							game.messageReset = true;
 						}
 						else{
 							noteMessage.line1 = "Press z to dash forward";
 							noteMessage.line2 = "";
 							noteMessage.line3 = "";
 							noteMessage.line4 = "";
-							lastMessage = messageNum;
+							game.lastMessage = messageNum;
 						}
 
 					break;
 
 					case 3:
 
-						if (lastMessage == messageNum){
-							messageReset = true;
+						if (game.lastMessage == messageNum){
+							game.messageReset = true;
 						}
 						else{
-							noteMessage.line1 = "Press ENTER to chat with nearby players";
+							noteMessage.line1 = "Press ENTER to chat with nearby users";
 							noteMessage.line2 = "";
 							noteMessage.line3 = "";
 							noteMessage.line4 = "";
-							lastMessage = messageNum;
+							game.lastMessage = messageNum;
 						}
 
 					break;
 
 					case 4:
 
-						if (lastMessage == messageNum){
-							messageReset = true;
+						if (game.lastMessage == messageNum){
+							game.messageReset = true;
 						}
 						else{
 							noteMessage.line1 = "You can now press 'k' to wield a deadly weapon.";
@@ -1141,14 +582,14 @@ var update = function (modifier) {
 							noteMessage.line3 = "";
 							noteMessage.line4 = "";
 							hasWeapon = true;
-							lastMessage = messageNum;
+							game.lastMessage = messageNum;
 						}
 
 					break;
 					case 5:
 
-						if (lastMessage == messageNum){
-							messageReset = true;
+						if (game.lastMessage == messageNum){
+							game.messageReset = true;
 						}
 						else{
 
@@ -1157,15 +598,15 @@ var update = function (modifier) {
 							noteMessage.line3 = "";
 							noteMessage.line4 = "";
 							hasWeapon = true;
-							lastMessage = messageNum;
+							game.lastMessage = messageNum;
 						}
 
 
 					break;
 
 					case 6:						
-						if (lastMessage == messageNum){
-							messageReset = true;
+						if (game.lastMessage == messageNum){
+							game.messageReset = true;
 						}
 						else{
 							noteMessage.line1 = "Press 'k' to brandish your knife and then press 'k' again to hide it.";
@@ -1173,60 +614,60 @@ var update = function (modifier) {
 							noteMessage.line3 = "";
 							noteMessage.line4 = "";
 							hasWeapon = true;
-							lastMessage = messageNum;
+							game.lastMessage = messageNum;
 						}
 
 					break;
 					case 7:
-						if (lastMessage == messageNum){
-							messageReset = true;
+						if (game.lastMessage == messageNum){
+							game.messageReset = true;
 						}
 						else{
 							noteMessage.line1 = "Appearances can be decieving...stay on gaurd";
 							noteMessage.line2 = "";
 							noteMessage.line3 = "";
 							noteMessage.line4 = "";
-							lastMessage = messageNum;
+							game.lastMessage = messageNum;
 						}
 					break;
 					case 8:
-						if (lastMessage == messageNum){
-							messageReset = true;
+						if (game.lastMessage == messageNum){
+							game.messageReset = true;
 						}
 						else{	
 							noteMessage.line1 = "You have picked up a disguise. Hold 'm' and then";
 							noteMessage.line2 = "press r,g or b to impersonate another team.";
 							noteMessage.line3 = "";
 							noteMessage.line4 = "";
-							lastMessage = messageNum;
-							GiveCanDisguise(players[playerNumber]);
+							game.lastMessage = messageNum;
+							GiveCanDisguise(users[username]);
 						}
 
 					break;
 
 					case 9:
-						if (lastMessage == messageNum){
-						messageReset = true;
+						if (game.lastMessage == messageNum){
+						game.messageReset = true;
 						}
 						else{
 						noteMessage.line1 = "Some notes can give you immense power. This note does not.";
 						noteMessage.line2 = "";
 						noteMessage.line3 = "";
 						noteMessage.line4 = "";
-						lastMessage = messageNum;
+						game.lastMessage = messageNum;
 						}
 					break;
 					case 10:
-						if (lastMessage == messageNum){
-						messageReset = true;
+						if (game.lastMessage == messageNum){
+						game.messageReset = true;
 						}
 						else{
 						noteMessage.line1 = "Hold 'm' and press r,g, or b.";
 						noteMessage.line2 = "Not everyone can disguse themselves...but some of your enemies can.";
 						noteMessage.line3 = "";
 						noteMessage.line4 = "";
-						lastMessage = messageNum;
-						GiveCanDisguise(players[playerNumber]);
+						game.lastMessage = messageNum;
+						GiveCanDisguise(users[username]);
 
 						}
 					
@@ -1240,7 +681,7 @@ var update = function (modifier) {
 					noteMessage.line2 = "You are fast, deadly, and nearly invincible";
 					noteMessage.line3 = "You can only be killed by a golden sword";
 					noteMessage.line4 = "Will you help your former team or embrace your frightening nature?";
-					GivePapa(players[playerNumber], z);
+					GivePapa(users[username], z);
 					hasLog = false;
 					
 					}else{
@@ -1263,7 +704,7 @@ var update = function (modifier) {
 					noteMessage.line2 = "You are fast, deadly, and nearly invincible";
 					noteMessage.line3 = "You can only be killed by a golden sword";
 					noteMessage.line4 = "Will you help your former team or embrace your frightening nature?";
-					GivePapa(players[playerNumber], z);
+					GivePapa(users[username], z);
 					
 					}else{
 					noteMessage.line1 = "Papa Bear has a secret..";
@@ -1280,7 +721,7 @@ var update = function (modifier) {
 						noteMessage.line2 = "You are fast, deadly, and nearly invincible";
 						noteMessage.line3 = "You can only be killed by a golden sword";
 						noteMessage.line4 = "Will you help your former team or embrace your frightening nature?";
-						GivePapa(players[playerNumber], z);
+						GivePapa(users[username], z);
 						hasLog = false;
 						hasWeapon = true;
 
@@ -1298,7 +739,7 @@ var update = function (modifier) {
 						noteMessage.line2 = "";
 						hasWeapon = true;
 
-						GivePowerSword(players[playerNumber]);
+						GivePowerSword(users[username]);
 					}else{
 						noteMessage.line1 = "Only the golden sword can defeat PAPA BEAR.";
 						noteMessage.line2 = "";
@@ -1311,7 +752,7 @@ var update = function (modifier) {
 
 					if(!checkIfSwordBearer()){
 					noteMessage.line1 = "Press 'k' to sheath and unsheathe a golden sword. This weapon can kill PAPA BEAR.";
-					GivePowerSword(players[playerNumber]);
+					GivePowerSword(users[username]);
 					}else{
 					noteMessage.line1 = "Right now someone has the golden sword that could defeat PAPA BEAR...";
 					}
@@ -1319,7 +760,7 @@ var update = function (modifier) {
 					case 16:
 					noteMessage.line1 = "You have picked up a disguise. Hold 'm' and then";
 					noteMessage.line2 = "press r,g or b to impersonate another team.";
-					GiveCanDisguise(players[playerNumber]);
+					GiveCanDisguise(users[username]);
 					break;
 
 					case 17:
@@ -1351,13 +792,11 @@ var update = function (modifier) {
 	//Depositing logs code
 	//theres one for each team here due to inneficient programming
 	
-	if(!players[playerNumber].PAPABEAR){
+	if(!users[username].PAPABEAR){
+			
+		if(game.checkCollision(users[username], yellowBase, 41, 36, 140, 84, -25, -25)){
 		
-		if(!threeteams){
-	
-			if(checkCollision(players[playerNumber], yellowBase, 41, 36, 140, 84, -25, -25)){
-		
-			if(players[playerNumber].team == yellowBase.team){
+			if(users[username].team == yellowBase.team){
 			
 				depLog();
 			
@@ -1367,7 +806,7 @@ var update = function (modifier) {
 			
 					stealText = true;
 			
-					if(32 in keysDown){
+					if(32 in inputManager.keys){
 				
 						stealWood('yellow');
 					}
@@ -1378,11 +817,9 @@ var update = function (modifier) {
 	
 		}
 	
-		}
-	
-		if(checkCollision(players[playerNumber], redBase, 41, 36, 161, 94, -25, -25)){
+		if(game.checkCollision(users[username], redBase, 41, 36, 161, 94, -25, -25)){
 
-			if(players[playerNumber].team == redBase.team){
+			if(users[username].team == redBase.team){
 			
 				depLog();
 			
@@ -1392,7 +829,7 @@ var update = function (modifier) {
 			
 					stealText = true;
 			
-					if(32 in keysDown){
+					if(32 in inputManager.keys){
 				
 						stealWood('red');
 					}
@@ -1403,10 +840,10 @@ var update = function (modifier) {
 		}
 
 	
-		if(checkCollision(players[playerNumber], blueBase, 41, 36, 161, 94, -25, -25)){
+		if(game.checkCollision(users[username], blueBase, 41, 36, 161, 94, -25, -25)){
 
 		
-			if(players[playerNumber].team == blueBase.team){
+			if(users[username].team == blueBase.team){
 			
 				depLog();
 			
@@ -1417,7 +854,7 @@ var update = function (modifier) {
 			
 					stealText = true;
 			
-					if(32 in keysDown){
+					if(32 in inputManager.keys){
 				
 						stealWood('blue');
 					}
@@ -1428,10 +865,10 @@ var update = function (modifier) {
 	
 		}
 	
-		if(checkCollision(players[playerNumber], greenBase, 41, 36, 161, 94, -25, -25)){
+		if(game.checkCollision(users[username], greenBase, 41, 36, 161, 94, -25, -25)){
 
 		
-			if(players[playerNumber].team == greenBase.team){
+			if(users[username].team == greenBase.team){
 			
 				depLog();
 			
@@ -1441,7 +878,7 @@ var update = function (modifier) {
 					
 					stealText = true;
 			
-					if(32 in keysDown){
+					if(32 in inputManager.keys){
 				
 						stealWood('green');
 					}
@@ -1455,9 +892,9 @@ var update = function (modifier) {
 	}
 	
 	//endgame
-	if(timeLimit - elapsedseconds <= 0){
+	if(game.timeLimit - elapsedseconds <= 0){
 		
-		gameState = "won";
+		game.gameState = "won";
 		
 		
 		
@@ -1484,10 +921,10 @@ var render = function () {
 
 
 
-	if(playerNumber != 0){
+	if(username != 0){
 	
-		camera.y = canvas.height/2 - players[playerNumber].y;
-		camera.x = canvas.width/2 - players[playerNumber].x;
+		camera.y = canvas.height/2 - users[username].y;
+		camera.x = canvas.width/2 - users[username].x;
 	
 	}
 	
@@ -1559,17 +996,6 @@ var render = function () {
 
 	}
 
-	//donetesting
-
-
-	//bases & score
-	if(!threeteams){
-		
-		ctx.drawImage(yellowBaseImage, yellowBase.x + camera.x, yellowBase.y + camera.y);
-	
-		ctx.fillText(score.yellow,  yellowBase.x + camera.x, yellowBase.y + camera.y);
-	
-	}
 	
 	ctx.drawImage(blueBaseImage, blueBase.x + camera.x, blueBase.y + camera.y);
 	ctx.fillStyle = "white";
@@ -1591,9 +1017,9 @@ var render = function () {
 		//treeNum = 1;
 
 		//getRandomInt(1,4);
-		//if((i<trees.length) && (!trees[i].removed))
+		//if((i<trees.length) && (!trees[i].reuser.moved))
 		
-		if(!trees[i].removed){
+		if(!trees[i].reuser.moved){
 
 		
 			ctx.fillStyle = "rgb(150,100,100)";
@@ -1633,7 +1059,7 @@ var render = function () {
 	//notes
 	for(i =0; i< notes.length; i++){
 		
-		if(!notes[i].removed){
+		if(!notes[i].reuser.moved){
 		
 			ctx.fillStyle = "rgb(0,0,180)";
 			
@@ -1643,210 +1069,210 @@ var render = function () {
 		
 	}
 		
-	for(i=0; i < players.length; i++){
+	for(i=0; i < users.length; i++){
 		//shadows
-	//if (players[i].direction == "L"){
-		ctx.drawImage(playershadow, players[i].x + camera.x -1 , players[i].y + camera.y + 11, 41,36);
+	//if (users[i].direction == "L"){
+		ctx.drawImage(usershadow, users[i].x + camera.x -1 , users[i].y + camera.y + 11, 41,36);
 	//}	
 
 		//CHARACTER DRAWING
-		if(players[i].dead){
+		if(users[i].dead){
 			
 
-			if (players[i].team == "green"){
+			if (users[i].team == "green"){
 				
-				ctx.drawImage(greenCorpse, players[i].x + camera.x - 4, players[i].y + camera.y);
+				ctx.drawImage(greenCorpse, users[i].x + camera.x - 4, users[i].y + camera.y);
 			
 			}
 			
-			if (players[i].team == "red"){
+			if (users[i].team == "red"){
 				
-				ctx.drawImage(redCorpse, players[i].x + camera.x - 4, players[i].y + camera.y);
+				ctx.drawImage(redCorpse, users[i].x + camera.x - 4, users[i].y + camera.y);
 			
 			}
-			if (players[i].team == "blue"){
+			if (users[i].team == "blue"){
 				
-				ctx.drawImage(blueCorpse, players[i].x + camera.x - 4, players[i].y + camera.y);
+				ctx.drawImage(blueCorpse, users[i].x + camera.x - 4, users[i].y + camera.y);
 			
 			}
 		
 		
-		}else if(players[i].PAPABEAR==true){
+		}else if(users[i].PAPABEAR==true){
 
-			if (players[i].direction == "R") { 
-			ctx.drawImage(bearImage, 0, 0, 63, 63, players[i].x + camera.x, players[i].y + camera.y, 63,63);
-			}else if (players[i].direction == "D"){ 
-			ctx.drawImage(bearImage, 0, 66, 63, 129, players[i].x + camera.x, players[i].y + camera.y, 63,129);
-			}else if (players[i].direction == "L"){
-			ctx.drawImage(bearImage, 66, 0, 129, 63, players[i].x + camera.x, players[i].y + camera.y, 129,63);
-			}else if (players[i].direction == "U"){
-			ctx.drawImage(bearImage, 66, 66, 129, 129, players[i].x + camera.x, players[i].y + camera.y, 129,129); 
+			if (users[i].direction == "R") { 
+			ctx.drawImage(bearImage, 0, 0, 63, 63, users[i].x + camera.x, users[i].y + camera.y, 63,63);
+			}else if (users[i].direction == "D"){ 
+			ctx.drawImage(bearImage, 0, 66, 63, 129, users[i].x + camera.x, users[i].y + camera.y, 63,129);
+			}else if (users[i].direction == "L"){
+			ctx.drawImage(bearImage, 66, 0, 129, 63, users[i].x + camera.x, users[i].y + camera.y, 129,63);
+			}else if (users[i].direction == "U"){
+			ctx.drawImage(bearImage, 66, 66, 129, 129, users[i].x + camera.x, users[i].y + camera.y, 129,129); 
 			}
 				//losing papa bear on death
-		}else if (players[i].renderteam == "green"){
+		}else if (users[i].renderteam == "green"){
 		
-			if (players[i].character == 1){
-				if (players[i].direction == "L") {				
-					ctx.drawImage(greenImage, 2, 2, 41, 36, players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "R"){				
-					ctx.drawImage(greenImage, 2, 40, 41, 33,players[i].x + camera.x, players[i].y + camera.y, 41,33);
-				}else if (players[i].direction == "D"){
-					ctx.drawImage(greenImage, 2, 75, 41, 35,players[i].x + camera.x, players[i].y + camera.y, 41,35);
-				}else if (players[i].direction == "U"){
-					ctx.drawImage(greenImage, 2, 113, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);	
+			if (users[i].character == 1){
+				if (users[i].direction == "L") {				
+					ctx.drawImage(greenImage, 2, 2, 41, 36, users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "R"){				
+					ctx.drawImage(greenImage, 2, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,33);
+				}else if (users[i].direction == "D"){
+					ctx.drawImage(greenImage, 2, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,35);
+				}else if (users[i].direction == "U"){
+					ctx.drawImage(greenImage, 2, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);	
 				}	
 		
-			}else if (players[i].character == 2){
-				if (players[i].direction == "L" ){
-					ctx.drawImage(greenImage, 45, 2, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+			}else if (users[i].character == 2){
+				if (users[i].direction == "L" ){
+					ctx.drawImage(greenImage, 45, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 			
-				}else if (players[i].direction == "R"){	
+				}else if (users[i].direction == "R"){	
 						
-					ctx.drawImage(greenImage, 45, 40, 41, 33,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "D"){				
-					ctx.drawImage(greenImage, 45, 75, 41, 35,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+					ctx.drawImage(greenImage, 45, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "D"){				
+					ctx.drawImage(greenImage, 45, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 			
-				}else if (players[i].direction == "U"){				
-					ctx.drawImage(greenImage, 45, 113, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "U"){				
+					ctx.drawImage(greenImage, 45, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 			
 				}
 		
-			}else if (players[i].character == 3){
-				if (players[i].direction == "L") {
-					ctx.drawImage(greenImage, 88, 2, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "R"){
-					ctx.drawImage(greenImage, 88, 40, 41, 33,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "D"){
-					ctx.drawImage(greenImage, 88, 75, 41, 35,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "U"){
-					ctx.drawImage(greenImage, 88, 113, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+			}else if (users[i].character == 3){
+				if (users[i].direction == "L") {
+					ctx.drawImage(greenImage, 88, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "R"){
+					ctx.drawImage(greenImage, 88, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "D"){
+					ctx.drawImage(greenImage, 88, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "U"){
+					ctx.drawImage(greenImage, 88, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 				}
 		
 			}
 	
-		}else if (players[i].renderteam == "blue"){
+		}else if (users[i].renderteam == "blue"){
 
-			if (players[i].character == 1){
-				if (players[i].direction == "L") {				
-					ctx.drawImage(blueImage, 2, 2, 41, 36, players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "R"){				
-					ctx.drawImage(blueImage, 2, 40, 41, 33,players[i].x + camera.x, players[i].y + camera.y, 41,33);
-				}else if (players[i].direction == "D"){
-					ctx.drawImage(blueImage, 2, 75, 41, 35,players[i].x + camera.x, players[i].y + camera.y, 41,35);
-				}else if (players[i].direction == "U"){
-					ctx.drawImage(blueImage, 2, 113, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);	
+			if (users[i].character == 1){
+				if (users[i].direction == "L") {				
+					ctx.drawImage(blueImage, 2, 2, 41, 36, users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "R"){				
+					ctx.drawImage(blueImage, 2, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,33);
+				}else if (users[i].direction == "D"){
+					ctx.drawImage(blueImage, 2, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,35);
+				}else if (users[i].direction == "U"){
+					ctx.drawImage(blueImage, 2, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);	
 				}	
 		
-			}else if (players[i].character == 2){
-				if (players[i].direction == "L" ){
-					ctx.drawImage(blueImage, 45, 2, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+			}else if (users[i].character == 2){
+				if (users[i].direction == "L" ){
+					ctx.drawImage(blueImage, 45, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 			
-				}else if (players[i].direction == "R"){	
+				}else if (users[i].direction == "R"){	
 						
-					ctx.drawImage(blueImage, 45, 40, 41, 33,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "D"){				
-					ctx.drawImage(blueImage, 45, 75, 41, 35,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+					ctx.drawImage(blueImage, 45, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "D"){				
+					ctx.drawImage(blueImage, 45, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 			
-				}else if (players[i].direction == "U"){				
-					ctx.drawImage(blueImage, 45, 113, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "U"){				
+					ctx.drawImage(blueImage, 45, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 			
 				}
 		
-			}else if (players[i].character == 3){
-				if (players[i].direction == "L") {
-					ctx.drawImage(blueImage, 88, 2, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "R"){
-					ctx.drawImage(blueImage, 88, 40, 41, 33,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "D"){
-					ctx.drawImage(blueImage, 88, 75, 41, 35,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "U"){
-					ctx.drawImage(blueImage, 88, 113, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+			}else if (users[i].character == 3){
+				if (users[i].direction == "L") {
+					ctx.drawImage(blueImage, 88, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "R"){
+					ctx.drawImage(blueImage, 88, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "D"){
+					ctx.drawImage(blueImage, 88, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "U"){
+					ctx.drawImage(blueImage, 88, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 				}
 		
 			}
 
-		}else if (players[i].renderteam == "red"){
+		}else if (users[i].renderteam == "red"){
 	
-			if (players[i].character == 1){
-				if (players[i].direction == "L") {				
-					ctx.drawImage(redImage, 2, 2, 41, 36, players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "R"){				
-					ctx.drawImage(redImage, 2, 40, 41, 33,players[i].x + camera.x, players[i].y + camera.y, 41,33);
-				}else if (players[i].direction == "D"){
-					ctx.drawImage(redImage, 2, 75, 41, 35,players[i].x + camera.x, players[i].y + camera.y, 41,35);
-				}else if (players[i].direction == "U"){
-					ctx.drawImage(redImage, 2, 113, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);	
+			if (users[i].character == 1){
+				if (users[i].direction == "L") {				
+					ctx.drawImage(redImage, 2, 2, 41, 36, users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "R"){				
+					ctx.drawImage(redImage, 2, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,33);
+				}else if (users[i].direction == "D"){
+					ctx.drawImage(redImage, 2, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,35);
+				}else if (users[i].direction == "U"){
+					ctx.drawImage(redImage, 2, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);	
 				}	
 		
-			}else if (players[i].character == 2){
-				if (players[i].direction == "L" ){
-					ctx.drawImage(redImage, 45, 2, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+			}else if (users[i].character == 2){
+				if (users[i].direction == "L" ){
+					ctx.drawImage(redImage, 45, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 			
-				}else if (players[i].direction == "R"){	
+				}else if (users[i].direction == "R"){	
 						
-					ctx.drawImage(redImage, 45, 40, 41, 33,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "D"){				
-					ctx.drawImage(redImage, 45, 75, 41, 35,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+					ctx.drawImage(redImage, 45, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "D"){				
+					ctx.drawImage(redImage, 45, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 			
-				}else if (players[i].direction == "U"){				
-					ctx.drawImage(redImage, 45, 113, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "U"){				
+					ctx.drawImage(redImage, 45, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 			
 				}
 		
-			}else if (players[i].character == 3){
-				if (players[i].direction == "L") {
-					ctx.drawImage(redImage, 88, 2, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "R"){
-					ctx.drawImage(redImage, 88, 40, 41, 33,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "D"){
-					ctx.drawImage(redImage, 88, 75, 41, 35,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "U"){
-					ctx.drawImage(redImage, 88, 113, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+			}else if (users[i].character == 3){
+				if (users[i].direction == "L") {
+					ctx.drawImage(redImage, 88, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "R"){
+					ctx.drawImage(redImage, 88, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "D"){
+					ctx.drawImage(redImage, 88, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "U"){
+					ctx.drawImage(redImage, 88, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 				}
 		
 			}
 	
-		}else if (players[i].renderteam == "yellow" && !threeteams){
+		}else if (users[i].renderteam == "yellow" && !threeteams){
 	
-			if (players[i].character == 1){
+			if (users[i].character == 1){
 			
-				if (players[i].direction == "L") {		
+				if (users[i].direction == "L") {		
 							
-					ctx.drawImage(yellowImage, 2, 2, 41, 36, players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "R"){				
-					ctx.drawImage(yellowImage, 2, 40, 41, 33,players[i].x + camera.x, players[i].y + camera.y, 41,33);
-				}else if (players[i].direction == "D"){
-					ctx.drawImage(yellowImage, 2, 75, 41, 35,players[i].x + camera.x, players[i].y + camera.y, 41,35);
-				}else if (players[i].direction == "U"){
-					ctx.drawImage(yellowImage, 2, 113, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);	
+					ctx.drawImage(yellowImage, 2, 2, 41, 36, users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "R"){				
+					ctx.drawImage(yellowImage, 2, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,33);
+				}else if (users[i].direction == "D"){
+					ctx.drawImage(yellowImage, 2, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,35);
+				}else if (users[i].direction == "U"){
+					ctx.drawImage(yellowImage, 2, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);	
 				}	
 		
-			}else if (players[i].character == 2){
+			}else if (users[i].character == 2){
 				
-				if (players[i].direction == "L" ){
-					ctx.drawImage(yellowImage, 45, 2, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+				if (users[i].direction == "L" ){
+					ctx.drawImage(yellowImage, 45, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 			
-				}else if (players[i].direction == "R"){	
+				}else if (users[i].direction == "R"){	
 						
-					ctx.drawImage(yellowImage, 45, 40, 41, 33,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "D"){				
-					ctx.drawImage(yellowImage, 45, 75, 41, 35,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+					ctx.drawImage(yellowImage, 45, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "D"){				
+					ctx.drawImage(yellowImage, 45, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 			
-				}else if (players[i].direction == "U"){				
-					ctx.drawImage(yellowImage, 45, 113, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "U"){				
+					ctx.drawImage(yellowImage, 45, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 			
 				}
 		
-			}else if (players[i].character == 3){
+			}else if (users[i].character == 3){
 				
-				if (players[i].direction == "L") {
-					ctx.drawImage(yellowImage, 88, 2, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "R"){
-					ctx.drawImage(yellowImage, 88, 40, 41, 33,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "D"){
-					ctx.drawImage(yellowImage, 88, 75, 41, 35,players[i].x + camera.x, players[i].y + camera.y, 41,36);
-				}else if (players[i].direction == "U"){
-					ctx.drawImage(yellowImage, 88, 113, 41, 36,players[i].x + camera.x, players[i].y + camera.y, 41,36);
+				if (users[i].direction == "L") {
+					ctx.drawImage(yellowImage, 88, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "R"){
+					ctx.drawImage(yellowImage, 88, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "D"){
+					ctx.drawImage(yellowImage, 88, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (users[i].direction == "U"){
+					ctx.drawImage(yellowImage, 88, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
 				}
 		
 			}
@@ -1859,54 +1285,54 @@ var render = function () {
 		
 		ctx.fillStyle = "rgb(255,255,0)";
 		
-		if(players[i].chatting){
+		if(users[i].chatting){
 						
-			ctx.fillText(players[i].chatText, players[i].x - 40 + camera.x, players[i].y - 20 + camera.y);
+			ctx.fillText(users[i].chatText, users[i].x - 40 + camera.x, users[i].y - 20 + camera.y);
 		
 		}
 			
-		if(players[i].dead == false){
+		if(users[i].dead == false){
 
 			//testing123
 			if (preSwiping){
 
-					if (players[i].direction == "L"){
-						ctx.drawImage(swordL, players[i].x + camera.x + 10, players[i].y + camera.y - 42);
+					if (users[i].direction == "L"){
+						ctx.drawImage(swordL, users[i].x + camera.x + 10, users[i].y + camera.y - 42);
 					}
-						if (players[i].direction == "R"){
-						ctx.drawImage(swordR, players[i].x + camera.x + 10, players[i].y + camera.y + 38);
+						if (users[i].direction == "R"){
+						ctx.drawImage(swordR, users[i].x + camera.x + 10, users[i].y + camera.y + 38);
 					}
-						if (players[i].direction == "D"){
-						ctx.drawImage(swordU, players[i].x + camera.x - 42, players[i].y + camera.y + 12);
+						if (users[i].direction == "D"){
+						ctx.drawImage(swordU, users[i].x + camera.x - 42, users[i].y + camera.y + 12);
 					}
-						if (players[i].direction == "U"){
-						ctx.drawImage(swordD, players[i].x + camera.x + 41, players[i].y + camera.y + 12);
+						if (users[i].direction == "U"){
+						ctx.drawImage(swordD, users[i].x + camera.x + 41, users[i].y + camera.y + 12);
 					}
 			}
 
 			if (swipage){
 
-						if (players[i].direction == "R"){
-						ctx.drawImage(swordL, players[i].x + camera.x + 10, players[i].y + camera.y - 42);
+						if (users[i].direction == "R"){
+						ctx.drawImage(swordL, users[i].x + camera.x + 10, users[i].y + camera.y - 42);
 					}
-						if (players[i].direction == "L"){
-						ctx.drawImage(swordR, players[i].x + camera.x + 10, players[i].y + camera.y + 38);
+						if (users[i].direction == "L"){
+						ctx.drawImage(swordR, users[i].x + camera.x + 10, users[i].y + camera.y + 38);
 					}
-						if (players[i].direction == "U"){
-						ctx.drawImage(swordU, players[i].x + camera.x - 42, players[i].y + camera.y + 12);
+						if (users[i].direction == "U"){
+						ctx.drawImage(swordU, users[i].x + camera.x - 42, users[i].y + camera.y + 12);
 					}
-						if (players[i].direction == "D"){
-						ctx.drawImage(swordD, players[i].x + camera.x + 41, players[i].y + camera.y + 12);
+						if (users[i].direction == "D"){
+						ctx.drawImage(swordD, users[i].x + camera.x + 41, users[i].y + camera.y + 12);
 					}
 
 
 				swipeArch = ctx.fillStyle = "rgb(255,255,0)"
 
 
-				 if (players[i].direction == "U"){
+				 if (users[i].direction == "U"){
 
-					swipeX = players[i].x + camera.x + 19;
-					swipeY = players[i].y + camera.y + 19;
+					swipeX = users[i].x + camera.x + 19;
+					swipeY = users[i].y + camera.y + 19;
 					ctx.beginPath();
 					swipeArch = ctx.arc(swipeX, swipeY, swipe.radius, 0, Math.PI, true);
 					ctx.lineWidth = 10;
@@ -1915,28 +1341,28 @@ var render = function () {
       				//ctx.closePath();
 					//ctx.fillStyle = "rgb(255,255,0)";
 					//ctx.fill();	
-				}else if (players[i].direction == "D"){
+				}else if (users[i].direction == "D"){
 					 	
-					swipeX = players[i].x + camera.x + 19;
-					swipeY = players[i].y + camera.y + 19;
+					swipeX = users[i].x + camera.x + 19;
+					swipeY = users[i].y + camera.y + 19;
 					ctx.beginPath();
 					swipeArch = ctx.arc(swipeX, swipeY, swipe.radius, 0, Math.PI, false);
 					ctx.lineWidth = 10;
       				ctx.strokeStyle = "rgb(255,255,0)";
       				ctx.stroke();
-				}else if (players[i].direction == "L"){
+				}else if (users[i].direction == "L"){
 					 	
-					swipeX = players[i].x + camera.x + 19;
-					swipeY = players[i].y + camera.y + 17;
+					swipeX = users[i].x + camera.x + 19;
+					swipeY = users[i].y + camera.y + 17;
 					ctx.beginPath();
 					swipeArch = ctx.arc(swipeX, swipeY, swipe.radius, 4.7, Math.PI*.5, true);
 					ctx.lineWidth = 10;
       				ctx.strokeStyle = "rgb(255,255,0)";
       				ctx.stroke();
-				}else if (players[i].direction == "R"){
+				}else if (users[i].direction == "R"){
 					 	
-					swipeX = players[i].x + camera.x + 19;
-					swipeY = players[i].y + camera.y + 17;
+					swipeX = users[i].x + camera.x + 19;
+					swipeY = users[i].y + camera.y + 17;
 					ctx.beginPath();
 					swipeArch = ctx.arc(swipeX, swipeY, swipe.radius, 4.7, Math.PI*.5, false);
 					ctx.lineWidth = 10;
@@ -1951,14 +1377,14 @@ var render = function () {
 			if(hasLog == true){
 
 
-				if (players[i].direction == "R"){
-							ctx.drawImage(backpackImage, 0, 0, 60, 40, players[i].x + camera.x -14, players[i].y + camera.y - 3, 60,40);
-				}else if (players[i].direction == "D") { 
-							ctx.drawImage(backpackImage, 0, 40, 60, 43, players[i].x + camera.x -20, players[i].y + camera.y - 10, 60, 43);
-				}else if (players[i].direction == "U") { 
-							ctx.drawImage(backpackImage, 0, 83, 60, 39, players[i].x + camera.x - 20, players[i].y + camera.y -5, 60, 39);
-				}else if (players[i].direction == "L") { 
-							ctx.drawImage(backpackImage, 0, 126, 60, 40, players[i].x + camera.x, players[i].y + camera.y - 3, 60, 40);
+				if (users[i].direction == "R"){
+							ctx.drawImage(backpackImage, 0, 0, 60, 40, users[i].x + camera.x -14, users[i].y + camera.y - 3, 60,40);
+				}else if (users[i].direction == "D") { 
+							ctx.drawImage(backpackImage, 0, 40, 60, 43, users[i].x + camera.x -20, users[i].y + camera.y - 10, 60, 43);
+				}else if (users[i].direction == "U") { 
+							ctx.drawImage(backpackImage, 0, 83, 60, 39, users[i].x + camera.x - 20, users[i].y + camera.y -5, 60, 39);
+				}else if (users[i].direction == "L") { 
+							ctx.drawImage(backpackImage, 0, 126, 60, 40, users[i].x + camera.x, users[i].y + camera.y - 3, 60, 40);
 				}
 			}
 
@@ -1972,9 +1398,9 @@ var render = function () {
 			//SWORD DRAWING		
 			ctx.fillStyle = "rgb(200,200,200)";
 		
-			if (players[i].attacking && players[i].PAPABEAR == false){
+			if (users[i].attacking && users[i].PAPABEAR == false){
 	
-				if(players[i].swordBearer == true){
+				if(users[i].swordBearer == true){
 
 					weapon.hwidth = 45;
 					weapon.hheight = 7;
@@ -1992,18 +1418,18 @@ var render = function () {
 	
 				}
 
-				if (players[i].direction == "U"){
+				if (users[i].direction == "U"){
 
-					weaponRect = ctx.fillRect(players[i].x + camera.x + 36, players[i].y + camera.y - 22, weapon.vwidth, weapon.vheight);	
-				}else if (players[i].direction == "D"){
+					weaponRect = ctx.fillRect(users[i].x + camera.x + 36, users[i].y + camera.y - 22, weapon.vwidth, weapon.vheight);	
+				}else if (users[i].direction == "D"){
 
-					weaponRect = ctx.fillRect(players[i].x + camera.x, players[i].y + camera.y + 20, weapon.vwidth, weapon.vheight);	
-				}else if (players[i].direction == "R"){
+					weaponRect = ctx.fillRect(users[i].x + camera.x, users[i].y + camera.y + 20, weapon.vwidth, weapon.vheight);	
+				}else if (users[i].direction == "R"){
 
-					weaponRect = ctx.fillRect(players[i].x + camera.x + 36, players[i].y + camera.y + 22, weapon.hwidth, weapon.hheight);	
-				}else if (players[i].direction == "L") {
+					weaponRect = ctx.fillRect(users[i].x + camera.x + 36, users[i].y + camera.y + 22, weapon.hwidth, weapon.hheight);	
+				}else if (users[i].direction == "L") {
 
-					weaponRect = ctx.fillRect(players[i].x + camera.x - 26, players[i].y + camera.y + 22, weapon.hwidth, weapon.hheight);	
+					weaponRect = ctx.fillRect(users[i].x + camera.x - 26, users[i].y + camera.y + 22, weapon.hwidth, weapon.hheight);	
 				}
 
 			}		
@@ -2044,7 +1470,7 @@ var render = function () {
 		
 	}
 	
-	if(elapsedseconds > timeLimit - 100){
+	if(elapsedseconds > game.timeLimit - 100){
 		
 		ctx.fillStyle = "rgb(255,0,0)";
 		
@@ -2054,11 +1480,11 @@ var render = function () {
 		
 	}
 	
-	ctx.fillText((timeLimit - elapsedseconds) + " Seconds Left", 50, 80);
+	ctx.fillText((game.timeLimit - elapsedseconds) + " Seconds Left", 50, 80);
 	
 	ctx.fillStyle = "rgb(0,0,0)";
 	
-	if(players[playerNumber].dead){
+	if(users[username].dead){
 		
 		ctx.fillText("You will respawn soon", window.innerWidth/8, 325);
 		
@@ -2069,7 +1495,7 @@ var render = function () {
 
 		//ctx.fillText("You are holding " + woodTotal + " pieces of wood", window.innerWidth/4, window.innerHeight - 50);
 		
-		if(players[playerNumber].dead){
+		if(users[username].dead){
 			
 			hasLog = false;
 			
@@ -2098,7 +1524,7 @@ var render = function () {
 	
 	}
 	
-	//console.log(players[playerNumber]);
+	//console.log(users[username]);
 	
 };
 
@@ -2117,17 +1543,17 @@ ctx.fillStyle = "rgb(0,0,0)";
 ctx.font = "24px Helvetica";
 ctx.textAlign = "left";
    
-	if(gameState == "load"){
+	if(game.gameState == "load"){
    
 		ctx.fillText("Loading....99%", window.innerWidth/4, 100);
    
 	}
 	   
-	if(gameState == "wait"){
+	if(game.gameState == "wait"){
 	
-		  if(playerSet == true){
+		  if(userSet == true){
 
-             ctx.fillText("There are three villages. You are villager #" + playerNumber + " of the " + players[playerNumber].team + " village.", 100, 120);
+             ctx.fillText("There are three villages. You are villager #" + username + " of the " + users[username].team + " village.", 100, 120);
 
              ctx.fillText("Only one village will survive this harsh winter, so you must stockpile as much wood as you can.", 100, 160);
 
@@ -2138,16 +1564,16 @@ ctx.textAlign = "left";
 
      		 ctx.fillText("Good luck.", 100, 340);
 
-               ctx.fillText("Waiting for game to start....", 100, 480);
+               ctx.fillText("Waiting for game to game.start....", 100, 480);
 
       
 
 
  
 	
-			if(13 in keysDown && playerNumber == 0){
+			if(13 in inputManager.keys && username == 0){
 
-				socket.emit("startgame", {});
+				socket.emit("game.startgame", {});
 
 			}
 	
@@ -2157,22 +1583,22 @@ ctx.textAlign = "left";
 	   
 	   
 
-	if(started){
+	if(game.started){
 
-	   if(gameState == "play"){
+	   if(game.gameState == "play"){
 		   
-		   if(playerNumber == 0){
+		   if(username == 0){
 		   	
-			   	if (38 in keysDown) { // Player holding up
+			   	if (38 in inputManager.keys) { // user holding up
 			   		camera.y += 700 * delta/1000;
 			   	}
-			   	if (40 in keysDown) { // Player holding down
+			   	if (40 in inputManager.keys) { // user holding down
 			   		camera.y -= 700 * delta/1000;
 			   	}
-			   	if (37 in keysDown) { // Player holding left
+			   	if (37 in inputManager.keys) { // user holding left
 			  		camera.x += 700 * delta/1000;	
 			   	}
-			   	if (39 in keysDown) { // Player holding right
+			   	if (39 in inputManager.keys) { // user holding right
 			  		camera.x -= 700 * delta/1000;
 			   	}
 				
@@ -2186,7 +1612,7 @@ ctx.textAlign = "left";
 	  	  render();
 
 		}
-		if(gameState == "won"){
+		if(game.gameState == "won"){
 
 			if(!threeteams){
 
@@ -2208,40 +1634,40 @@ ctx.textAlign = "left";
 };
 
 
-playerSet = false;
+userSet = false;
 
-socket.on('set_player', function(data) {
-	players = data.players;
+socket.on('set_user', function(data) {
+	users = data.users;
 
-	playerNumber = data.number;	
-	playerSet = true;
+	username = data.name;	
+	userSet = true;
 	
-	socket.emit("player_added", {});
+	socket.emit("user_added", {});
 	
 });
 
-socket.on('startgame', function(data) {
+socket.on('game.startgame', function(data) {
 
-	players = data.players;
+	users = data.users;
 	trees = data.trees;
 	notes = data.notes;
-	started = true;
-	gameState = "play";
+	game.started = true;
+	game.gameState = "play";
 	
 });
 
 socket.on('treeChopped', function(data) {
 	
- //	trees.splice(data.number, 1);
+ //	trees.splice(data.name, 1);
 	
- 	trees[data.number].removed = true;
+ 	trees[data.name].reuser.moved = true;
 	
 	
 });
 
 socket.on('noteGot', function(data) {
 	
- 	notes[data.number].removed = true;
+ 	notes[data.name].reuser.moved = true;
 	
 	//alert('yeah I spliced that fucker');
 	
@@ -2265,7 +1691,7 @@ var elapsedseconds = 0;
 
 socket.on('update_clients', function(data) {
 
-	players = data.players;
+	users = data.users;
 	elapsedseconds = data.time;
 		
 });
@@ -2281,7 +1707,7 @@ main();
 
 $(window).load(function() {
 
-	gameState = 'wait';
+	game.gameState = 'wait';
 
 });
 

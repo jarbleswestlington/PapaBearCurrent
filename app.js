@@ -24,12 +24,12 @@ var index = fs.readFileSync('index.html');
 
 app.get('/player/:name', function (req, res){
 
-   res.writeHead(200, {'content-type': 'text/html'});
+   res.writeHead(200, {'Content-Type': 'text/html'});
 
    var pName = req.params.name;
-
+   
    if(!game.hasPlayer(pName)) game.addPlayer(pName, pName == "master" ? true : false);
-   else res.write(JSON.parse({returning: pName}));
+   else res.write(pName);
 
    res.write(index);
 
@@ -57,25 +57,6 @@ io.sockets.on('connection', function(socket) {
 	  
  	});
 
-	socket.on('player_killed', function(player){
-
-		player = game.findPlayerByName(player.name);
-
-		player.dead = true;	
-
-		player.spawn(function(spawn){
-
-			setTimeout(function() { 
-				player.x = spawn.x;
-				player.y = spawn.y;
-				player.dead = false;
-				player.PAPABEAR = false;
-				
-			 }, 8000);
-
-		});
-
-	});
 
 	socket.on('stealWood', function(data){
 		  
@@ -201,7 +182,7 @@ io.sockets.on('connection', function(socket) {
 	   	   
    if(data.direction == "up"){
 	   
-	   dummy.y = players[data.number].y - data.amount;
+	   dummy.y = player.y - data.amount;
 	   
 	   player.direction = "U";
 
@@ -225,43 +206,42 @@ io.sockets.on('connection', function(socket) {
 
    }
    	
-	illegal[data.number] = false;
+	illegal = false;
 	
 	if(!player.PAPABEAR){
 	
-	   	for(i = 0; i < players.length; i++){
-				
-	   		if(i != data.number && !players[i].dead){
-		
-   				if(!players[i].PAPABEAR && checkCollision(dummy, players[i], 41, 36, 41, 36, 0, 0)){
+		game.forAllPlayers(function(oPlayer){
 			
-   					illegal[data.number] = true;
-					
+			if(!oPlayer.dead){
+		
+   				if(!oPlayer.PAPABEAR && game.checkCollision(dummy, oPlayer, 41, 36, 41, 36, 0, 0)){
+			
+   					illegal = true;
    				}
 					
-	   		}
-		
-	   	}
+			}
+			
+		});
 	
 	}
 		
-   	for(i = 0; i < trees.length; i++){
+   	for(i = 0; i < game.trees.length; i++){
 		
-		if(trees[i].removed == false){
+		if(game.trees[i].removed == false){
 		
 			if(player.PAPABEAR){
 			
-				if(checkCollision(dummy, trees[i], 63, 63, 78, 78, 0, 0)){
+				if(game.checkCollision(dummy, game.trees[i], 63, 63, 78, 78, 0, 0)){
 		
-					illegal[data.number] = true;
+					illegal = true;
 			
 				}
 		
 			}else{
 			
-				if(checkCollision(dummy, trees[i], 41, 36, 78, 78, 0, 0)){
+				if(game.checkCollision(dummy, game.trees[i], 41, 36, 78, 78, 0, 0)){
 		
-					illegal[data.number] = true;
+					illegal = true;
 			
 				}
 			}
@@ -283,6 +263,8 @@ io.sockets.on('connection', function(socket) {
   
 	socket.on('changeteam', function(data){
 		
+		if (player.canDisguise == true){// has ability
+
 		//players[data.number].canDisguise = data.canDisguise;
 		players[data.number].renderteam = data.team;
 
