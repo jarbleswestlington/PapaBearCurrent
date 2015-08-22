@@ -372,5 +372,108 @@ Player.prototype.spawn = function(func){
 
 }
 
+Player.prototype.checkCollisions = function(dummy){
+	
+	var illegal = false;
+	
+	if(!this.PAPABEAR){
+	
+		game.forAllOtherAlivePlayers(this, function(oPlayer){
+					
+   			if(!oPlayer.PAPABEAR && game.checkCollision(dummy, oPlayer, 41, 36, 41, 36, 0, 0)){
+			
+   				illegal = true;
+					
+			}
+			
+		});
+	
+	}
+		
+   	for(i = 0; i < game.trees.length; i++){
+		
+		if(game.trees[i].removed == false){
+		
+			if(this.PAPABEAR){
+			
+				if(game.checkCollision(dummy, game.trees[i], 63, 63, 78, 78, 0, 0)){
+		
+					illegal = true;
+			
+				}
+		
+			}else{
+			
+				if(game.checkCollision(dummy, game.trees[i], 41, 36, 78, 78, 0, 0)){
+		
+					illegal = true;
+			
+				}
+			}
+		
+		}
+		
+   	}
+	
+   	if(!illegal){
+		
+		this.x = dummy.x;
+		this.y = dummy.y;
+		
+   	}
+	
+	
+}
+
+
+
+Player.prototype.checkHits = function(){
+	
+	var hit = false;
+	
+	game.forAllOtherAlivePlayers(this, function(oPlayer){
+
+		if(this.PAPABEAR){
+						
+			if(game.checkCollision(oPlayers, this, 41, 36, 63, 63, 0, 0)) hit = true;
+
+		}
+		
+		if(this.attacking){
+			
+			var directions = {
+				U:{x: 36,y: -22},
+				D:{x:0,y:20},
+				R:{x:36,y:22},
+				L:{x:-26,y:+22}
+			}
+			
+			if(game.checkCollision({x: this.x + directions[this.direction].x, y: this.y + directions[this.direction].x}, oPlayer, this.weapon.getWidth(), this.weapon.getHeight(), oPlayer.PAPABEAR ? 41 + game.bearX : 41, oPlayer.PAPABEAR ? 36 + game.bearX : 36, 0, 0)) hit = true;
+	
+		}		
+		
+		if(hit){
+	
+			oPlayer.dead = true;	
+
+			oPlayer.spawn(function(spawn){
+
+				setTimeout(function() { 
+					oPlayer.x = spawn.x;
+					oPlayer.y = spawn.y;
+					oPlayer.dead = false;
+					oPlayer.PAPABEAR = false;
+					
+				 }, 8000);
+
+			});
+		
+		}
+		
+	}.bind(this));
+
+}
+
+
 
 module.exports = {game: Game, player: Player, team: Team};

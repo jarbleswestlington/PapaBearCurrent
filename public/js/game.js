@@ -43,7 +43,7 @@ var game = {
 
 };
 
-game.game.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
+game.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
 
    if( (item.x >= shark.x + paddingX && item.x <= shark.x + sharkWidth - paddingX) || (item.x + itemWidth >= shark.x + paddingX && item.x + itemWidth <= shark.x + sharkWidth - paddingX) ){
 
@@ -295,6 +295,8 @@ inputManager.processInput = function(){
 		renderer.showNote = false;
 	}
 	
+	if(32 in inputManager.keys) user.chop = true;
+	else user.chop = false;
 	//equip sword
 	if (75 in inputManager.keys) {		
 		if(inputManager.pressable.k && user.weapon.has == true){
@@ -344,104 +346,6 @@ var update = function (modifier) {
 
 	inputManager.processInput();
 	
-	hit = false;
-	
-	game.forAllOtherAlivePlayers(function(oPlayer){
-
-		if(player.PAPABEAR){
-						
-			if(game.checkCollision(oPlayers, player, 41, 36, 63, 63, 0, 0)){
-					
-				socket.emit('user_killed', {name: i});
-		
-			}
-
-		}else{
-		
-			if(player.attacking){
-				
-				var directions = {
-					U:{
-						x: 36,
-						y: -22,
-					},
-					D:{
-						x:0,
-						y:20
-					},
-					R:{
-						x:36,
-						y:22
-					},
-					L:{
-						x:-26,
-						y:+22
-					}
-	
-				}
-				
-				
-					game.checkCollision({x: player.x + directions[player.direction].x, y: player.y + directions[player.direction].x}, oPlayer, player.weapon.getWidth(), player.weapon.getHeight(), oPlayer.PAPABEAR ? 41 + game.bearX : 41, oPlayer.PAPABEAR ? 36 + game.bearX : 36, 0, 0)
-					
-					if (player.direction == "U"){
-				
-						if(){
-							
-							hit = true;
-				
-						}
-				oPlayer.PAPABEAR ? 41 + game.bearX : 41
-					}else if (player.direction == "D"){
-
-						if(game.checkCollision({x: player.x, y: player.y + 20}, oPlayer, player.weapon.getWidth(), player.weapon.getHeight(), 41 + game.bearX, 36 + game.bearY, 0, 0)){
-			
-							hit = true;
-			
-						}
-
-					}else if (player.direction == "R"){
-
-						if(game.checkCollision({x: player.x + 36, y: player.y + 22}, oPlayer, player.weapon.getWidth(), player.weapon.getHeight(), 41 + game.bearX, 36 + game.bearY, 0, 0)){
-			
-							hit = true;
-				
-						}
-				
-					}else if (player.direction == "L") {
-				
-						if(game.checkCollision({x: player.x - 26, y: player.y + 22}, oPlayer, player.weapon.getWidth(), player.weapon.getHeight(), 41 + game.bearX, 36 + game.bearY, 0, 0)){
-			
-							hit = true;
-				
-						}
-				
-					}
-		
-				}
-				
-				if(hit){
-			
-					oPlayer.dead = true;	
-
-					oPlayer.spawn(function(spawn){
-
-						setTimeout(function() { 
-							oPlayer.x = spawn.x;
-							oPlayer.y = spawn.y;
-							oPlayer.dead = false;
-							oPlayer.PAPABEAR = false;
-							
-						 }, 8000);
-
-					});
-				}
-			
-			}
-		
-		}
-		
-	}
-
 	if(Date.now() > user.dashStart + 100 && user.dashing){
 		
 		user.moved = false;
@@ -455,50 +359,49 @@ var update = function (modifier) {
 
 	if((user.moved || user.dashing) && !user.dead){
 		
-		amount = 256 * modifier;
+		user.amount = 256 * modifier;
 		
-		if(users.PAPABEAR){
+		if(user.PAPABEAR){
 			
-			amount = amount * 1.2;
+			user.amount = user.amount * 1.2;
 		}
 		
-		if(dashing){
+		if(user.dashing){
 			
-			amount = amount * 5;
+			user.amount = amount * 5;
 		}
 		
-		socket.emit('move_input', {direction: user.direction, name: user.name, amount: amount});
+		socket.emit('move_input', {direction: user.direction, name: user.name, amount: user.amount});
 	}
-	//
-	//
-	//COLLISIONS END
-	
 	
 	renderer.treeText = false;
 	
-	for(i = 0; i < game.server.trees.length; i++){
-		
-		if(game.server.trees[i].removed == false && !user.dead && !user.PAPABEAR){
-		
-			if(game.checkCollision(user, trees[i], 41, 36, 78, 78, -25, -25)){
-		
-				renderer.treeText = true;		
+	if(!user.PAPABEAR){
 	
-				if(32 in inputManager.keys){
-		
-					user.chopTree(i);
-		
-				}	
+		for(var i = 0; i < game.server.trees.length; i++){
 			
-			}
-
-		}
+			if(game.server.trees[i].removed == false && !user.dead){
+			
+				if(game.checkCollision(user, trees[i], 41, 36, 78, 78, -25, -25)){
+			
+					renderer.treeText = true;		
 		
+					if(user.chop){
+			
+						user.chopTree(i);
+			
+					}	
+				
+				}
+
+			}
+			
+		}
 	}
 		
 
 	//messages
-	if(users[username].PAPABEAR == false){
+	if(users.PAPABEAR == false){
 		//messages
 		//messages
 		for (var z = 0; z < notes.length; z++){

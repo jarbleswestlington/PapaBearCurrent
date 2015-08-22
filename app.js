@@ -174,89 +174,39 @@ io.sockets.on('connection', function(socket) {
 
    	var dummy = {};
 	var player = game.findPlayerByName(data.player.name);
-
+	
 	dummy.x = player.x;
 	dummy.y = player.y;
-
-	var illegal = false;
 	   	   
-   if(data.direction == "up"){
+	if(data.direction == "up"){
 	   
 	   dummy.y = player.y - data.amount;
 	   
 	   player.direction = "U";
 
-   }
-   if(data.direction == "down"){
-   	
+	}
+	if(data.direction == "down"){
+
 	   dummy.y = player.y + data.amount;
 	   player.direction = "D";
-	
-   }
-   if(data.direction == "left"){
-   	
+
+	}
+	if(data.direction == "left"){
+
 	   dummy.x = player.x - data.amount;
 	   player.direction = "L";
-	
-   }
-   if(data.direction == "right"){
-   	
+
+	}
+	if(data.direction == "right"){
+
 	   dummy.x = player.x + data.amount;
 	   player.direction = "R";
 
-   }
-   	
-	illegal = false;
-	
-	if(!player.PAPABEAR){
-	
-		game.forAllPlayers(function(oPlayer){
-			
-			if(!oPlayer.dead){
-		
-   				if(!oPlayer.PAPABEAR && game.checkCollision(dummy, oPlayer, 41, 36, 41, 36, 0, 0)){
-			
-   					illegal = true;
-   				}
-					
-			}
-			
-		});
-	
 	}
-		
-   	for(i = 0; i < game.trees.length; i++){
-		
-		if(game.trees[i].removed == false){
-		
-			if(player.PAPABEAR){
-			
-				if(game.checkCollision(dummy, game.trees[i], 63, 63, 78, 78, 0, 0)){
-		
-					illegal = true;
-			
-				}
-		
-			}else{
-			
-				if(game.checkCollision(dummy, game.trees[i], 41, 36, 78, 78, 0, 0)){
-		
-					illegal = true;
-			
-				}
-			}
-		
-		}
-		
-   	}
-	
-   	if(!illegal){
-		
-		player.x = dummy.x;
-		player.y = dummy.y;
-		
-   	}
-	 
+
+	player.checkCollisions(dummy);
+	player.checkHits();
+ 
   });
 
 /*
