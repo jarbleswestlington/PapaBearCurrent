@@ -198,3 +198,98 @@
 
 					break;
 					}
+					
+					
+					
+	//old main				
+					
+					
+					  var now = Date.now();
+   var delta = now - then;
+   
+
+	if(game.gameState == "load"){
+   
+		ctx.fillText("Loading....99%", window.innerWidth/4, 100);
+   
+	}
+	   
+	if(game.gameState == "wait"){
+	
+		  if(userSet == true){
+
+             ctx.fillText("There are three villages. You are villager #" + username + " of the " + users[username].team + " village.", 100, 120);
+
+             ctx.fillText("Only one village will survive this harsh winter, so you must stockpile as much wood as you can.", 100, 160);
+
+             ctx.fillText("Learn how better to survive by searching the woods for notes.", 100,240);
+
+
+             //ctx.fillText("with the arrow keys. Confer with your allies by using enter key to type.", 100, 250);
+
+     		 ctx.fillText("Good luck.", 100, 340);
+
+               ctx.fillText("Waiting for game to game.start....", 100, 480);
+
+      
+
+
+ 
+	
+			if(13 in inputManager.keys && username == 0){
+
+				socket.emit("game.startgame", {});
+
+			}
+	
+		}
+
+	}
+	   
+	   
+
+	if(game.started){
+
+	   if(game.gameState == "play"){
+		   
+		   if(username == 0){
+		   	
+			   	if (38 in inputManager.keys) { // user holding up
+			   		camera.y += 700 * delta/1000;
+			   	}
+			   	if (40 in inputManager.keys) { // user holding down
+			   		camera.y -= 700 * delta/1000;
+			   	}
+			   	if (37 in inputManager.keys) { // user holding left
+			  		camera.x += 700 * delta/1000;	
+			   	}
+			   	if (39 in inputManager.keys) { // user holding right
+			  		camera.x -= 700 * delta/1000;
+			   	}
+				
+			   
+		   }else{
+
+	 		   update(delta / 1000);
+		  
+	  		}
+
+	  	  render();
+
+		}
+		if(game.gameState == "won"){
+
+			if(!threeteams){
+
+				ctx.fillText("Yellow:" + score.yellow , window.innerWidth/4, 100);
+			
+			}
+			ctx.fillText("Blue:" + score.blue , window.innerWidth/4, 200);
+			ctx.fillText("Green:" + score.green , window.innerWidth/4, 300);
+			ctx.fillText("Red:" + score.red , window.innerWidth/4, 400);
+	
+		}
+
+	}
+		
+   then = now;

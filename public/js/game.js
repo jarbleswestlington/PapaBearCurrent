@@ -16,6 +16,7 @@ document.body.appendChild(canvas);
 var inputManager = {};
 
 inputManager.keys = [];
+
 addEventListener("keydown", function (e) {
 	inputManager.keys[e.keyCode] = true;
 }, false);
@@ -23,6 +24,26 @@ addEventListener("keydown", function (e) {
 addEventListener("keyup", function (e) {
 	delete inputManager.keys[e.keyCode];
 }, false);
+
+inputManager.masterKeys = function(){			   	
+
+	if(13 in this.keys){
+		socket.emit("startgame_server", {});
+	}
+
+	if (38 in this.keys) { // user holding up
+		camera.y += 700 * delta/1000;
+	}
+	if (40 in this.keys) { // user holding down
+		camera.y -= 700 * delta/1000;
+	}
+	if (37 in this.keys) { // user holding left
+		camera.x += 700 * delta/1000;	
+	}
+	if (39 in this.keys) { // user holding right
+		camera.x -= 700 * delta/1000;
+	}
+};
 
 inputManager.pressable = {
 	enter:true,
@@ -51,6 +72,7 @@ game.forAllTeams = function(func){
 	}
 
 }
+
 game.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
 
    if( (item.x >= shark.x + paddingX && item.x <= shark.x + sharkWidth - paddingX) || (item.x + itemWidth >= shark.x + paddingX && item.x + itemWidth <= shark.x + sharkWidth - paddingX) ){
@@ -287,6 +309,7 @@ user.move = function(modifier){
 		socket.emit('move_input', {direction: this.direction, name: this.name, amount: this.amount});
 	}
 }
+
 //setUp Renderer
 var renderer = {
 	refs:{},
@@ -308,8 +331,12 @@ renderer.upload = function(src){
 	var newImg = new Image();
 	newImg.src = "images/" + ref + ".png";
 	this.refs[src] = newImg;
+	this.refs[src].onload = function(){
+		
+		this.loaded = true;
+		
+	}.bind(this.refs[src]);
 }
-
 
 //upload all images
 [
@@ -337,6 +364,82 @@ renderer.upload = function(src){
 	renderer.upload(image);
 })
 
+renderer.updateCamera = function(){
+	
+	this.camera.y = canvas.height/2 - users.y;
+	this.camera.x = canvas.width/2 - users.x;
+}
+
+renderer.drawImage = function(image, coordX, coordY){
+	
+	ctx.drawImage(image, coordX + this.camera.x, coordY + this.camera.y)
+};
+
+renderer.draw = {};
+
+renderer.draw["loading"] = function(){
+	
+	ctx.fillText("Loading....99%", window.innerWidth/4, 100);
+
+}	
+
+renderer.draw["wait"] = function(){
+
+	ctx.fillStyle = "rgb(0,0,0)";
+
+	ctx.font = "24px Helvetica";
+	ctx.textAlign = "left";
+   
+	
+	 ctx.fillText("There are three villages. You are " + user.name + " of the " + user.team + " village.", 100, 120);
+
+	 ctx.fillText("Only one village will survive this harsh winter, so you must stockpile as much wood as you can.", 100, 160);
+
+	 ctx.fillText("Learn how better to survive by searching the woods for notes.", 100,240);
+
+	 //ctx.fillText("with the arrow keys. Confer with your allies by using enter key to type.", 100, 250);
+
+	 ctx.fillText("Good luck.", 100, 340);
+
+	 ctx.fillText("Waiting for game to game.start....", 100, 480);
+}
+
+renderer.draw["score"] = function(){
+	
+	ctx.fillStyle = "rgb(0,0,0)";
+	ctx.font = "24px Helvetica";
+	ctx.textAlign = "left";
+   
+	var y = 100;
+	game.forAllTeams(function(team){
+			
+		ctx.fillText(team.name" : " + team.score , window.innerWidth/4, y+=100);
+			
+	});
+
+}
+
+renderer.draw["end"] = function(){
+	
+
+}
+
+renderer.animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.mozRequestAnimationFrame;
+
+renderer.hasLoaded = function(){
+	
+	//scroll through all images
+	for(var image in this.refs){
+		//check if loaded
+		if(this.refs.hasOwnProperty(image){
+			
+			if(!this.refs[image].loaded) return false;
+		}
+	
+	}
+	
+	return true;
+}
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -539,46 +642,35 @@ game.client.notes = [
 
 
 // Update game objects
-var update = function (modifier) {
-
-	inputManager.processInput();
+game.update = function (modifier) {
 	
 	user.move(modifier);
 	user.interactWBase();
 	user.interactWTree();
 	user.interactWMessage();
 	
-	//endgame
-	if(game.timeLimit - game.elapsedseconds <= 0){
-		game.gameState = "won";
-	}
+	renderer.updateCamera();
 	
 };
 
 
+renderer.draw['clear_frame'] = function(){
+	ctx.fillStyle = "rgb(105,175,105)";
+	ctx.fillRect(0,0, canvas.width, canvas.height);
+}
 // Draw everything
-var render = function () {
+renderer.draw["game"] = function () {
 	
 	//tiled background
-
-	for(q = 0; q < 6; q++){
+	for(var x = 0; x < 6; x++){
 	
-		for(r = 0; r < 6; r++){
+		for(var y = 0; y < 6; y++){
 
-		ctx.drawImage(backgroundImage, q * 944 + camera.x, r * 807 + camera.y);
+			this.drawImage(backgroundImage, x * 944, y * 807);
 
 		}
 	}
 
-
-
-	if(username != 0){
-	
-		camera.y = canvas.height/2 - users[username].y;
-		camera.x = canvas.width/2 - users[username].x;
-	
-	}
-	
 	ctx.fillStyle = "rgb(255,0,0)";
 
 	//testing123
@@ -1121,7 +1213,7 @@ var render = function () {
 		
 	}
 	
-	if(elapsedseconds > game.timeLimit - 100){
+	if(game.currentSec > game.timeLimit - 100){
 		
 		ctx.fillStyle = "rgb(255,0,0)";
 		
@@ -1131,7 +1223,7 @@ var render = function () {
 		
 	}
 	
-	ctx.fillText((game.timeLimit - elapsedseconds) + " Seconds Left", 50, 80);
+	ctx.fillText((game.timeLimit - game.currentSec) + " Seconds Left", 50, 80);
 	
 	ctx.fillStyle = "rgb(0,0,0)";
 	
@@ -1179,186 +1271,91 @@ var render = function () {
 	
 };
 
-// The main game loop
-var main = function () {
+game.stateManager = function () {
 
-   var now = Date.now();
-   var delta = now - then;
-   
-   
-ctx.fillStyle = "rgb(105,175,105)";
-ctx.fillRect(0,0, canvas.width, canvas.height);
-   
-ctx.fillStyle = "rgb(0,0,0)";
-
-ctx.font = "24px Helvetica";
-ctx.textAlign = "left";
-   
-	if(game.gameState == "load"){
-   
-		ctx.fillText("Loading....99%", window.innerWidth/4, 100);
-   
-	}
-	   
-	if(game.gameState == "wait"){
+	//delta modifier
+    var now = Date.now();
+    var delta = now - this.then;
 	
-		  if(userSet == true){
-
-             ctx.fillText("There are three villages. You are villager #" + username + " of the " + users[username].team + " village.", 100, 120);
-
-             ctx.fillText("Only one village will survive this harsh winter, so you must stockpile as much wood as you can.", 100, 160);
-
-             ctx.fillText("Learn how better to survive by searching the woods for notes.", 100,240);
-
-
-             //ctx.fillText("with the arrow keys. Confer with your allies by using enter key to type.", 100, 250);
-
-     		 ctx.fillText("Good luck.", 100, 340);
-
-               ctx.fillText("Waiting for game to game.start....", 100, 480);
-
+	renderer.draw['clear_frame']();
       
-
-
- 
-	
-			if(13 in inputManager.keys && username == 0){
-
-				socket.emit("game.startgame", {});
-
-			}
-	
-		}
-
-	}
-	   
-	   
-
-	if(game.started){
-
-	   if(game.gameState == "play"){
-		   
-		   if(username == 0){
-		   	
-			   	if (38 in inputManager.keys) { // user holding up
-			   		camera.y += 700 * delta/1000;
-			   	}
-			   	if (40 in inputManager.keys) { // user holding down
-			   		camera.y -= 700 * delta/1000;
-			   	}
-			   	if (37 in inputManager.keys) { // user holding left
-			  		camera.x += 700 * delta/1000;	
-			   	}
-			   	if (39 in inputManager.keys) { // user holding right
-			  		camera.x -= 700 * delta/1000;
-			   	}
-				
-			   
-		   }else{
-
-	 		   update(delta / 1000);
-		  
-	  		}
-
-	  	  render();
-
-		}
-		if(game.gameState == "won"){
-
-			if(!threeteams){
-
-				ctx.fillText("Yellow:" + score.yellow , window.innerWidth/4, 100);
-			
-			}
-			ctx.fillText("Blue:" + score.blue , window.innerWidth/4, 200);
-			ctx.fillText("Green:" + score.green , window.innerWidth/4, 300);
-			ctx.fillText("Red:" + score.red , window.innerWidth/4, 400);
-	
-		}
-
-	}
+	if(game.state == "loading"){
 		
-   then = now;
+		if(renderer.hasLoaded()) game.state = "waiting";
+
+	}
+   
+	if(game.state == "waiting"){
+				  
+		renderer.state = "intro";
+
+		if(game.started) game.state = "game";
+
+	}
+	   
+
+	if(game.state == "game"){
+  
+	    if(!user.name = "master"){	
+			inputManager.processInput();
+			game.update(delta / 1000);	
+		} 
+				
+		renderer.state = "game";
+		
+		//endgame
+		if(game.timeLimit - game.currentSec <= 0){
+			game.state = "won";
+		}
+			
+	}
+	
+	if(game.state == "won"){
+		
+		renderer.state = "score";
+
+	}
+	
+	if(renderer.draw[renderer.state]) renderer.draw[renderer.state]();
+	
+	this.then = now;
+
+	renderer.animate(this.stateManager);
      
-   // Request to do this again ASAP
-   requestAnimationFrame(main);
 };
 
 
-userSet = false;
-
-socket.on('set_user', function(data) {
-	users = data.users;
-
-	username = data.name;	
-	userSet = true;
-	
-	socket.emit("user_added", {});
-	
+socket.on('user_set', function(data) {
+	user.confirmed = data.success;
 });
 
-socket.on('game.startgame', function(data) {
+socket.on('startgame', function(data) {
 
-	users = data.users;
-	trees = data.trees;
-	notes = data.notes;
 	game.started = true;
-	game.gameState = "play";
-	
-});
-
-socket.on('treeChopped', function(data) {
-	
- //	trees.splice(data.name, 1);
-	
- 	trees[data.name].reuser.moved = true;
-	
-	
-});
-
-socket.on('noteGot', function(data) {
-	
- 	notes[data.name].reuser.moved = true;
-	
-	//alert('yeah I spliced that fucker');
-	
-});
-
-socket.on('logged', function(data) {
-	
- 	score = data.score;
-	
+		
 });
 
 socket.on('stealTotal', function(data) {
 	
-	woodTotal = data.total;
-	
+	user.log.wood = data.total;
 	
 });
-
-
-var elapsedseconds = 0;
 
 socket.on('update_clients', function(data) {
 
-	users = data.users;
-	elapsedseconds = data.time;
+	game.server = data.game;
+	game.currentSec = data.time;
 		
 });
 
-// Cross-browser support for requestAnimationFrame
-var w = window;
-requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+$(document).load(function() {
 
-// Let's play this game!
-var then = Date.now();
-main();
-
-
-$(window).load(function() {
-
-	game.gameState = 'wait';
+	game.state = 'loading';
+	
+	renderer.state = "loading";
+	
+	game.then = Date.now();
+	game.stateManager();
 
 });
 

@@ -51,12 +51,13 @@ io.sockets.on('connection', function(socket) {
 
 	socket.on('startgame_server', function(data){
 		 
-		 game.startsecond = new Date().getTime() / 1000;
+		game.startsecond = new Date().getTime() / 1000;
 
-		 game.started = true;	  	  	  
+		game.state = "started";	
+		
+		process.nextTick(function(){ game.update(io) } );
 	  
  	});
-
 
 	socket.on('stealWood', function(data){
 		  
@@ -254,18 +255,4 @@ io.sockets.on('connection', function(socket) {
   
 });
 
-function updateClients() {
-	
-	if(game.started == true){
-		
-		currentseconds = new Date().getTime() / 1000;
-		elapsedseconds = Math.floor(currentseconds - startsecond);
 
-		io.sockets.emit('update_clients', {game: game, time: elapsedseconds});
-   
-	}
-
-}
-
-// updates clients every 
-setInterval(updateClients, 0);

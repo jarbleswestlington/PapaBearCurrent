@@ -10,6 +10,8 @@ var Game = function(){
 	
 	this.master = undefined;
 	
+	this.currentSec = 0;
+	
 	this.treeNum = 1;
 	this.joined = 0;
 	this.playerCount = 0;
@@ -23,6 +25,16 @@ var Game = function(){
 	this.bearX = 22;
 	this.bearY = 27;
 };
+
+Game.prototype.update(io) {
+			
+	var now = new Date().getTime() / 1000;
+	game.currentSec = Math.floor(now - startsecond);
+
+	io.sockets.emit('update_clients', {game: game, time: game.currentSec});
+
+	process.nextTick(function(){ game.update(io) } );
+}
 
 Game.prototype.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
 
