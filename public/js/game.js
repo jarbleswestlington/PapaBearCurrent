@@ -32,17 +32,25 @@ inputManager.pressable = {
 
 //setUp Game object;
 var game = {
+	
 	connected:false,
 	gameState:"init",
 	timeLimit:720,
-	illegal: false,
-	server:{
-		hasPape = false;
-		hasSword = false;
-	}
+	currentSec:0,
+	server:{},
+	client:{}
 
 };
 
+game.forAllTeams = function(func){
+
+	for(var name in this.server.teams){
+
+		func(this.server.teams[name]);
+
+	}
+
+}
 game.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
 
    if( (item.x >= shark.x + paddingX && item.x <= shark.x + sharkWidth - paddingX) || (item.x + itemWidth >= shark.x + paddingX && item.x + itemWidth <= shark.x + sharkWidth - paddingX) ){
@@ -59,6 +67,7 @@ game.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, s
 
 //setUp users user
 var user = {
+	amount:0,
 	messageReset:false,
 	lastMessage:0,
 	weapon:{
@@ -76,8 +85,119 @@ var user = {
 	server:{
 		attacking:false;
 	}
+	x:0,
+	y:0,
+	
+	hasPapa = false;
+	hasSword = false;
+	
 	
 };
+
+user.interactWBase = function(){
+	
+	renderer.stealText = false;
+
+	if(!this.PAPABEAR){
+			
+		game.forAllTeams(function(team){
+			
+			if(game.checkCollision(this, team.base, 41, 36, 140, 84, -25, -25)){
+		
+				if(this.team == team.name){
+				
+					this.depLog();
+				
+				}else{
+				
+					if(team.score != 0){
+				
+						renderer.stealText = true;
+				
+						if(this.action){
+					
+							this.stealWood(team.name);
+						}
+				
+					}
+				
+				}
+
+			}
+			
+		});
+
+	}
+
+}	
+
+user.interactWTree = function(){
+	
+	renderer.treeText = false;
+	
+	if(!this.PAPABEAR){
+	
+		for(var i = 0; i < game.server.trees.length; i++){
+			
+			if(game.server.trees[i].removed == false && !this.dead){
+			
+				if(game.checkCollision(this, trees[i], 41, 36, 78, 78, -25, -25)){
+			
+					renderer.treeText = true;		
+		
+					if(this.action){
+			
+						this.chopTree(i);
+			
+					}	
+				
+				}
+
+			}
+			
+		}
+	}
+}
+
+user.interactWMessage = function(){
+	//messages
+	if(this.PAPABEAR == false){
+
+		for (var z = 0; z < notes.length; z++){
+			
+			if(game.server.notes[z].removed == false){
+		
+				if ((game.checkCollision({x: game.server.notes[z].x + 29, y: game.server.notes[z].y + 29}, this, 20, 20, 41, 36, 0, 0))){
+					
+					var chance = Math.floor(Math.random() * 100);
+					
+					var probability;
+					
+					if(chance < 50){
+						probability = 1;	
+					}else{
+						probability = 2;
+					}
+					
+					var notes = noteIndex[probability].filter(function(note){
+						return note.condition();
+					});
+								
+					renderer.currentNote = notes[Math.floor(Math.random() * notes.length)];
+
+					renderer.showNote = true;
+
+					getNote(z);
+				}
+
+
+			}
+			
+		}
+	
+	}
+
+}
 
 user.stealWood = function(team){
 	
@@ -132,7 +252,41 @@ user.givePower = function(power){
 	socket.emit('give_power', {name: this.name, power: power});
 };
 
+user.dash = function(){
+	
+	if(Date.now() > this.dashStart + 100 && this.dashing){
+		
+		this.moved = false;
+		
+		if(Date.now() > this.dashStart + 700){
+			
+			this.dashing = false;
+		}
+		
+	}
+}
 
+user.move = function(modifier){
+	
+	this.dash();
+	
+	if((this.moved || this.dashing) && !this.dead){
+		
+		this.amount = 256 * modifier;
+		
+		if(this.PAPABEAR){
+			
+			this.amount = this.amount * 1.2;
+		}
+		
+		if(this.dashing){
+			
+			this.amount = amount * 5;
+		}
+		
+		socket.emit('move_input', {direction: this.direction, name: this.name, amount: this.amount});
+	}
+}
 //setUp Renderer
 var renderer = {
 	refs:{},
@@ -144,15 +298,8 @@ var renderer = {
 	
 	treeText: false,
 	stealText: false,
-	
-	noteMessage : {
-	line1:"",
-	line2:"",
-	line3:"",
-	line4:"",
-	line5:"Press X to close"
-	
-	},
+
+	currentNote : {};
 	
 	showNote: false,
 };
@@ -295,8 +442,8 @@ inputManager.processInput = function(){
 		renderer.showNote = false;
 	}
 	
-	if(32 in inputManager.keys) user.chop = true;
-	else user.chop = false;
+	if(32 in inputManager.keys) user.action = true;
+	else user.action = false;
 	//equip sword
 	if (75 in inputManager.keys) {		
 		if(inputManager.pressable.k && user.weapon.has == true){
@@ -341,466 +488,69 @@ inputManager.processInput = function(){
 	}	
 }
 
+var noteIndex = {};
+
+var Note = function(lines, options){
+	
+	if(typeof options.condition == 'number'){
+		
+		this.condition = function(){
+			
+			return options.condition > game.currentSec;
+		};
+		
+	}else{
+			
+		this.condition = options.condition;
+
+	}
+	
+	this.lines = lines;
+
+	this.probability = options.probability;
+	
+	this.func = options.action.func;
+	this.args = options.action.args;
+	
+	if(noteIndex[options.probability]) noteIndex[options.probability].push(this);
+	else noteIndex[options.probability] = [this];
+}
+
+game.client.notes = [
+
+ new Note(["If you manage to steal your opponent's wood, there is a considerable payoff."], 1, 0),
+ 
+ new Note(["Press Z to dash forward"], {prob: 1, condition: 0})),
+ 
+ new Note(["Press ENTER to chat with nearby users"], {prob: 1, condition: 0})),
+ 
+ new Note(["You can now press 'k' to wield a deadly weapon."], 1, 0, {prob: 1, condition: 0, action:{func: user.givePower, args: "weapon"}}),
+ 
+ new Note(["You have picked up a knife. Press 'k' to use it, but be careful where you point it."], {prob: 1, condition: 0, action:{func: user.givePower, args: "weapon"}}),
+
+ new Note(["Press 'k' to brandish your knife and then press 'k' again to hide it."], {prob: 1, condition: 0, action:{func: user.givePower, args: "weapon"}}),
+
+ new Note(["Appearances can be deceiving...stay on guard"], {prob: 1, condition: 0}),
+ 
+ new Note(["You have picked up a disguise. Hold 'm' and then", "press r,g or b to impersonate another team."],{prob: 1, condition: 0, action:{func: user.givePower, args: "weapon"}}),
+
+
+];
+
+
 // Update game objects
 var update = function (modifier) {
 
 	inputManager.processInput();
 	
-	if(Date.now() > user.dashStart + 100 && user.dashing){
-		
-		user.moved = false;
-		
-		if(Date.now() > user.dashStart + 700){
-			
-			user.dashing = false;
-		}
-		
-	}
-
-	if((user.moved || user.dashing) && !user.dead){
-		
-		user.amount = 256 * modifier;
-		
-		if(user.PAPABEAR){
-			
-			user.amount = user.amount * 1.2;
-		}
-		
-		if(user.dashing){
-			
-			user.amount = amount * 5;
-		}
-		
-		socket.emit('move_input', {direction: user.direction, name: user.name, amount: user.amount});
-	}
-	
-	renderer.treeText = false;
-	
-	if(!user.PAPABEAR){
-	
-		for(var i = 0; i < game.server.trees.length; i++){
-			
-			if(game.server.trees[i].removed == false && !user.dead){
-			
-				if(game.checkCollision(user, trees[i], 41, 36, 78, 78, -25, -25)){
-			
-					renderer.treeText = true;		
-		
-					if(user.chop){
-			
-						user.chopTree(i);
-			
-					}	
-				
-				}
-
-			}
-			
-		}
-	}
-		
-
-	//messages
-	if(users.PAPABEAR == false){
-		//messages
-		//messages
-		for (var z = 0; z < notes.length; z++){
-			
-
-			if(notes[z].reuser.moved == false){
-		
-				if ((game.checkCollision({x: notes[z].x + 29, y: notes[z].y + 29}, users[username], 20, 20, 41, 36, 0, 0)) || (game.messageReset == true)){
-					
-					game.messageReset = false;
-
-					noteMessage.line1 = ""
-					noteMessage.line2 = "";
-					noteMessage.line3 = "";
-					noteMessage.line4 = "";
-
-					if (elapsedseconds >= 480){
-						messageNum = getRandomInt(13,17);
-						
-					}else if (elapsedseconds >= 440){
-						messageNum = getRandomInt(11, 13);
-						
-					}else if (elapsedseconds >= 140){
-						messageNum = getRandomInt(5, 10);
-						
-					}else{
-						messageNum = getRandomInt(1, 7);
-						
-					}
-
-					switch (messageNum){
-					case 1:
-						if (game.lastMessage == messageNum){
-						game.messageReset = true;
-						}
-						else{
-						noteMessage.line1 = "If you manage to steal your opponent's wood, there is a considerable payoff.";
-						noteMessage.line2 = "";
-						noteMessage.line3 = "";
-						noteMessage.line4 = "";
-						game.lastMessage = messageNum;
-						}
-					break;
-					case 2:
-						if (game.lastMessage == messageNum){
-							game.messageReset = true;
-						}
-						else{
-							noteMessage.line1 = "Press z to dash forward";
-							noteMessage.line2 = "";
-							noteMessage.line3 = "";
-							noteMessage.line4 = "";
-							game.lastMessage = messageNum;
-						}
-
-					break;
-
-					case 3:
-
-						if (game.lastMessage == messageNum){
-							game.messageReset = true;
-						}
-						else{
-							noteMessage.line1 = "Press ENTER to chat with nearby users";
-							noteMessage.line2 = "";
-							noteMessage.line3 = "";
-							noteMessage.line4 = "";
-							game.lastMessage = messageNum;
-						}
-
-					break;
-
-					case 4:
-
-						if (game.lastMessage == messageNum){
-							game.messageReset = true;
-						}
-						else{
-							noteMessage.line1 = "You can now press 'k' to wield a deadly weapon.";
-							noteMessage.line2 = "";
-							noteMessage.line3 = "";
-							noteMessage.line4 = "";
-							hasWeapon = true;
-							game.lastMessage = messageNum;
-						}
-
-					break;
-					case 5:
-
-						if (game.lastMessage == messageNum){
-							game.messageReset = true;
-						}
-						else{
-
-							noteMessage.line1 = "You have picked up a knife. Press 'k' to use it, but be careful where you point it.";
-							noteMessage.line2 = "";
-							noteMessage.line3 = "";
-							noteMessage.line4 = "";
-							hasWeapon = true;
-							game.lastMessage = messageNum;
-						}
-
-
-					break;
-
-					case 6:						
-						if (game.lastMessage == messageNum){
-							game.messageReset = true;
-						}
-						else{
-							noteMessage.line1 = "Press 'k' to brandish your knife and then press 'k' again to hide it.";
-							noteMessage.line2 = "";
-							noteMessage.line3 = "";
-							noteMessage.line4 = "";
-							hasWeapon = true;
-							game.lastMessage = messageNum;
-						}
-
-					break;
-					case 7:
-						if (game.lastMessage == messageNum){
-							game.messageReset = true;
-						}
-						else{
-							noteMessage.line1 = "Appearances can be decieving...stay on gaurd";
-							noteMessage.line2 = "";
-							noteMessage.line3 = "";
-							noteMessage.line4 = "";
-							game.lastMessage = messageNum;
-						}
-					break;
-					case 8:
-						if (game.lastMessage == messageNum){
-							game.messageReset = true;
-						}
-						else{	
-							noteMessage.line1 = "You have picked up a disguise. Hold 'm' and then";
-							noteMessage.line2 = "press r,g or b to impersonate another team.";
-							noteMessage.line3 = "";
-							noteMessage.line4 = "";
-							game.lastMessage = messageNum;
-							GiveCanDisguise(users[username]);
-						}
-
-					break;
-
-					case 9:
-						if (game.lastMessage == messageNum){
-						game.messageReset = true;
-						}
-						else{
-						noteMessage.line1 = "Some notes can give you immense power. This note does not.";
-						noteMessage.line2 = "";
-						noteMessage.line3 = "";
-						noteMessage.line4 = "";
-						game.lastMessage = messageNum;
-						}
-					break;
-					case 10:
-						if (game.lastMessage == messageNum){
-						game.messageReset = true;
-						}
-						else{
-						noteMessage.line1 = "Hold 'm' and press r,g, or b.";
-						noteMessage.line2 = "Not everyone can disguse themselves...but some of your enemies can.";
-						noteMessage.line3 = "";
-						noteMessage.line4 = "";
-						game.lastMessage = messageNum;
-						GiveCanDisguise(users[username]);
-
-						}
-					
-					break;
-
-					case 11:
-
-					if(!checkIfPapa()){
-						
-					noteMessage.line1 = "By reading this note you have transformed into PAPA BEAR, the king of the forest.;"
-					noteMessage.line2 = "You are fast, deadly, and nearly invincible";
-					noteMessage.line3 = "You can only be killed by a golden sword";
-					noteMessage.line4 = "Will you help your former team or embrace your frightening nature?";
-					GivePapa(users[username], z);
-					hasLog = false;
-					
-					}else{
-					
-						noteMessage.line1 = "Papa Bear can be a powerful ally, but can you trust him?";
-						noteMessage.line2 = "";
-						hasWeapon = true;
-
-
-						
-					}
-					
-					break;
-
-					case 12:
-
-					if(!checkIfPapa()){
-						
-					noteMessage.line1 = "By reading this note you have transformed into PAPA BEAR, the king of the forest.;"
-					noteMessage.line2 = "You are fast, deadly, and nearly invincible";
-					noteMessage.line3 = "You can only be killed by a golden sword";
-					noteMessage.line4 = "Will you help your former team or embrace your frightening nature?";
-					GivePapa(users[username], z);
-					
-					}else{
-					noteMessage.line1 = "Papa Bear has a secret..";
-					noteMessage.line2 = "";
-					hasWeapon = true;
-
-					}
-					break;
-
-					case 13:
-					if(!checkIfPapa()){
-						
-						noteMessage.line1 = "By reading this note you have transformed into PAPA BEAR, the king of the forest.;"
-						noteMessage.line2 = "You are fast, deadly, and nearly invincible";
-						noteMessage.line3 = "You can only be killed by a golden sword";
-						noteMessage.line4 = "Will you help your former team or embrace your frightening nature?";
-						GivePapa(users[username], z);
-						hasLog = false;
-						hasWeapon = true;
-
-					}else{
-						noteMessage.line1 = "The woods contain a note which can be used to kill Papa Bear";
-						noteMessage.line2 = "";
-
-					}
-					break;
-
-					case 14:
-
-					if(!checkIfSwordBearer()){
-						noteMessage.line1 = "Press 'k' to sheath and unsheathe a golden sword. This weapon can kill PAPA BEAR.";
-						noteMessage.line2 = "";
-						hasWeapon = true;
-
-						GivePowerSword(users[username]);
-					}else{
-						noteMessage.line1 = "Only the golden sword can defeat PAPA BEAR.";
-						noteMessage.line2 = "";
-
-					}
-
-					break;
-
-					case 15:
-
-					if(!checkIfSwordBearer()){
-					noteMessage.line1 = "Press 'k' to sheath and unsheathe a golden sword. This weapon can kill PAPA BEAR.";
-					GivePowerSword(users[username]);
-					}else{
-					noteMessage.line1 = "Right now someone has the golden sword that could defeat PAPA BEAR...";
-					}
-		
-					case 16:
-					noteMessage.line1 = "You have picked up a disguise. Hold 'm' and then";
-					noteMessage.line2 = "press r,g or b to impersonate another team.";
-					GiveCanDisguise(users[username]);
-					break;
-
-					case 17:
-
-					noteMessage.line1 = "What sort of notes have your teammates read? Are they hiding something?";
-
-					break;
-					}
-
-					showNote = true;
-
-					getNote(z);
-				}
-
-
-			}
-			
-		}
-	
-	}
-
-
-	
-	
-	
-	//Stealing logs code
-	stealText = false;
-	
-	//Depositing logs code
-	//theres one for each team here due to inneficient programming
-	
-	if(!users[username].PAPABEAR){
-			
-		if(game.checkCollision(users[username], yellowBase, 41, 36, 140, 84, -25, -25)){
-		
-			if(users[username].team == yellowBase.team){
-			
-				depLog();
-			
-			}else{
-			
-				if(score.yellow != 0){
-			
-					stealText = true;
-			
-					if(32 in inputManager.keys){
-				
-						stealWood('yellow');
-					}
-			
-				}
-			
-			}
-	
-		}
-	
-		if(game.checkCollision(users[username], redBase, 41, 36, 161, 94, -25, -25)){
-
-			if(users[username].team == redBase.team){
-			
-				depLog();
-			
-			}else{
-			
-				if(score.red != 0){
-			
-					stealText = true;
-			
-					if(32 in inputManager.keys){
-				
-						stealWood('red');
-					}
-			
-				}
-			}
-	
-		}
-
-	
-		if(game.checkCollision(users[username], blueBase, 41, 36, 161, 94, -25, -25)){
-
-		
-			if(users[username].team == blueBase.team){
-			
-				depLog();
-			
-			}else{
-			
-				if(score.blue != 0){
-			
-			
-					stealText = true;
-			
-					if(32 in inputManager.keys){
-				
-						stealWood('blue');
-					}
-			
-			
-				}
-			}
-	
-		}
-	
-		if(game.checkCollision(users[username], greenBase, 41, 36, 161, 94, -25, -25)){
-
-		
-			if(users[username].team == greenBase.team){
-			
-				depLog();
-			
-			}else{
-			
-				if(score.green != 0){
-					
-					stealText = true;
-			
-					if(32 in inputManager.keys){
-				
-						stealWood('green');
-					}
-			
-				}
-			
-			}
-	
-		}
-	
-	}
+	user.move(modifier);
+	user.interactWBase();
+	user.interactWTree();
+	user.interactWMessage();
 	
 	//endgame
-	if(game.timeLimit - elapsedseconds <= 0){
-		
+	if(game.timeLimit - game.elapsedseconds <= 0){
 		game.gameState = "won";
-		
-		
-		
 	}
 	
 };
@@ -809,8 +559,6 @@ var update = function (modifier) {
 // Draw everything
 var render = function () {
 	
-
-
 	//tiled background
 
 	for(q = 0; q < 6; q++){

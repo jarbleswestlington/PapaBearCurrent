@@ -37,6 +37,15 @@ Game.prototype.checkCollision = function(item, shark, itemWidth, itemHeight, sha
    }
 }
 
+Game.prototype.forAllTeams = function(func){
+
+	for(var name in this.teams){
+
+		func(this.teams[name]);
+
+	}
+
+}
 
 Game.prototype.forAllPlayers = function(func){
 
@@ -225,6 +234,7 @@ var Team = function(game, name, coord){
 	this.players = [];
 	this.baseX = coord.x;
 	this.baseY = coord.y;
+	this.base = coord;
 
 	game.teams[name] = this;
 };

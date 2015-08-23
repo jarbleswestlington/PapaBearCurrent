@@ -71,3 +71,130 @@
 		}
 		
 	}
+	
+	
+	
+		case 9:
+						if (game.lastMessage == messageNum){
+						game.messageReset = true;
+						}
+						else{
+						noteMessage.line1 = "Some notes can give you immense power. This note does not.";
+						noteMessage.line2 = "";
+						noteMessage.line3 = "";
+						noteMessage.line4 = "";
+						game.lastMessage = messageNum;
+						}
+					break;
+					case 10:
+						if (game.lastMessage == messageNum){
+						game.messageReset = true;
+						}
+						else{
+						noteMessage.line1 = "Hold 'm' and press r,g, or b.";
+						noteMessage.line2 = "Not everyone can disguse themselves...but some of your enemies can.";
+						noteMessage.line3 = "";
+						noteMessage.line4 = "";
+						game.lastMessage = messageNum;
+						GiveCanDisguise(users[username]);
+
+						}
+					
+					break;
+
+					case 11:
+
+					if(!checkIfPapa()){
+						
+					noteMessage.line1 = "By reading this note you have transformed into PAPA BEAR, the king of the forest.;"
+					noteMessage.line2 = "You are fast, deadly, and nearly invincible";
+					noteMessage.line3 = "You can only be killed by a golden sword";
+					noteMessage.line4 = "Will you help your former team or embrace your frightening nature?";
+					GivePapa(users[username], z);
+					hasLog = false;
+					
+					}else{
+					
+						noteMessage.line1 = "Papa Bear can be a powerful ally, but can you trust him?";
+						noteMessage.line2 = "";
+						hasWeapon = true;
+
+
+						
+					}
+					
+					break;
+
+					case 12:
+
+					if(!checkIfPapa()){
+						
+					noteMessage.line1 = "By reading this note you have transformed into PAPA BEAR, the king of the forest.;"
+					noteMessage.line2 = "You are fast, deadly, and nearly invincible";
+					noteMessage.line3 = "You can only be killed by a golden sword";
+					noteMessage.line4 = "Will you help your former team or embrace your frightening nature?";
+					GivePapa(users[username], z);
+					
+					}else{
+					noteMessage.line1 = "Papa Bear has a secret..";
+					noteMessage.line2 = "";
+					hasWeapon = true;
+
+					}
+					break;
+
+					case 13:
+					if(!checkIfPapa()){
+						
+						noteMessage.line1 = "By reading this note you have transformed into PAPA BEAR, the king of the forest.;"
+						noteMessage.line2 = "You are fast, deadly, and nearly invincible";
+						noteMessage.line3 = "You can only be killed by a golden sword";
+						noteMessage.line4 = "Will you help your former team or embrace your frightening nature?";
+						GivePapa(users[username], z);
+						hasLog = false;
+						hasWeapon = true;
+
+					}else{
+						noteMessage.line1 = "The woods contain a note which can be used to kill Papa Bear";
+						noteMessage.line2 = "";
+
+					}
+					break;
+
+					case 14:
+
+					if(!checkIfSwordBearer()){
+						noteMessage.line1 = "Press 'k' to sheath and unsheathe a golden sword. This weapon can kill PAPA BEAR.";
+						noteMessage.line2 = "";
+						hasWeapon = true;
+
+						GivePowerSword(users[username]);
+					}else{
+						noteMessage.line1 = "Only the golden sword can defeat PAPA BEAR.";
+						noteMessage.line2 = "";
+
+					}
+
+					break;
+
+					case 15:
+
+					if(!checkIfSwordBearer()){
+					noteMessage.line1 = "Press 'k' to sheath and unsheathe a golden sword. This weapon can kill PAPA BEAR.";
+					GivePowerSword(users[username]);
+					}else{
+					noteMessage.line1 = "Right now someone has the golden sword that could defeat PAPA BEAR...";
+					}
+		
+					case 16:
+					noteMessage.line1 = "You have picked up a disguise. Hold 'm' and then";
+					noteMessage.line2 = "press r,g or b to impersonate another team.";
+					GiveCanDisguise(users[username]);
+					break;
+
+					case 17:
+
+					noteMessage.line1 = "What sort of notes have your teammates read? Are they hiding something?";
+
+					break;
+					}
