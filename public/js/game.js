@@ -1,6 +1,15 @@
+//for all players
+//make sure all images are same image
+//make sure server and client are like doing things correclty i guess -- not sure how they interact now
+
+
 //connect to sockets on server
 var socket = io.connect(window.location.hostname);
-socket.on('connect', function(data) { });
+socket.on('connect', function(data) {
+
+	socket.emit("confirm_name", {user.name})
+	
+});
 socket.on('error', function() { console.error(arguments) });
 socket.on('message', function() { console.log(arguments) });  
 
@@ -25,23 +34,23 @@ addEventListener("keyup", function (e) {
 	delete inputManager.keys[e.keyCode];
 }, false);
 
-inputManager.masterKeys = function(){			   	
+inputManager.masterKeys = function(modifier){			   	
 
 	if(13 in this.keys){
 		socket.emit("startgame_server", {});
 	}
 
 	if (38 in this.keys) { // user holding up
-		camera.y += 700 * delta/1000;
+		camera.y += 700 * modifier;
 	}
 	if (40 in this.keys) { // user holding down
-		camera.y -= 700 * delta/1000;
+		camera.y -= 700 * modifier;
 	}
 	if (37 in this.keys) { // user holding left
-		camera.x += 700 * delta/1000;	
+		camera.x += 700 * modifier;	
 	}
 	if (39 in this.keys) { // user holding right
-		camera.x -= 700 * delta/1000;
+		camera.x -= 700 * modifier;
 	}
 };
 
@@ -87,11 +96,11 @@ game.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, s
    return false;
 }
 
+var URI = window.location.pathname.split( '/' );
 //setUp users user
 var user = {
+	name: URI[URI.length-1];
 	amount:0,
-	messageReset:false,
-	lastMessage:0,
 	weapon:{
 		has:false;
 		power:false;
@@ -113,6 +122,7 @@ var user = {
 	hasPapa = false;
 	hasSword = false;
 	
+	dead = false;
 	
 };
 
@@ -181,7 +191,7 @@ user.interactWTree = function(){
 	}
 }
 
-user.interactWMessage = function(){
+user.interactWNote = function(){
 	//messages
 	if(this.PAPABEAR == false){
 
@@ -208,6 +218,8 @@ user.interactWMessage = function(){
 					renderer.currentNote = notes[Math.floor(Math.random() * notes.length)];
 
 					renderer.showNote = true;
+					
+					renderer.currentNote.func.apply(null, renderer.currentNote.args)
 
 					getNote(z);
 				}
@@ -372,8 +384,14 @@ renderer.updateCamera = function(){
 
 renderer.drawImage = function(image, coordX, coordY){
 	
-	ctx.drawImage(image, coordX + this.camera.x, coordY + this.camera.y)
+	ctx.drawImage(this.refs[image], coordX + this.camera.x, coordY + this.camera.y)
 };
+
+renderer.drawSprite(image, coordX, coordY, sprite){
+	
+	ctx.drawImage(this.refs[image], sprite.x, sprite.y, sprite.width, sprite.height, coordX + this.camera.x, coordY + this.camera.y)
+
+}
 
 renderer.draw = {};
 
@@ -448,7 +466,6 @@ function getRandomInt(min, max) {
 function getRandomArbitrary( numone,  numtwo) {
 	return Math.floor(Math.random() * (numtwo - numone) + 1);
 }
-
 
 var chatController = {
 	
@@ -627,11 +644,11 @@ game.client.notes = [
  
  new Note(["Press ENTER to chat with nearby users"], {prob: 1, condition: 0})),
  
- new Note(["You can now press 'k' to wield a deadly weapon."], 1, 0, {prob: 1, condition: 0, action:{func: user.givePower, args: "weapon"}}),
+ new Note(["You can now press 'k' to wield a deadly weapon."], 1, 0, {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
  
- new Note(["You have picked up a knife. Press 'k' to use it, but be careful where you point it."], {prob: 1, condition: 0, action:{func: user.givePower, args: "weapon"}}),
+ new Note(["You have picked up a knife. Press 'k' to use it, but be careful where you point it."], {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
 
- new Note(["Press 'k' to brandish your knife and then press 'k' again to hide it."], {prob: 1, condition: 0, action:{func: user.givePower, args: "weapon"}}),
+ new Note(["Press 'k' to brandish your knife and then press 'k' again to hide it."], {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
 
  new Note(["Appearances can be deceiving...stay on guard"], {prob: 1, condition: 0}),
  
@@ -640,19 +657,17 @@ game.client.notes = [
 
 ];
 
-
 // Update game objects
 game.update = function (modifier) {
 	
 	user.move(modifier);
 	user.interactWBase();
 	user.interactWTree();
-	user.interactWMessage();
+	user.interactWNote();
 	
 	renderer.updateCamera();
 	
 };
-
 
 renderer.draw['clear_frame'] = function(){
 	ctx.fillStyle = "rgb(105,175,105)";
@@ -661,483 +676,251 @@ renderer.draw['clear_frame'] = function(){
 // Draw everything
 renderer.draw["game"] = function () {
 	
+	ctx.fillStyle = "rgb(255,255,255)";
+	
 	//tiled background
 	for(var x = 0; x < 6; x++){
 	
 		for(var y = 0; y < 6; y++){
 
-			this.drawImage(backgroundImage, x * 944, y * 807);
+			this.drawImage("background", x * 944, y * 807);
 
 		}
 	}
-
-	ctx.fillStyle = "rgb(255,0,0)";
-
-	//testing123
-
-	//ctx.drawImage(counter, blueBase.x + camera.x - 5, blueBase.y + camera.y + 40);
-
-
-	if(score.blue > 0){
-
-	ctx.drawImage(pileImage2, blueBase.x + camera.x - 53, blueBase.y + camera.y + 61);
-	}
-	if(score.blue > 150){
-
-			ctx.drawImage(pileImage2, blueBase.x + camera.x - 77, blueBase.y + camera.y + 61);
-	}
-	if(score.blue > 300){
-
-			ctx.drawImage(pileImage2, blueBase.x + camera.x - 70, blueBase.y + camera.y + 47);
-	}
-	if(score.blue > 450){
-
-			ctx.drawImage(pileImage2, blueBase.x + camera.x - 101, blueBase.y + camera.y + 61);
-	}
-	if(score.blue > 600){
-
-			ctx.drawImage(pileImage2, blueBase.x + camera.x - 100, blueBase.y + camera.y + 61);
-	}
-	if(score.blue > 750){
-
-			ctx.drawImage(pileImage2, blueBase.x + camera.x - 93, blueBase.y + camera.y + 47);
-
-	}
-	if(score.blue > 900){
-
-			ctx.drawImage(pileImage2, blueBase.x + camera.x - 124, blueBase.y + camera.y + 61);
-
-	}
-	if(score.blue > 1050){
-
-			ctx.drawImage(pileImage2, blueBase.x + camera.x - 117, blueBase.y + camera.y + 47);
-
-	}
-	if(score.blue > 1200){
-
-			ctx.drawImage(pileImage2, blueBase.x + camera.x - 148, blueBase.y + camera.y + 61);
-
-	}
-	if(score.blue > 1350){
-
-			ctx.drawImage(pileImage2, blueBase.x + camera.x - 141, blueBase.y + camera.y + 47);
-
-	}
-	if(score.blue > 1500){
-
-		ctx.drawImage(pileImage2, blueBase.x + camera.x - 75, blueBase.y + camera.y + 33);
-
-	}
-	if(score.blue > 1650){
-
-		ctx.drawImage(pileImage2, blueBase.x + camera.x - 99, blueBase.y + camera.y + 33);
-
-	}
-	if(score.blue > 1650){
-
-	ctx.drawImage(pileImage2, blueBase.x + camera.x - 123, blueBase.y + camera.y + 33);
-
-	}
-
 	
-	ctx.drawImage(blueBaseImage, blueBase.x + camera.x, blueBase.y + camera.y);
-	ctx.fillStyle = "white";
-	ctx.font="11px Georgia";
-	ctx.drawImage(counter, blueBase.x + camera.x - 8, blueBase.y + camera.y + 50);
-	ctx.fillText(score.blue,  blueBase.x + camera.x - 3, blueBase.y + camera.y + 65);
+	//teams and their scores and stuff
+	game.forAllTeams(function(team){
+		
+		//wood piles
+		var row = 1;
+		var col = 1;
+		var x = 0;
+		var y = 0;
 
-	
-	ctx.drawImage(greenBaseImage, greenBase.x + camera.x, greenBase.y + camera.y);
-	ctx.fillText(score.green,  greenBase.x + camera.x, greenBase.y + camera.y);
-	
-	ctx.drawImage(redBaseImage, redBase.x + camera.x, redBase.y + camera.y);
-	ctx.fillText(score.red,  redBase.x + camera.x, redBase.y + camera.y);
-	
+		for(var i = 1; i < team.score; i+= 150){
+			
+			col += .5;
+			if(row < 2) row += 1;
+			else row = 1;
+			
+			x = -Math.floor(col) * 24;
+			
+			y = -Math.floor(row) * 26;
+			
+			this.drawImage("pile", (team.baseX - 53) + x, (team.baseY + 61));
+		}
+		
+		//actual base
+		this.drawImage('house' + team.name, team.baseX, team.baseY);
+		
+		//baseScore
+		ctx.fillStyle = "white";
+		ctx.font="11px Georgia";
+		
+		ctx.fillText(team.score, team.baseX - 3, team.baseY + 65);
+		
+	}.bind(this));
 
 	//trees
-	for(i =0; i< trees.length; i++){
-
-		//treeNum = 1;
-
-		//getRandomInt(1,4);
-		//if((i<trees.length) && (!trees[i].reuser.moved))
+	var treeSpriteFinder = {
+		1:{x:0, y:0, width:111, height:131},
+		2:{x:114, y:0, width:111, height:131},
+		3:{x:0, y:131, width:111, height:131},
+		4:{x:115, y:132, width:111, height:131},
+	}
+	
+	for(i =0; i< game.server.trees.length; i++){
 		
-		if(!trees[i].reuser.moved){
-
-		
-			ctx.fillStyle = "rgb(150,100,100)";
-
-			switch (trees[i].treeNum){
-
-			case 1:
-			
-				ctx.drawImage(pinesImage, 0, 0, 111, 131, trees[i].x + camera.x - 9, trees[i].y + camera.y - 9, 111, 131);
-
-			break;
-
-			
-			case 2:
-				ctx.drawImage(pinesImage, 114, 0, 220, 131, trees[i].x + camera.x - 9, trees[i].y + camera.y - 9, 220, 131);
-
-			break;
-
-			case 3:
-				ctx.drawImage(pinesImage, 0, 131, 111, 257, trees[i].x + camera.x - 9, trees[i].y + camera.y - 9, 111, 257);
-
-			break;
-
-			
-			case 4:
-				ctx.drawImage(pinesImage, 114, 132, 220, 257, trees[i].x + camera.x - 9, trees[i].y + camera.y - 9, 220, 257);
-
-			break;
-
-			}
-		
-		}
-		
+		if(!game.server.trees[i].removed) this.drawSprite(pinesImage, trees[i].x - 9, trees[i].y - 9, treeSpriteFinder[game.server.trees[i].treeNum]);
 		
 	}
 	
 	//notes
-	for(i =0; i< notes.length; i++){
+	ctx.fillStyle = "rgb(0,0,180)";
+	for(i =0; i< game.server.notes.length; i++){
 		
-		if(!notes[i].reuser.moved){
-		
-			ctx.fillStyle = "rgb(0,0,180)";
-			
-			ctx.drawImage(notesImage, notes[i].x + camera.x + 29, notes[i].y + camera.y + 29);
-					
-		}
+		if(!game.server.notes[i].removed) this.drawImage('note', game.server.notes[i].x + 29, game.server.notes[i].y + 29);
 		
 	}
 		
-	for(i=0; i < users.length; i++){
+	game.forAllPlayers(function(player){
 		//shadows
-	//if (users[i].direction == "L"){
-		ctx.drawImage(usershadow, users[i].x + camera.x -1 , users[i].y + camera.y + 11, 41,36);
-	//}	
+		this.drawImage(usershadow, player.x   -1 , player.y   + 11, 41,36);
 
 		//CHARACTER DRAWING
-		if(users[i].dead){
+		if(player.dead){
 			
 
-			if (users[i].team == "green"){
+			if (player.team == "green"){
 				
-				ctx.drawImage(greenCorpse, users[i].x + camera.x - 4, users[i].y + camera.y);
+				this.drawImage(greenCorpse, player.x   - 4, player.y  );
 			
 			}
 			
-			if (users[i].team == "red"){
+			if (player.team == "red"){
 				
-				ctx.drawImage(redCorpse, users[i].x + camera.x - 4, users[i].y + camera.y);
+				this.drawImage(redCorpse, player.x   - 4, player.y  );
 			
 			}
-			if (users[i].team == "blue"){
+			if (player.team == "blue"){
 				
-				ctx.drawImage(blueCorpse, users[i].x + camera.x - 4, users[i].y + camera.y);
+				this.drawImage(blueCorpse, player.x   - 4, player.y  );
 			
 			}
 		
 		
-		}else if(users[i].PAPABEAR==true){
+		}else if(player.PAPABEAR==true){
 
-			if (users[i].direction == "R") { 
-			ctx.drawImage(bearImage, 0, 0, 63, 63, users[i].x + camera.x, users[i].y + camera.y, 63,63);
-			}else if (users[i].direction == "D"){ 
-			ctx.drawImage(bearImage, 0, 66, 63, 129, users[i].x + camera.x, users[i].y + camera.y, 63,129);
-			}else if (users[i].direction == "L"){
-			ctx.drawImage(bearImage, 66, 0, 129, 63, users[i].x + camera.x, users[i].y + camera.y, 129,63);
-			}else if (users[i].direction == "U"){
-			ctx.drawImage(bearImage, 66, 66, 129, 129, users[i].x + camera.x, users[i].y + camera.y, 129,129); 
+			if (player.direction == "R") { 
+			this.drawImage(bearImage, 0, 0, 63, 63, player.x  , player.y  , 63,63);
+			}else if (player.direction == "D"){ 
+			this.drawImage(bearImage, 0, 66, 63, 129, player.x  , player.y  , 63,129);
+			}else if (player.direction == "L"){
+			this.drawImage(bearImage, 66, 0, 129, 63, player.x  , player.y  , 129,63);
+			}else if (player.direction == "U"){
+			this.drawImage(bearImage, 66, 66, 129, 129, player.x  , player.y  , 129,129); 
 			}
 				//losing papa bear on death
-		}else if (users[i].renderteam == "green"){
+		}else if (player.renderteam == "green"){
 		
-			if (users[i].character == 1){
-				if (users[i].direction == "L") {				
-					ctx.drawImage(greenImage, 2, 2, 41, 36, users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "R"){				
-					ctx.drawImage(greenImage, 2, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,33);
-				}else if (users[i].direction == "D"){
-					ctx.drawImage(greenImage, 2, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,35);
-				}else if (users[i].direction == "U"){
-					ctx.drawImage(greenImage, 2, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);	
+			if (player.character == 1){
+				if (player.direction == "L") {				
+					this.drawImage(greenImage, 2, 2, 41, 36, player.x  , player.y  , 41,36);
+				}else if (player.direction == "R"){				
+					this.drawImage(greenImage, 2, 40, 41, 33,player.x  , player.y  , 41,33);
+				}else if (player.direction == "D"){
+					this.drawImage(greenImage, 2, 75, 41, 35,player.x  , player.y  , 41,35);
+				}else if (player.direction == "U"){
+					this.drawImage(greenImage, 2, 113, 41, 36,player.x  , player.y  , 41,36);	
 				}	
 		
-			}else if (users[i].character == 2){
-				if (users[i].direction == "L" ){
-					ctx.drawImage(greenImage, 45, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+			}else if (player.character == 2){
+				if (player.direction == "L" ){
+					this.drawImage(greenImage, 45, 2, 41, 36,player.x  , player.y  , 41,36);
 			
-				}else if (users[i].direction == "R"){	
+				}else if (player.direction == "R"){	
 						
-					ctx.drawImage(greenImage, 45, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "D"){				
-					ctx.drawImage(greenImage, 45, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+					this.drawImage(greenImage, 45, 40, 41, 33,player.x  , player.y  , 41,36);
+				}else if (player.direction == "D"){				
+					this.drawImage(greenImage, 45, 75, 41, 35,player.x  , player.y  , 41,36);
 			
-				}else if (users[i].direction == "U"){				
-					ctx.drawImage(greenImage, 45, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (player.direction == "U"){				
+					this.drawImage(greenImage, 45, 113, 41, 36,player.x  , player.y  , 41,36);
 			
 				}
 		
-			}else if (users[i].character == 3){
-				if (users[i].direction == "L") {
-					ctx.drawImage(greenImage, 88, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "R"){
-					ctx.drawImage(greenImage, 88, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "D"){
-					ctx.drawImage(greenImage, 88, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "U"){
-					ctx.drawImage(greenImage, 88, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+			}else if (player.character == 3){
+				if (player.direction == "L") {
+					this.drawImage(greenImage, 88, 2, 41, 36,player.x  , player.y  , 41,36);
+				}else if (player.direction == "R"){
+					this.drawImage(greenImage, 88, 40, 41, 33,player.x  , player.y  , 41,36);
+				}else if (player.direction == "D"){
+					this.drawImage(greenImage, 88, 75, 41, 35,player.x  , player.y  , 41,36);
+				}else if (player.direction == "U"){
+					this.drawImage(greenImage, 88, 113, 41, 36,player.x  , player.y  , 41,36);
 				}
 		
 			}
 	
-		}else if (users[i].renderteam == "blue"){
+		}else if (player.renderteam == "blue"){
 
-			if (users[i].character == 1){
-				if (users[i].direction == "L") {				
-					ctx.drawImage(blueImage, 2, 2, 41, 36, users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "R"){				
-					ctx.drawImage(blueImage, 2, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,33);
-				}else if (users[i].direction == "D"){
-					ctx.drawImage(blueImage, 2, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,35);
-				}else if (users[i].direction == "U"){
-					ctx.drawImage(blueImage, 2, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);	
+			if (player.character == 1){
+				if (player.direction == "L") {				
+					this.drawImage(blueImage, 2, 2, 41, 36, player.x  , player.y  , 41,36);
+				}else if (player.direction == "R"){				
+					this.drawImage(blueImage, 2, 40, 41, 33,player.x  , player.y  , 41,33);
+				}else if (player.direction == "D"){
+					this.drawImage(blueImage, 2, 75, 41, 35,player.x  , player.y  , 41,35);
+				}else if (player.direction == "U"){
+					this.drawImage(blueImage, 2, 113, 41, 36,player.x  , player.y  , 41,36);	
 				}	
 		
-			}else if (users[i].character == 2){
-				if (users[i].direction == "L" ){
-					ctx.drawImage(blueImage, 45, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+			}else if (player.character == 2){
+				if (player.direction == "L" ){
+					this.drawImage(blueImage, 45, 2, 41, 36,player.x  , player.y  , 41,36);
 			
-				}else if (users[i].direction == "R"){	
+				}else if (player.direction == "R"){	
 						
-					ctx.drawImage(blueImage, 45, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "D"){				
-					ctx.drawImage(blueImage, 45, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+					this.drawImage(blueImage, 45, 40, 41, 33,player.x  , player.y  , 41,36);
+				}else if (player.direction == "D"){				
+					this.drawImage(blueImage, 45, 75, 41, 35,player.x  , player.y  , 41,36);
 			
-				}else if (users[i].direction == "U"){				
-					ctx.drawImage(blueImage, 45, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (player.direction == "U"){				
+					this.drawImage(blueImage, 45, 113, 41, 36,player.x  , player.y  , 41,36);
 			
 				}
 		
-			}else if (users[i].character == 3){
-				if (users[i].direction == "L") {
-					ctx.drawImage(blueImage, 88, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "R"){
-					ctx.drawImage(blueImage, 88, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "D"){
-					ctx.drawImage(blueImage, 88, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "U"){
-					ctx.drawImage(blueImage, 88, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+			}else if (player.character == 3){
+				if (player.direction == "L") {
+					this.drawImage(blueImage, 88, 2, 41, 36,player.x  , player.y  , 41,36);
+				}else if (player.direction == "R"){
+					this.drawImage(blueImage, 88, 40, 41, 33,player.x  , player.y  , 41,36);
+				}else if (player.direction == "D"){
+					this.drawImage(blueImage, 88, 75, 41, 35,player.x  , player.y  , 41,36);
+				}else if (player.direction == "U"){
+					this.drawImage(blueImage, 88, 113, 41, 36,player.x  , player.y  , 41,36);
 				}
 		
 			}
 
-		}else if (users[i].renderteam == "red"){
+		}else if (player.renderteam == "red"){
 	
-			if (users[i].character == 1){
-				if (users[i].direction == "L") {				
-					ctx.drawImage(redImage, 2, 2, 41, 36, users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "R"){				
-					ctx.drawImage(redImage, 2, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,33);
-				}else if (users[i].direction == "D"){
-					ctx.drawImage(redImage, 2, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,35);
-				}else if (users[i].direction == "U"){
-					ctx.drawImage(redImage, 2, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);	
+			if (player.character == 1){
+				if (player.direction == "L") {				
+					this.drawImage(redImage, 2, 2, 41, 36, player.x  , player.y  , 41,36);
+				}else if (player.direction == "R"){				
+					this.drawImage(redImage, 2, 40, 41, 33,player.x  , player.y  , 41,33);
+				}else if (player.direction == "D"){
+					this.drawImage(redImage, 2, 75, 41, 35,player.x  , player.y  , 41,35);
+				}else if (player.direction == "U"){
+					this.drawImage(redImage, 2, 113, 41, 36,player.x  , player.y  , 41,36);	
 				}	
 		
-			}else if (users[i].character == 2){
-				if (users[i].direction == "L" ){
-					ctx.drawImage(redImage, 45, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+			}else if (player.character == 2){
+				if (player.direction == "L" ){
+					this.drawImage(redImage, 45, 2, 41, 36,player.x  , player.y  , 41,36);
 			
-				}else if (users[i].direction == "R"){	
+				}else if (player.direction == "R"){	
 						
-					ctx.drawImage(redImage, 45, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "D"){				
-					ctx.drawImage(redImage, 45, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+					this.drawImage(redImage, 45, 40, 41, 33,player.x  , player.y  , 41,36);
+				}else if (player.direction == "D"){				
+					this.drawImage(redImage, 45, 75, 41, 35,player.x  , player.y  , 41,36);
 			
-				}else if (users[i].direction == "U"){				
-					ctx.drawImage(redImage, 45, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-			
-				}
-		
-			}else if (users[i].character == 3){
-				if (users[i].direction == "L") {
-					ctx.drawImage(redImage, 88, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "R"){
-					ctx.drawImage(redImage, 88, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "D"){
-					ctx.drawImage(redImage, 88, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "U"){
-					ctx.drawImage(redImage, 88, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}
-		
-			}
-	
-		}else if (users[i].renderteam == "yellow" && !threeteams){
-	
-			if (users[i].character == 1){
-			
-				if (users[i].direction == "L") {		
-							
-					ctx.drawImage(yellowImage, 2, 2, 41, 36, users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "R"){				
-					ctx.drawImage(yellowImage, 2, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,33);
-				}else if (users[i].direction == "D"){
-					ctx.drawImage(yellowImage, 2, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,35);
-				}else if (users[i].direction == "U"){
-					ctx.drawImage(yellowImage, 2, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);	
-				}	
-		
-			}else if (users[i].character == 2){
-				
-				if (users[i].direction == "L" ){
-					ctx.drawImage(yellowImage, 45, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-			
-				}else if (users[i].direction == "R"){	
-						
-					ctx.drawImage(yellowImage, 45, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "D"){				
-					ctx.drawImage(yellowImage, 45, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-			
-				}else if (users[i].direction == "U"){				
-					ctx.drawImage(yellowImage, 45, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+				}else if (player.direction == "U"){				
+					this.drawImage(redImage, 45, 113, 41, 36,player.x  , player.y  , 41,36);
 			
 				}
 		
-			}else if (users[i].character == 3){
-				
-				if (users[i].direction == "L") {
-					ctx.drawImage(yellowImage, 88, 2, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "R"){
-					ctx.drawImage(yellowImage, 88, 40, 41, 33,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "D"){
-					ctx.drawImage(yellowImage, 88, 75, 41, 35,users[i].x + camera.x, users[i].y + camera.y, 41,36);
-				}else if (users[i].direction == "U"){
-					ctx.drawImage(yellowImage, 88, 113, 41, 36,users[i].x + camera.x, users[i].y + camera.y, 41,36);
+			}else if (player.character == 3){
+				if (player.direction == "L") {
+					this.drawImage(redImage, 88, 2, 41, 36,player.x  , player.y  , 41,36);
+				}else if (player.direction == "R"){
+					this.drawImage(redImage, 88, 40, 41, 33,player.x  , player.y  , 41,36);
+				}else if (player.direction == "D"){
+					this.drawImage(redImage, 88, 75, 41, 35,player.x  , player.y  , 41,36);
+				}else if (player.direction == "U"){
+					this.drawImage(redImage, 88, 113, 41, 36,player.x  , player.y  , 41,36);
 				}
 		
 			}
 	
 		}
 		
+		if(player.dead == false){
 
-		//chat drawing
-	    ctx.font = '20px Calibri';
-		
-		ctx.fillStyle = "rgb(255,255,0)";
-		
-		if(users[i].chatting){
-						
-			ctx.fillText(users[i].chatText, users[i].x - 40 + camera.x, users[i].y - 20 + camera.y);
-		
-		}
-			
-		if(users[i].dead == false){
+			if(player.log.has){
 
-			//testing123
-			if (preSwiping){
-
-					if (users[i].direction == "L"){
-						ctx.drawImage(swordL, users[i].x + camera.x + 10, users[i].y + camera.y - 42);
-					}
-						if (users[i].direction == "R"){
-						ctx.drawImage(swordR, users[i].x + camera.x + 10, users[i].y + camera.y + 38);
-					}
-						if (users[i].direction == "D"){
-						ctx.drawImage(swordU, users[i].x + camera.x - 42, users[i].y + camera.y + 12);
-					}
-						if (users[i].direction == "U"){
-						ctx.drawImage(swordD, users[i].x + camera.x + 41, users[i].y + camera.y + 12);
-					}
-			}
-
-			if (swipage){
-
-						if (users[i].direction == "R"){
-						ctx.drawImage(swordL, users[i].x + camera.x + 10, users[i].y + camera.y - 42);
-					}
-						if (users[i].direction == "L"){
-						ctx.drawImage(swordR, users[i].x + camera.x + 10, users[i].y + camera.y + 38);
-					}
-						if (users[i].direction == "U"){
-						ctx.drawImage(swordU, users[i].x + camera.x - 42, users[i].y + camera.y + 12);
-					}
-						if (users[i].direction == "D"){
-						ctx.drawImage(swordD, users[i].x + camera.x + 41, users[i].y + camera.y + 12);
-					}
-
-
-				swipeArch = ctx.fillStyle = "rgb(255,255,0)"
-
-
-				 if (users[i].direction == "U"){
-
-					swipeX = users[i].x + camera.x + 19;
-					swipeY = users[i].y + camera.y + 19;
-					ctx.beginPath();
-					swipeArch = ctx.arc(swipeX, swipeY, swipe.radius, 0, Math.PI, true);
-					ctx.lineWidth = 10;
-      				ctx.strokeStyle = "rgb(255,255,0)";
-      				ctx.stroke();
-      				//ctx.closePath();
-					//ctx.fillStyle = "rgb(255,255,0)";
-					//ctx.fill();	
-				}else if (users[i].direction == "D"){
-					 	
-					swipeX = users[i].x + camera.x + 19;
-					swipeY = users[i].y + camera.y + 19;
-					ctx.beginPath();
-					swipeArch = ctx.arc(swipeX, swipeY, swipe.radius, 0, Math.PI, false);
-					ctx.lineWidth = 10;
-      				ctx.strokeStyle = "rgb(255,255,0)";
-      				ctx.stroke();
-				}else if (users[i].direction == "L"){
-					 	
-					swipeX = users[i].x + camera.x + 19;
-					swipeY = users[i].y + camera.y + 17;
-					ctx.beginPath();
-					swipeArch = ctx.arc(swipeX, swipeY, swipe.radius, 4.7, Math.PI*.5, true);
-					ctx.lineWidth = 10;
-      				ctx.strokeStyle = "rgb(255,255,0)";
-      				ctx.stroke();
-				}else if (users[i].direction == "R"){
-					 	
-					swipeX = users[i].x + camera.x + 19;
-					swipeY = users[i].y + camera.y + 17;
-					ctx.beginPath();
-					swipeArch = ctx.arc(swipeX, swipeY, swipe.radius, 4.7, Math.PI*.5, false);
-					ctx.lineWidth = 10;
-      				ctx.strokeStyle = "rgb(255,255,0)";
-      				ctx.stroke();	
-				}
-			
-			}
-
-			//testing123
-
-			if(hasLog == true){
-
-
-				if (users[i].direction == "R"){
-							ctx.drawImage(backpackImage, 0, 0, 60, 40, users[i].x + camera.x -14, users[i].y + camera.y - 3, 60,40);
-				}else if (users[i].direction == "D") { 
-							ctx.drawImage(backpackImage, 0, 40, 60, 43, users[i].x + camera.x -20, users[i].y + camera.y - 10, 60, 43);
-				}else if (users[i].direction == "U") { 
-							ctx.drawImage(backpackImage, 0, 83, 60, 39, users[i].x + camera.x - 20, users[i].y + camera.y -5, 60, 39);
-				}else if (users[i].direction == "L") { 
-							ctx.drawImage(backpackImage, 0, 126, 60, 40, users[i].x + camera.x, users[i].y + camera.y - 3, 60, 40);
+				if (player.direction == "R"){
+							this.drawImage(backpackImage, 0, 0, 60, 40, player.x   -14, player.y   - 3, 60,40);
+				}else if (player.direction == "D") { 
+							this.drawImage(backpackImage, 0, 40, 60, 43, player.x   -20, player.y   - 10, 60, 43);
+				}else if (player.direction == "U") { 
+							this.drawImage(backpackImage, 0, 83, 60, 39, player.x   - 20, player.y   -5, 60, 39);
+				}else if (player.direction == "L") { 
+							this.drawImage(backpackImage, 0, 126, 60, 40, player.x  , player.y   - 3, 60, 40);
 				}
 			}
 
-
-
-			//donetesting
-
-
-
-	
 			//SWORD DRAWING		
 			ctx.fillStyle = "rgb(200,200,200)";
 		
@@ -1163,112 +946,65 @@ renderer.draw["game"] = function () {
 
 				if (users[i].direction == "U"){
 
-					weaponRect = ctx.fillRect(users[i].x + camera.x + 36, users[i].y + camera.y - 22, weapon.vwidth, weapon.vheight);	
+					weaponRect = ctx.fillRect(users[i].x   + 36, users[i].y   - 22, weapon.vwidth, weapon.vheight);	
 				}else if (users[i].direction == "D"){
 
-					weaponRect = ctx.fillRect(users[i].x + camera.x, users[i].y + camera.y + 20, weapon.vwidth, weapon.vheight);	
+					weaponRect = ctx.fillRect(users[i].x  , users[i].y   + 20, weapon.vwidth, weapon.vheight);	
 				}else if (users[i].direction == "R"){
 
-					weaponRect = ctx.fillRect(users[i].x + camera.x + 36, users[i].y + camera.y + 22, weapon.hwidth, weapon.hheight);	
+					weaponRect = ctx.fillRect(users[i].x   + 36, users[i].y   + 22, weapon.hwidth, weapon.hheight);	
 				}else if (users[i].direction == "L") {
 
-					weaponRect = ctx.fillRect(users[i].x + camera.x - 26, users[i].y + camera.y + 22, weapon.hwidth, weapon.hheight);	
+					weaponRect = ctx.fillRect(users[i].x   - 26, users[i].y   + 22, weapon.hwidth, weapon.hheight);	
 				}
 
 			}		
 		
 		}	
 	
-	}
+	}.bind(this)});
 	
+	
+	//chat drawing
+	ctx.font = '20px Calibri';
+	
+	ctx.fillStyle = "rgb(255,255,0)";
+	
+	if(user.chatting) ctx.fillText(users[i].chatText, users[i].x - 40  , users[i].y - 20  );
+	
+	//TEXT OVERLAYS
     ctx.font = '40px Calibri';
-	
-	//show text for chopping
-	if(treeText){
-		
-		ctx.fillStyle = "rgb(0,0,0)";
-		
-		
-		if(!hasLog){
-		
-			ctx.fillText("Press space to cut wood!", window.innerWidth/4, window.innerHeight - 100);
-		
-		//}else{
-			
-			//ctx.fillText("You already have a log", window.innerWidth/4, window.innerHeight - 100);
-			
-			
-		}
-		
-	}
-	
-	
-	//show text for stealing
-	if(stealText){
-		
-		ctx.fillStyle = "rgb(0,0,0)";
-		
-		
-		ctx.fillText("Press space to steal wood!", window.innerWidth/4, window.innerHeight - 100);
-		
-	}
-	
-	if(game.currentSec > game.timeLimit - 100){
-		
-		ctx.fillStyle = "rgb(255,0,0)";
-		
-	}else{
-		
-		ctx.fillStyle = "rgb(0,0,0)";
-		
-	}
-	
-	ctx.fillText((game.timeLimit - game.currentSec) + " Seconds Left", 50, 80);
-	
 	ctx.fillStyle = "rgb(0,0,0)";
-	
-	if(users[username].dead){
-		
-		ctx.fillText("You will respawn soon", window.innerWidth/8, 325);
-		
-	}
-	
-	if(hasLog){
-		
 
-		//ctx.fillText("You are holding " + woodTotal + " pieces of wood", window.innerWidth/4, window.innerHeight - 50);
-		
-		if(users[username].dead){
-			
-			hasLog = false;
-			
-			stolen = false;
-			
-			socket.emit("depLog", {team: stolenFrom, amount: woodTotal})
-		
-			stolenFrom = "";
-		}
-		
+	//show text for chopping
+	if(this.treeText && !user.log.has) ctx.fillText("Press space to cut wood!", window.innerWidth/4, window.innerHeight - 100);
+
+	//show text for stealing
+	if(this.stealText) ctx.fillText("Press space to steal wood!", window.innerWidth/4, window.innerHeight - 100);
 	}
-	
-	
-    ctx.font = '20px Calibri';
+		
+	//show respawn text
+	if(user.dead) ctx.fillText("You will respawn soon", window.innerWidth/8, 325);	
 	
 	//show note text
-	if(showNote){
+	if(this.showNote){
 		
-		//(noteMessage);
-	
-		ctx.fillText(noteMessage.line1, window.innerWidth/8, 200);
-		ctx.fillText(noteMessage.line2, window.innerWidth/8, 225);
-		ctx.fillText(noteMessage.line3, window.innerWidth/8, 250);
-		ctx.fillText(noteMessage.line4, window.innerWidth/8, 275);
-		ctx.fillText(noteMessage.line5, window.innerWidth/8, 300);
+		ctx.font = '20px Calibri';
+
+		this.currentNote.forEach(function(line, i){
+			
+			ctx.fillText(line, window.innerWidth/8, 200 + (i*25));
+			
+		}.bind(this));
 	
 	}
 	
-	//console.log(users[username]);
-	
+	//time limit
+	if(game.currentSec > game.timeLimit - 100) ctx.fillStyle = "rgb(255,0,0)";
+	else ctx.fillStyle = "rgb(0,0,0)";
+
+	ctx.fillText((game.timeLimit - game.currentSec) + " Seconds Left", 50, 80);
+		
 };
 
 game.stateManager = function () {
@@ -1278,6 +1014,8 @@ game.stateManager = function () {
     var delta = now - this.then;
 	
 	renderer.draw['clear_frame']();
+	
+	if(user.name == "master") inputManager.masterKeys(delta/1000);
       
 	if(game.state == "loading"){
 		
@@ -1286,8 +1024,18 @@ game.stateManager = function () {
 	}
    
 	if(game.state == "waiting"){
+		
+		if(user.confirmed){
+			
+			renderer.state = "intro";
+
+			
+		}else{
+			
+			renderer.state = "server";
+
+		}
 				  
-		renderer.state = "intro";
 
 		if(game.started) game.state = "game";
 
@@ -1325,8 +1073,9 @@ game.stateManager = function () {
 };
 
 
-socket.on('user_set', function(data) {
-	user.confirmed = data.success;
+socket.on('name_confirmed', function(data) {
+	user.name = data.name;
+	user.confirmed = true;
 });
 
 socket.on('startgame', function(data) {
@@ -1347,6 +1096,22 @@ socket.on('update_clients', function(data) {
 	game.currentSec = data.time;
 		
 });
+
+socket.on("death", function(data){
+	
+	user.log.has = false;
+
+	if(user.log.stolen){
+	
+		user.log.stolen = false;
+
+		socket.emit("depLog", {team: user.log.stolenFrom, amount: user.log.wood})
+
+		user.log.stolenFrom = "";
+	
+	}
+
+})
 
 $(document).load(function() {
 

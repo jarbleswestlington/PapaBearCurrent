@@ -24,6 +24,7 @@ var Game = function(){
 	
 	this.bearX = 22;
 	this.bearY = 27;
+	this.sockets = {};
 };
 
 Game.prototype.update(io) {
@@ -476,7 +477,9 @@ Player.prototype.checkHits = function(){
 		
 		if(hit){
 	
-			oPlayer.dead = true;	
+			oPlayer.dead = true;
+
+			game.sockets[oPlayer.name].emit("death", {});
 
 			oPlayer.spawn(function(spawn){
 

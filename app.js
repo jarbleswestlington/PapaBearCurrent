@@ -29,7 +29,6 @@ app.get('/player/:name', function (req, res){
    var pName = req.params.name;
    
    if(!game.hasPlayer(pName)) game.addPlayer(pName, pName == "master" ? true : false);
-   else res.write(pName);
 
    res.write(index);
 
@@ -48,6 +47,14 @@ io.sockets.on('connection', function(socket) {
     	socket.emit('startgame_client', game);
 	  
 	}
+	
+	socket.on("confirm_name", function(data){
+		
+		game.sockets[data.name] = socket;
+		
+		game.sockets[data.name].emit("name_confirmed", {name: data.name});
+		
+	});
 
 	socket.on('startgame_server', function(data){
 		 
@@ -62,56 +69,22 @@ io.sockets.on('connection', function(socket) {
 	socket.on('stealWood', function(data){
 		  
 		var woodTotal = 250;
-
-  		if(data.team.name == "red"){
+		
+		var team = game.teams[data.team];
+		
+		if(team.score >= 250){
 			
-			if(game.teams["red"].score >= 250){
-			
-  				game.teams["red"].score -= 250;
+  			team.score -= 250;
 				
 			
-			}else{
-				
-				woodTotal = game.teams["red"].score;
-				
-				game.teams["red"].score = 0;
-				
-				
-			}
+		}else{
 			
-  		}
-  		if(data.team.name == "blue"){
+			woodTotal = team.score;
 			
-			if(game.teams["blue"].score >= 250){
+			team.score = 0;
 			
-  				game.teams["blue"].score -= 250;
-							
-			}else{
 				
-				woodTotal = game.teams["blue"].score;
-				
-				game.teams["blue"].score = 0;
-				
-				
-			}
-			
-  		}
-  		if(data.team.name == "green"){
-			
-			if(game.teams["green"].score >= 250){
-			
-  				game.teams["green"].score-= 250;
-							
-			}else{
-				
-				woodTotal = game.teams["green"].scoren;
-				
-				game.teams["green"].score = 0;
-				
-				
-			}
-			
-  		}
+		}
 				 		 
 		socket.emit('stealTotal', {total: woodTotal})
 		
@@ -149,26 +122,20 @@ io.sockets.on('connection', function(socket) {
     socket.on('getNote', function(data){
 		
 	 	game.notes[data.number].removed = true;
-		
-        io.sockets.emit('noteGot', {number: data.number});
-	
+			
 	});
 	
     socket.on('depLog', function(data){
 				
 		game.teams[data.team] += data.amount;
-		
-        io.sockets.emit('logged', {score: score});
-	
+			
 	});
 	
 	
     socket.on('chopTree', function(data){
 		
 	 	game.trees[data.number].removed = true;
-		
-        io.sockets.emit('treeChopped', {number: data.number});
-	
+			
 	});
 	
    socket.on('move_input', function(data){
