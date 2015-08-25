@@ -72,6 +72,19 @@ var game = {
 
 };
 
+game.forAllPlayers = function(func){
+	
+	for(var name in this.server.teams){
+
+		for(var i = 0; i < this.server.teams[name].players.length; i++){
+			
+			func(this.server.teams[name].players[i]);
+		}
+
+	}
+	
+}
+
 game.forAllTeams = function(func){
 
 	for(var name in this.server.teams){
@@ -731,7 +744,7 @@ renderer.draw["game"] = function () {
 	
 	for(i =0; i< game.server.trees.length; i++){
 		
-		if(!game.server.trees[i].removed) this.drawSprite(pinesImage, trees[i].x - 9, trees[i].y - 9, treeSpriteFinder[game.server.trees[i].treeNum]);
+		if(!game.server.trees[i].removed) this.drawSprite('pines', trees[i].x - 9, trees[i].y - 9, treeSpriteFinder[game.server.trees[i].treeNum]);
 		
 	}
 	
@@ -745,232 +758,74 @@ renderer.draw["game"] = function () {
 		
 	game.forAllPlayers(function(player){
 		//shadows
-		this.drawImage(usershadow, player.x   -1 , player.y   + 11, 41,36);
+		this.drawImage("usershadow", player.x -1 , player.y + 11);
 
 		//CHARACTER DRAWING
 		if(player.dead){
 			
-
-			if (player.team == "green"){
-				
-				this.drawImage(greenCorpse, player.x   - 4, player.y  );
+			this.drawImage(player.team.name + "Corpse", player.x- 4, player.y);
+		
+		}else if(player.PAPABEAR){
 			
+			var papaSpriteFinder= {
+				"R":{x:0, y:0, width:63, height:129},
+				"D":{x:0, y:66, width:63, height:129},
+				"L":{x:66, y:0, width:63, height:129},
+				"U":{x:66, y:66, width:63, height:129},
 			}
 			
-			if (player.team == "red"){
-				
-				this.drawImage(redCorpse, player.x   - 4, player.y  );
+			this.drawSprite("bear", player.x,player.y, papaSpriteFinder[player.direction]);
 			
+		}else{
+			
+			var playerSpriteFinder = {
+				"L":{x:2 + ((player.character-1) * 43), y:2, width:41, height:36},
+				"R":{x:2 + ((player.character-1) * 43), y:40, width:41, height:33},
+				"D":{x:2 + ((player.character-1) * 43), y:75, width:41, height:35},
+				"U":{x:2 + ((player.character-1) * 43), y:113, width:41, height:36},
 			}
-			if (player.team == "blue"){
-				
-				this.drawImage(blueCorpse, player.x   - 4, player.y  );
 			
-			}
-		
-		
-		}else if(player.PAPABEAR==true){
-
-			if (player.direction == "R") { 
-			this.drawImage(bearImage, 0, 0, 63, 63, player.x  , player.y  , 63,63);
-			}else if (player.direction == "D"){ 
-			this.drawImage(bearImage, 0, 66, 63, 129, player.x  , player.y  , 63,129);
-			}else if (player.direction == "L"){
-			this.drawImage(bearImage, 66, 0, 129, 63, player.x  , player.y  , 129,63);
-			}else if (player.direction == "U"){
-			this.drawImage(bearImage, 66, 66, 129, 129, player.x  , player.y  , 129,129); 
-			}
-				//losing papa bear on death
-		}else if (player.renderteam == "green"){
-		
-			if (player.character == 1){
-				if (player.direction == "L") {				
-					this.drawImage(greenImage, 2, 2, 41, 36, player.x  , player.y  , 41,36);
-				}else if (player.direction == "R"){				
-					this.drawImage(greenImage, 2, 40, 41, 33,player.x  , player.y  , 41,33);
-				}else if (player.direction == "D"){
-					this.drawImage(greenImage, 2, 75, 41, 35,player.x  , player.y  , 41,35);
-				}else if (player.direction == "U"){
-					this.drawImage(greenImage, 2, 113, 41, 36,player.x  , player.y  , 41,36);	
-				}	
-		
-			}else if (player.character == 2){
-				if (player.direction == "L" ){
-					this.drawImage(greenImage, 45, 2, 41, 36,player.x  , player.y  , 41,36);
-			
-				}else if (player.direction == "R"){	
-						
-					this.drawImage(greenImage, 45, 40, 41, 33,player.x  , player.y  , 41,36);
-				}else if (player.direction == "D"){				
-					this.drawImage(greenImage, 45, 75, 41, 35,player.x  , player.y  , 41,36);
-			
-				}else if (player.direction == "U"){				
-					this.drawImage(greenImage, 45, 113, 41, 36,player.x  , player.y  , 41,36);
-			
-				}
-		
-			}else if (player.character == 3){
-				if (player.direction == "L") {
-					this.drawImage(greenImage, 88, 2, 41, 36,player.x  , player.y  , 41,36);
-				}else if (player.direction == "R"){
-					this.drawImage(greenImage, 88, 40, 41, 33,player.x  , player.y  , 41,36);
-				}else if (player.direction == "D"){
-					this.drawImage(greenImage, 88, 75, 41, 35,player.x  , player.y  , 41,36);
-				}else if (player.direction == "U"){
-					this.drawImage(greenImage, 88, 113, 41, 36,player.x  , player.y  , 41,36);
-				}
-		
-			}
-	
-		}else if (player.renderteam == "blue"){
-
-			if (player.character == 1){
-				if (player.direction == "L") {				
-					this.drawImage(blueImage, 2, 2, 41, 36, player.x  , player.y  , 41,36);
-				}else if (player.direction == "R"){				
-					this.drawImage(blueImage, 2, 40, 41, 33,player.x  , player.y  , 41,33);
-				}else if (player.direction == "D"){
-					this.drawImage(blueImage, 2, 75, 41, 35,player.x  , player.y  , 41,35);
-				}else if (player.direction == "U"){
-					this.drawImage(blueImage, 2, 113, 41, 36,player.x  , player.y  , 41,36);	
-				}	
-		
-			}else if (player.character == 2){
-				if (player.direction == "L" ){
-					this.drawImage(blueImage, 45, 2, 41, 36,player.x  , player.y  , 41,36);
-			
-				}else if (player.direction == "R"){	
-						
-					this.drawImage(blueImage, 45, 40, 41, 33,player.x  , player.y  , 41,36);
-				}else if (player.direction == "D"){				
-					this.drawImage(blueImage, 45, 75, 41, 35,player.x  , player.y  , 41,36);
-			
-				}else if (player.direction == "U"){				
-					this.drawImage(blueImage, 45, 113, 41, 36,player.x  , player.y  , 41,36);
-			
-				}
-		
-			}else if (player.character == 3){
-				if (player.direction == "L") {
-					this.drawImage(blueImage, 88, 2, 41, 36,player.x  , player.y  , 41,36);
-				}else if (player.direction == "R"){
-					this.drawImage(blueImage, 88, 40, 41, 33,player.x  , player.y  , 41,36);
-				}else if (player.direction == "D"){
-					this.drawImage(blueImage, 88, 75, 41, 35,player.x  , player.y  , 41,36);
-				}else if (player.direction == "U"){
-					this.drawImage(blueImage, 88, 113, 41, 36,player.x  , player.y  , 41,36);
-				}
-		
-			}
-
-		}else if (player.renderteam == "red"){
-	
-			if (player.character == 1){
-				if (player.direction == "L") {				
-					this.drawImage(redImage, 2, 2, 41, 36, player.x  , player.y  , 41,36);
-				}else if (player.direction == "R"){				
-					this.drawImage(redImage, 2, 40, 41, 33,player.x  , player.y  , 41,33);
-				}else if (player.direction == "D"){
-					this.drawImage(redImage, 2, 75, 41, 35,player.x  , player.y  , 41,35);
-				}else if (player.direction == "U"){
-					this.drawImage(redImage, 2, 113, 41, 36,player.x  , player.y  , 41,36);	
-				}	
-		
-			}else if (player.character == 2){
-				if (player.direction == "L" ){
-					this.drawImage(redImage, 45, 2, 41, 36,player.x  , player.y  , 41,36);
-			
-				}else if (player.direction == "R"){	
-						
-					this.drawImage(redImage, 45, 40, 41, 33,player.x  , player.y  , 41,36);
-				}else if (player.direction == "D"){				
-					this.drawImage(redImage, 45, 75, 41, 35,player.x  , player.y  , 41,36);
-			
-				}else if (player.direction == "U"){				
-					this.drawImage(redImage, 45, 113, 41, 36,player.x  , player.y  , 41,36);
-			
-				}
-		
-			}else if (player.character == 3){
-				if (player.direction == "L") {
-					this.drawImage(redImage, 88, 2, 41, 36,player.x  , player.y  , 41,36);
-				}else if (player.direction == "R"){
-					this.drawImage(redImage, 88, 40, 41, 33,player.x  , player.y  , 41,36);
-				}else if (player.direction == "D"){
-					this.drawImage(redImage, 88, 75, 41, 35,player.x  , player.y  , 41,36);
-				}else if (player.direction == "U"){
-					this.drawImage(redImage, 88, 113, 41, 36,player.x  , player.y  , 41,36);
-				}
-		
-			}
+			this.drawSprite(player.team.name + "team", player.x,player.y, playerSpriteFinder[player.direction]);
 	
 		}
 		
 		if(player.dead == false){
-
+			
 			if(player.log.has){
 
-				if (player.direction == "R"){
-							this.drawImage(backpackImage, 0, 0, 60, 40, player.x   -14, player.y   - 3, 60,40);
-				}else if (player.direction == "D") { 
-							this.drawImage(backpackImage, 0, 40, 60, 43, player.x   -20, player.y   - 10, 60, 43);
-				}else if (player.direction == "U") { 
-							this.drawImage(backpackImage, 0, 83, 60, 39, player.x   - 20, player.y   -5, 60, 39);
-				}else if (player.direction == "L") { 
-							this.drawImage(backpackImage, 0, 126, 60, 40, player.x  , player.y   - 3, 60, 40);
+				var backpackSpriteFinder = {
+					"R":{x:0, y:0, width:60, height:40, playerDelta:{x: -14, y:-3}},
+					"D":{x:0, y:40, width:60, height:43, playerDelta:{x: -20, y:-10}},
+					"U":{x:0, y:83, width:60, height:39, playerDelta:{x: -20, y:-5}},
+					"L":{x:0, y:126, width:60, height:40, playerDelta:{x: 0, y:-3}},	
 				}
+
+				this.drawImage("backpack", player.x + backpackSpriteFinder[player.direction].playerDelta.x, player.y + backpackSpriteFinder[player.direction].playerDelta.y, backpackSpriteFinder[player.direction]);
 			}
-
-			//SWORD DRAWING		
-			ctx.fillStyle = "rgb(200,200,200)";
 		
-			if (users[i].attacking && users[i].PAPABEAR == false){
-	
-				if(users[i].swordBearer == true){
-
-					weapon.hwidth = 45;
-					weapon.hheight = 7;
-					weapon.vwidth = 7;
-					weapon.vheight = 45;
-					
-					//ctx.fillStyle = "rgb(255, 255,0)";					
-
-				}else{
-					
-					weapon.hwidth = 30;
-					weapon.hheight = 5;
-					weapon.vwidth = 5;
-					weapon.vheight = 30;
-	
+			if (player.attacking && player.PAPABEAR == false){
+				//SWORD DRAWING		
+				ctx.fillStyle = "rgb(200,200,200)";
+				
+				var swordHelper = {
+					"U":{x: 36, y: -22},
+					"D":{x:0, y: 20},
+					"R":{x:36, y:22},
+					"L":{x:-26, y:22},
 				}
-
-				if (users[i].direction == "U"){
-
-					weaponRect = ctx.fillRect(users[i].x   + 36, users[i].y   - 22, weapon.vwidth, weapon.vheight);	
-				}else if (users[i].direction == "D"){
-
-					weaponRect = ctx.fillRect(users[i].x  , users[i].y   + 20, weapon.vwidth, weapon.vheight);	
-				}else if (users[i].direction == "R"){
-
-					weaponRect = ctx.fillRect(users[i].x   + 36, users[i].y   + 22, weapon.hwidth, weapon.hheight);	
-				}else if (users[i].direction == "L") {
-
-					weaponRect = ctx.fillRect(users[i].x   - 26, users[i].y   + 22, weapon.hwidth, weapon.hheight);	
-				}
-
+				
+				ctx.fillRect(player.x + swordHelper[player.direction].x, player.y + swordHelper[player.direction].y, player.weapon.vwidth, player.weapon.vheight);	
 			}		
 		
 		}	
+		
+		//chat drawing
+		ctx.font = '20px Calibri';
+		ctx.fillStyle = "rgb(255,255,0)";
+		if(player.chatting) ctx.fillText(player.chatText, player.x - 40  , player.y - 20  );
 	
-	}.bind(this)});
+	}.bind(this));
 	
-	
-	//chat drawing
-	ctx.font = '20px Calibri';
-	
-	ctx.fillStyle = "rgb(255,255,0)";
-	
-	if(user.chatting) ctx.fillText(users[i].chatText, users[i].x - 40  , users[i].y - 20  );
 	
 	//TEXT OVERLAYS
     ctx.font = '40px Calibri';
@@ -981,7 +836,6 @@ renderer.draw["game"] = function () {
 
 	//show text for stealing
 	if(this.stealText) ctx.fillText("Press space to steal wood!", window.innerWidth/4, window.innerHeight - 100);
-	}
 		
 	//show respawn text
 	if(user.dead) ctx.fillText("You will respawn soon", window.innerWidth/8, 325);	
