@@ -52,8 +52,7 @@ io.sockets.on('connection', function(socket) {
 	if(game.state == "started"){
 		
 		console.log("started game on " + socket.id)
-    	socket.emit('startgame_client', {game:game});
-	  
+		game.start(io);
 	}
 	
 	socket.on("confirm_name", function(data){
@@ -71,8 +70,8 @@ io.sockets.on('connection', function(socket) {
 		game.startsecond = new Date().getTime() / 1000;
 
 		game.state = "started";	
-			
-		io.sockets.emit("startgame_client", {game: game});
+		
+		game.start(io);
 
 		console.log("started game on " + socket.id)
 
@@ -134,11 +133,11 @@ io.sockets.on('connection', function(socket) {
 	
 	});
 	
-	
     socket.on('getNote', function(data){
 		
 	 	game.notes[data.id].removed = true;
-			
+		io.sockets.emit('noteGot', {number: data.id});
+
 	});
 	
     socket.on('depLog', function(data){
@@ -150,10 +149,11 @@ io.sockets.on('connection', function(socket) {
     socket.on('chopTree', function(data){
 		
 	 	game.trees[data.id].removed = true;
-			
+		io.sockets.emit('treeChopped', {number: data.id});
+
 	});
 	
-   socket.on('move_input', function(data){
+	socket.on('move_input', function(data){
 
    	var dummy = {};
 	var player = game.findPlayerByName(data.name);
@@ -193,14 +193,14 @@ io.sockets.on('connection', function(socket) {
  
   });
   
-  socket.on("give_power", function(data){
+	socket.on("give_power", function(data){
 	  
 		var player = game.findPlayerByName(data.name);
 
-		player[data.power] = true;
+		player.powers[data.power] = true;
 	
   });
-
+  
 /*
   
 	socket.on('changeteam', function(data){

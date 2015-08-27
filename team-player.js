@@ -37,12 +37,16 @@ module.exports = function(game){
 		this.slashing = false;
 		this.character = Math.floor((Math.random() * 3) + 1);
 		
+		this.powers = {};
+
 		this.canDisguise = false;
 		this.swordBearer = false;
 		this.chosenOne = false;
-		this.PAPABEAR = false;
+		this.hasPapa = false;
+		this.hasSword = false;
 		
 		this.dead = false;
+		
 		
 		this.chatting = false;
 		this.chatText =  "";

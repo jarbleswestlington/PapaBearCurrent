@@ -17,13 +17,30 @@
 			position:fixed;
 			top:0px;
 			z-index:1;
+			
+		}
+		
+		#chatView {
+		
+			position:fixed;
+			top:35%;
+			z-index:2;
+			left:20%;
+			width:60%;
+			display:none;
+			padding:3px;
+			background-color:black;
 		}
 
+		#chatInput{
+			width:100%;
+		}
        </style>
        <script src='//code.jquery.com/jquery-1.7.2.min.js'></script>
 		<script src="/socket.io/socket.io.js"></script>
    </head>
    <body>
+   <div id = "chatView"><input type = "text" id = "chatInput"></div>
     <br>
          <script src="/js/game.js"></script>
        <div class = "infobox"></div>

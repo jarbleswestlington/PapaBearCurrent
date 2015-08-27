@@ -65,13 +65,21 @@ var game = {
 	timeLimit:720,
 	currentSec:0,
 	server:null,
-	client:{}
+	client:{
+		trees:[],
+		notes:[]
+	}
+};
+
+game.getCurrentSec = function(){
+	
+	return this.currentSec;
 };
 
 game.forAllTrees = function(func){
 
-	for(var i = 0; this.server.trees.length; i++){
-		func(this.server.trees[i].length);
+	for(var i = 0; this.client.trees.length; i++){
+		func(this.client.trees[i].length);
 	}
 }
 
@@ -209,11 +217,11 @@ user.interactWTree = function(){
 	
 	if(!this.server.hasPapa){
 	
-		for(var i = 0; i < game.server.trees.length; i++){
+		for(var i = 0; i < game.client.trees.length; i++){
 			
-			if(game.server.trees[i].removed == false && !this.server.dead){
+			if(game.client.trees[i].removed == false && !this.server.dead){
 			
-				if(game.checkCollision(this.server, game.server.trees[i], 41, 36, 78, 78, -25, -25)){
+				if(game.checkCollision(this.server, game.client.trees[i], 41, 36, 78, 78, -25, -25)){
 			
 					renderer.treeText = true;		
 		
@@ -233,36 +241,40 @@ user.interactWTree = function(){
 
 user.interactWNote = function(){
 	//messages
+	
 	if(this.server.hasPapa == false){
 
-		for (var z = 0; z < game.server.notes.length; z++){
-			
-			if(game.server.notes[z].removed == false){
-		
-				if (game.checkCollision({x: game.server.notes[z].x + 29, y: game.server.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)){
+		for (var z = 0; z < game.client.notes.length; z++){
+						
+			if(game.client.notes[z].removed == false){
+						
+				if (game.checkCollision({x: game.client.notes[z].x + 29, y: game.client.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)){
 					
 					var chance = Math.floor(Math.random() * 100);
 					
 					var probability = 1;
-					/*
+					
+					//customize this
 					if(chance < 50){
 						probability = 1;	
 					}else{
-						probability = 2;
+						probability = 1;
 					}
-					*/
+					
 					
 					var notes = noteIndex[probability].filter(function(note){
 						return note.condition();
 					});
 								
-					renderer.currentNote = notes[Math.floor(Math.random() * notes.length)];
+					var random = Math.floor(Math.random() * notes.length);
+
+					renderer.currentNote = notes[random];
 
 					renderer.showNote = true;
 					
-					renderer.currentNote.func.apply(null, renderer.currentNote.args)
+					if(renderer.currentNote.func) renderer.currentNote.func.apply(this, renderer.currentNote.args)
 
-					getNote(z);
+					this.getNote(z);
 					
 				}
 
@@ -291,8 +303,8 @@ user.stealWood = function(team){
 }
 
 user.chopTree = function(treeId){
-		
-	if(this.log.has == false){
+	
+	if(!this.log.has){
 		
 		this.log.has = true;
 		
@@ -300,6 +312,7 @@ user.chopTree = function(treeId){
 		
 		this.log.wood = 50;
 		
+		game.client.trees[treeId].removed = true;
 	    socket.emit('chopTree', {id: treeId});
 				
  	}
@@ -308,6 +321,7 @@ user.chopTree = function(treeId){
 
 user.getNote = function(noteId){
 			
+	game.client.notes[noteId].removed = true;
 	socket.emit('getNote', {id: noteId});
 		
 };
@@ -317,7 +331,7 @@ user.depLog = function(){
 	if(this.log.has){
 		
 		this.log.has = false;
-
+		console.log('depositing');
 	   	socket.emit('depLog', {team: this.server.team, amount: this.log.wood});
 	
 	}
@@ -553,7 +567,7 @@ chatController.submit = function(){
 	
 	$('#chatInput').attr('value','');
 	
-	socket.emit("sendChat", {message: chatMessage, user: user.name});
+	if(chatMessage != "") socket.emit("sendChat", {message: chatMessage, name: user.name});
 	
 }
 
@@ -670,7 +684,7 @@ var Note = function(lines, options){
 		
 		this.condition = function(){
 			
-			return options.condition > game.currentSec;
+			return game.getCurrentSec() >= options.condition;
 		};
 		
 	}else{
@@ -688,11 +702,9 @@ var Note = function(lines, options){
 		this.args = options.action.args;
 	} 
 	
-	if(noteIndex[options.probability]) noteIndex[options.prob].push(this);
+	if(noteIndex[options.prob]) noteIndex[options.prob].push(this);
 	else noteIndex[options.prob] = [this];
 	
-	console.log(noteIndex);
-
 }
 
 game.client.notes = [ new Note(["If you manage to steal your opponent's wood, there is a considerable payoff."], {prob: 1, condition: 0}),
@@ -783,17 +795,17 @@ renderer.draw["game"] = function () {
 	}
 	
 	//trees
-	for(var i = 0; i < game.server.trees.length; i++){
+	for(var i = 0; i < game.client.trees.length; i++){
 		
-		var tree = game.server.trees[i];
+		var tree = game.client.trees[i];
 		if(!tree.removed) this.drawSprite('pines', tree.x - 9, tree.y - 9, treeSpriteFinder[tree.treeNum]);
 
 	}
 	
 	//notes
-	for(var i =0; i< game.server.notes.length; i++){
-		if(!game.server.notes[i].removed) {
-			this.drawRect("rgb(0,0,180)", game.server.notes[i].x + 29, game.server.notes[i].y + 29);
+	for(var i =0; i< game.client.notes.length; i++){
+		if(!game.client.notes[i].removed) {
+			this.drawRect("rgb(0,0,180)", game.client.notes[i].x + 29, game.client.notes[i].y + 29, 20, 20);
 		}
 	}
 		
@@ -880,24 +892,24 @@ renderer.draw["game"] = function () {
 	//show respawn text
 	if(user.server.dead) ctx.fillText("You will respawn soon", window.innerWidth/8, 325);	
 	
+	//time limit
+	if(game.currentSec > game.timeLimit - 100) ctx.fillStyle = "rgb(255,0,0)";
+	else ctx.fillStyle = "rgb(0,0,0)";
+
+	ctx.fillText((game.timeLimit - game.currentSec) + " Seconds Left", 50, 80);
+	
 	//show note text
 	if(this.showNote){
 		
-		ctx.font = '20px Calibri';
+		ctx.font = '28px Calibri';
 
-		this.currentNote.forEach(function(line, i){
+		this.currentNote.lines.forEach(function(line, i){
 			
 			ctx.fillText(line, window.innerWidth/8, 200 + (i*25));
 			
 		}.bind(this));
 	
 	}
-	
-	//time limit
-	if(game.currentSec > game.timeLimit - 100) ctx.fillStyle = "rgb(255,0,0)";
-	else ctx.fillStyle = "rgb(0,0,0)";
-
-	ctx.fillText((game.timeLimit - game.currentSec) + " Seconds Left", 50, 80);
 		
 };
 
@@ -975,10 +987,12 @@ socket.on('name_confirmed', function(data) {
 socket.on('startgame_client', function(data) {
 
 	game.server = data.game;
-	console.log("game started");
-
+	game.client.trees = data.trees;
+	game.client.notes = data.notes;
 	game.started = true;
-		
+	
+	console.log("game started by server");
+	
 });
 
 socket.on('stealTotal', function(data) {
@@ -1010,6 +1024,18 @@ socket.on("death", function(data){
 	}
 
 })
+
+socket.on('treeChopped', function(data) {
+		
+	game.client.trees[data.number].removed = true;
+
+});
+
+socket.on('noteGot', function(data) {
+
+	game.client.notes[data.number].removed = true;
+		
+});
 
 $(document).ready(function() {
 

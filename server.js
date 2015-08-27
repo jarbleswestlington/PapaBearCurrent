@@ -37,6 +37,12 @@ Game.prototype.update = function(io) {
 	//process.nextTick(function(){ this.update(io) }.bind(this) );
 }
 
+Game.prototype.start = function(io){
+	
+	io.sockets.emit("startgame_client", {game: game, trees:game.trees, notes: game.notes});
+
+}
+
 Game.prototype.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
 
    if( (item.x >= shark.x + paddingX && item.x <= shark.x + sharkWidth - paddingX) || (item.x + itemWidth >= shark.x + paddingX && item.x + itemWidth <= shark.x + sharkWidth - paddingX) ){
