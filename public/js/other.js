@@ -1,3 +1,9 @@
+	this.hwidth = 45;
+	this.hheight = 7;
+	this.vwidth = 7;
+	this.vheight = 45;
+	
+	
 	if(!oPlayer.dead && !oPlayer.PAPABEAR){
 		
 		if (player.direction == "U"){

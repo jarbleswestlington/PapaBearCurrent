@@ -1,13 +1,8 @@
-//for all players
-//make sure all images are same image
-//make sure server and client are like doing things correclty i guess -- not sure how they interact now
-
-
 //connect to sockets on server
 var socket = io.connect(window.location.hostname);
 socket.on('connect', function(data) {
 
-	socket.emit("confirm_name", {user.name})
+	socket.emit("confirm_name", {name: user.name})
 	
 });
 socket.on('error', function() { console.error(arguments) });
@@ -37,20 +32,22 @@ addEventListener("keyup", function (e) {
 inputManager.masterKeys = function(modifier){			   	
 
 	if(13 in this.keys){
-		socket.emit("startgame_server", {});
+		if(this.pressable.enter){
+			this.pressable.enter = false;
+			socket.emit("startgame_server", {});
+		} 
 	}
-
 	if (38 in this.keys) { // user holding up
-		camera.y += 700 * modifier;
+		renderer.camera.y += 700 * modifier;
 	}
 	if (40 in this.keys) { // user holding down
-		camera.y -= 700 * modifier;
+		renderer.camera.y -= 700 * modifier;
 	}
 	if (37 in this.keys) { // user holding left
-		camera.x += 700 * modifier;	
+		renderer.camera.x += 700 * modifier;	
 	}
 	if (39 in this.keys) { // user holding right
-		camera.x -= 700 * modifier;
+		renderer.camera.x -= 700 * modifier;
 	}
 };
 
@@ -67,10 +64,16 @@ var game = {
 	gameState:"init",
 	timeLimit:720,
 	currentSec:0,
-	server:{},
+	server:null,
 	client:{}
-
 };
+
+game.forAllTrees = function(func){
+
+	for(var i = 0; this.server.trees.length; i++){
+		func(this.server.trees[i].length);
+	}
+}
 
 game.forAllPlayers = function(func){
 	
@@ -109,33 +112,56 @@ game.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, s
    return false;
 }
 
+game.findUser = function(){
+	
+	var playerGot;
+	
+	this.forAllPlayers(function(player){
+
+		if(player.name == user.name) playerGot = player;
+
+	});
+	
+	return playerGot;
+}
+
 var URI = window.location.pathname.split( '/' );
 //setUp users user
 var user = {
-	name: URI[URI.length-1];
+	
+	name: URI[URI.length-1],
 	amount:0,
-	weapon:{
-		has:false;
-		power:false;
-	}
+	dashing:false,
+	dashStart:0,
 	log:{
 		has: false,
 		stolen: false,
 		stolenFrom: "",
 		wood: 0,
-	},
-	dashing:false,
-	dashStart:0,
+	},	
+	
 	server:{
-		attacking:false;
+		x:0,
+		y:0,
+		
+		attacking:false,
+
+		hasPapa:false,
+		hasSword:false,
+		
+		dead:false,
+		weapon:{
+			has:false,
+			power:false,
+		},
+		log:{
+			has: false,
+			stolen: false,
+			stolenFrom: "",
+			wood: 0,
+		},
 	}
-	x:0,
-	y:0,
-	
-	hasPapa = false;
-	hasSword = false;
-	
-	dead = false;
+
 	
 };
 
@@ -147,9 +173,10 @@ user.interactWBase = function(){
 			
 		game.forAllTeams(function(team){
 			
-			if(game.checkCollision(this, team.base, 41, 36, 140, 84, -25, -25)){
+			if(game.checkCollision(this.server, team.base, 41, 36, 140, 84, -25, -25)){
 		
-				if(this.team == team.name){
+				if(this.server.team == team.name){
+				
 				
 					this.depLog();
 				
@@ -163,14 +190,14 @@ user.interactWBase = function(){
 					
 							this.stealWood(team.name);
 						}
-				
+
 					}
 				
 				}
 
 			}
 			
-		});
+		}.bind(this));
 
 	}
 
@@ -180,13 +207,13 @@ user.interactWTree = function(){
 	
 	renderer.treeText = false;
 	
-	if(!this.PAPABEAR){
+	if(!this.server.hasPapa){
 	
 		for(var i = 0; i < game.server.trees.length; i++){
 			
-			if(game.server.trees[i].removed == false && !this.dead){
+			if(game.server.trees[i].removed == false && !this.server.dead){
 			
-				if(game.checkCollision(this, trees[i], 41, 36, 78, 78, -25, -25)){
+				if(game.checkCollision(this.server, game.server.trees[i], 41, 36, 78, 78, -25, -25)){
 			
 					renderer.treeText = true;		
 		
@@ -206,23 +233,24 @@ user.interactWTree = function(){
 
 user.interactWNote = function(){
 	//messages
-	if(this.PAPABEAR == false){
+	if(this.server.hasPapa == false){
 
-		for (var z = 0; z < notes.length; z++){
+		for (var z = 0; z < game.server.notes.length; z++){
 			
 			if(game.server.notes[z].removed == false){
 		
-				if ((game.checkCollision({x: game.server.notes[z].x + 29, y: game.server.notes[z].y + 29}, this, 20, 20, 41, 36, 0, 0))){
+				if (game.checkCollision({x: game.server.notes[z].x + 29, y: game.server.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)){
 					
 					var chance = Math.floor(Math.random() * 100);
 					
-					var probability;
-					
+					var probability = 1;
+					/*
 					if(chance < 50){
 						probability = 1;	
 					}else{
 						probability = 2;
 					}
+					*/
 					
 					var notes = noteIndex[probability].filter(function(note){
 						return note.condition();
@@ -235,8 +263,8 @@ user.interactWNote = function(){
 					renderer.currentNote.func.apply(null, renderer.currentNote.args)
 
 					getNote(z);
+					
 				}
-
 
 			}
 			
@@ -262,7 +290,7 @@ user.stealWood = function(team){
 	
 }
 
-user.chopTree = function(treename){
+user.chopTree = function(treeId){
 		
 	if(this.log.has == false){
 		
@@ -272,15 +300,15 @@ user.chopTree = function(treename){
 		
 		this.log.wood = 50;
 		
-	    socket.emit('chopTree', {name: treename});
+	    socket.emit('chopTree', {id: treeId});
 				
  	}
 		
 };
 
-user.getNote = function(notename){
+user.getNote = function(noteId){
 			
-	socket.emit('getNote', {name: notename});
+	socket.emit('getNote', {id: noteId});
 		
 };
 
@@ -290,7 +318,7 @@ user.depLog = function(){
 		
 		this.log.has = false;
 
-	   	socket.emit('depLog', {team: this.team, amount: this.log.wood});
+	   	socket.emit('depLog', {team: this.server.team, amount: this.log.wood});
 	
 	}
 };
@@ -328,7 +356,7 @@ user.move = function(modifier){
 		
 		if(this.dashing){
 			
-			this.amount = amount * 5;
+			this.amount = this.amount * 5;
 		}
 		
 		socket.emit('move_input', {direction: this.direction, name: this.name, amount: this.amount});
@@ -344,17 +372,18 @@ var renderer = {
 		y:0
 	},
 	
+	state : "init",
 	treeText: false,
 	stealText: false,
 
-	currentNote : {};
+	currentNote : {},
 	
 	showNote: false,
 };
 
 renderer.upload = function(src){
 	var newImg = new Image();
-	newImg.src = "images/" + ref + ".png";
+	newImg.src = "/images/" + src + ".png";
 	this.refs[src] = newImg;
 	this.refs[src].onload = function(){
 		
@@ -364,9 +393,8 @@ renderer.upload = function(src){
 }
 
 //upload all images
-[
-"usershadow",
-"bear",
+var imageArray = ["bear",
+"playershadow",
 "swordR",
 "swordL",
 "swordD",
@@ -384,25 +412,39 @@ renderer.upload = function(src){
 "pines",
 "bluecorpse",
 "redcorpse",
-"greencorpse",
-].forEach(function(image){
+"greencorpse"];
+
+imageArray.forEach(function(image){
 	renderer.upload(image);
-})
+});
 
 renderer.updateCamera = function(){
 	
-	this.camera.y = canvas.height/2 - users.y;
-	this.camera.x = canvas.width/2 - users.x;
-}
+	this.camera.y = canvas.height/2 - user.server.y;
+	this.camera.x = canvas.width/2 - user.server.x;
+};
 
 renderer.drawImage = function(image, coordX, coordY){
 	
-	ctx.drawImage(this.refs[image], coordX + this.camera.x, coordY + this.camera.y)
+	ctx.drawImage(this.refs[image], coordX + this.camera.x, coordY + this.camera.y);
 };
 
-renderer.drawSprite(image, coordX, coordY, sprite){
+renderer.drawSprite= function(image, coordX, coordY, sprite){
 	
-	ctx.drawImage(this.refs[image], sprite.x, sprite.y, sprite.width, sprite.height, coordX + this.camera.x, coordY + this.camera.y)
+	ctx.drawImage(this.refs[image], sprite.x, sprite.y, sprite.width, sprite.height, coordX + this.camera.x, coordY + this.camera.y, sprite.width, sprite.height
+	);
+
+};
+
+renderer.drawRect= function(color, coordX, coordY, width, height){
+	
+	ctx.fillStyle = color;
+	ctx.fillRect(coordX + this.camera.x, coordY + this.camera.y, width, height);
+};
+	
+renderer.fillText = function(text, coordX, coordY){
+
+	ctx.fillText(text, coordX + this.camera.x, coordY + this.camera.y);
 
 }
 
@@ -422,7 +464,7 @@ renderer.draw["wait"] = function(){
 	ctx.textAlign = "left";
    
 	
-	 ctx.fillText("There are three villages. You are " + user.name + " of the " + user.team + " village.", 100, 120);
+	 ctx.fillText("There are three villages. You are " + user.name + " of the " + user.server.team + " village.", 100, 120);
 
 	 ctx.fillText("Only one village will survive this harsh winter, so you must stockpile as much wood as you can.", 100, 160);
 
@@ -444,7 +486,7 @@ renderer.draw["score"] = function(){
 	var y = 100;
 	game.forAllTeams(function(team){
 			
-		ctx.fillText(team.name" : " + team.score , window.innerWidth/4, y+=100);
+		ctx.fillText(team.name + " : " + team.score , window.innerWidth/4, y+=100);
 			
 	});
 
@@ -455,14 +497,14 @@ renderer.draw["end"] = function(){
 
 }
 
-renderer.animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.mozRequestAnimationFrame;
+var animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.mozRequestAnimationFrame;
 
 renderer.hasLoaded = function(){
 	
 	//scroll through all images
 	for(var image in this.refs){
 		//check if loaded
-		if(this.refs.hasOwnProperty(image){
+		if(this.refs.hasOwnProperty(image)){
 			
 			if(!this.refs[image].loaded) return false;
 		}
@@ -480,10 +522,7 @@ function getRandomArbitrary( numone,  numtwo) {
 	return Math.floor(Math.random() * (numtwo - numone) + 1);
 }
 
-var chatController = {
-	
-	this.started = false;
-};
+var chatController = { started:false };
 
 chatController.process = function(){
 	if(!this.started){
@@ -579,14 +618,17 @@ inputManager.processInput = function(){
 	else user.action = false;
 	//equip sword
 	if (75 in inputManager.keys) {		
-		if(inputManager.pressable.k && user.weapon.has == true){
+		if(inputManager.pressable.k && user.server.weapon.has == true){
 			inputManager.pressable.k = false;
 			
-			if (user.attacking == false) {
-
-			    socket.emit('arm', {name: user.name armed: true});
+			if (user.server.attacking == false) {
+				
+				user.server.attacking = true;
+			    socket.emit('arm', {name: user.name, armed: true});
 
 			}else {
+				
+				user.server.attacking = false;
 			    socket.emit('arm', {name: user.name, armed: false});
 			}
 		}
@@ -605,8 +647,7 @@ inputManager.processInput = function(){
 	
 	//special ability: change color
 	if (77 in inputManager.keys) { // change color of character
-		if (users[username].canDisguise == true){// has ability
-		
+		if (user.server.canDisguise == true){// has ability
 			//pick team
 			if (66 in inputManager.keys) {
 				socket.emit('changeteam', {name: user.name, canDisguise: false, team: "blue"});
@@ -640,24 +681,27 @@ var Note = function(lines, options){
 	
 	this.lines = lines;
 
-	this.probability = options.probability;
+	this.probability = options.prob;
 	
-	this.func = options.action.func;
-	this.args = options.action.args;
+	if(options.action){
+		this.func = options.action.func;
+		this.args = options.action.args;
+	} 
 	
-	if(noteIndex[options.probability]) noteIndex[options.probability].push(this);
-	else noteIndex[options.probability] = [this];
+	if(noteIndex[options.probability]) noteIndex[options.prob].push(this);
+	else noteIndex[options.prob] = [this];
+	
+	console.log(noteIndex);
+
 }
 
-game.client.notes = [
-
- new Note(["If you manage to steal your opponent's wood, there is a considerable payoff."], 1, 0),
+game.client.notes = [ new Note(["If you manage to steal your opponent's wood, there is a considerable payoff."], {prob: 1, condition: 0}),
  
- new Note(["Press Z to dash forward"], {prob: 1, condition: 0})),
+ new Note(["Press Z to dash forward"], {prob: 1, condition: 0}),
  
- new Note(["Press ENTER to chat with nearby users"], {prob: 1, condition: 0})),
+ new Note(["Press ENTER to chat with nearby users"], {prob: 1, condition: 0}),
  
- new Note(["You can now press 'k' to wield a deadly weapon."], 1, 0, {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
+ new Note(["You can now press 'k' to wield a deadly weapon."], {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
  
  new Note(["You have picked up a knife. Press 'k' to use it, but be careful where you point it."], {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
 
@@ -665,12 +709,8 @@ game.client.notes = [
 
  new Note(["Appearances can be deceiving...stay on guard"], {prob: 1, condition: 0}),
  
- new Note(["You have picked up a disguise. Hold 'm' and then", "press r,g or b to impersonate another team."],{prob: 1, condition: 0, action:{func: user.givePower, args: "weapon"}}),
+ new Note(["You have picked up a disguise. Hold 'm' and then", "press r,g or b to impersonate another team."],{prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}), ];
 
-
-];
-
-// Update game objects
 game.update = function (modifier) {
 	
 	user.move(modifier);
@@ -686,11 +726,11 @@ renderer.draw['clear_frame'] = function(){
 	ctx.fillStyle = "rgb(105,175,105)";
 	ctx.fillRect(0,0, canvas.width, canvas.height);
 }
-// Draw everything
+
 renderer.draw["game"] = function () {
 	
 	ctx.fillStyle = "rgb(255,255,255)";
-	
+		
 	//tiled background
 	for(var x = 0; x < 6; x++){
 	
@@ -720,7 +760,7 @@ renderer.draw["game"] = function () {
 			
 			y = -Math.floor(row) * 26;
 			
-			this.drawImage("pile", (team.baseX - 53) + x, (team.baseY + 61));
+			this.drawImage("pile", (team.baseX - 53) + x, (team.baseY + 61) + y);
 		}
 		
 		//actual base
@@ -730,7 +770,7 @@ renderer.draw["game"] = function () {
 		ctx.fillStyle = "white";
 		ctx.font="11px Georgia";
 		
-		ctx.fillText(team.score, team.baseX - 3, team.baseY + 65);
+		this.fillText(team.score, team.baseX - 3, team.baseY + 65);
 		
 	}.bind(this));
 
@@ -742,28 +782,29 @@ renderer.draw["game"] = function () {
 		4:{x:115, y:132, width:111, height:131},
 	}
 	
-	for(i =0; i< game.server.trees.length; i++){
+	//trees
+	for(var i = 0; i < game.server.trees.length; i++){
 		
-		if(!game.server.trees[i].removed) this.drawSprite('pines', trees[i].x - 9, trees[i].y - 9, treeSpriteFinder[game.server.trees[i].treeNum]);
-		
+		var tree = game.server.trees[i];
+		if(!tree.removed) this.drawSprite('pines', tree.x - 9, tree.y - 9, treeSpriteFinder[tree.treeNum]);
+
 	}
 	
 	//notes
-	ctx.fillStyle = "rgb(0,0,180)";
-	for(i =0; i< game.server.notes.length; i++){
-		
-		if(!game.server.notes[i].removed) this.drawImage('note', game.server.notes[i].x + 29, game.server.notes[i].y + 29);
-		
+	for(var i =0; i< game.server.notes.length; i++){
+		if(!game.server.notes[i].removed) {
+			this.drawRect("rgb(0,0,180)", game.server.notes[i].x + 29, game.server.notes[i].y + 29);
+		}
 	}
 		
 	game.forAllPlayers(function(player){
 		//shadows
-		this.drawImage("usershadow", player.x -1 , player.y + 11);
+		this.drawImage("playershadow", player.x -1 , player.y + 11);
 
 		//CHARACTER DRAWING
 		if(player.dead){
 			
-			this.drawImage(player.team.name + "Corpse", player.x- 4, player.y);
+			this.drawImage(game.server[player.team].name + "Corpse", player.x- 4, player.y);
 		
 		}else if(player.PAPABEAR){
 			
@@ -785,7 +826,7 @@ renderer.draw["game"] = function () {
 				"U":{x:2 + ((player.character-1) * 43), y:113, width:41, height:36},
 			}
 			
-			this.drawSprite(player.team.name + "team", player.x,player.y, playerSpriteFinder[player.direction]);
+			this.drawSprite(game.server.teams[player.team].name + "team", player.x,player.y, playerSpriteFinder[player.direction]);
 	
 		}
 		
@@ -805,7 +846,6 @@ renderer.draw["game"] = function () {
 		
 			if (player.attacking && player.PAPABEAR == false){
 				//SWORD DRAWING		
-				ctx.fillStyle = "rgb(200,200,200)";
 				
 				var swordHelper = {
 					"U":{x: 36, y: -22},
@@ -814,7 +854,7 @@ renderer.draw["game"] = function () {
 					"L":{x:-26, y:22},
 				}
 				
-				ctx.fillRect(player.x + swordHelper[player.direction].x, player.y + swordHelper[player.direction].y, player.weapon.vwidth, player.weapon.vheight);	
+				this.drawRect("rgb(200,200,200)", player.x + swordHelper[player.direction].x, player.y + swordHelper[player.direction].y, player.weapon.vwidth, player.weapon.vheight);	
 			}		
 		
 		}	
@@ -822,7 +862,7 @@ renderer.draw["game"] = function () {
 		//chat drawing
 		ctx.font = '20px Calibri';
 		ctx.fillStyle = "rgb(255,255,0)";
-		if(player.chatting) ctx.fillText(player.chatText, player.x - 40  , player.y - 20  );
+		if(player.chatting) this.fillText(player.chatText, player.x - 40, player.y - 20);
 	
 	}.bind(this));
 	
@@ -838,7 +878,7 @@ renderer.draw["game"] = function () {
 	if(this.stealText) ctx.fillText("Press space to steal wood!", window.innerWidth/4, window.innerHeight - 100);
 		
 	//show respawn text
-	if(user.dead) ctx.fillText("You will respawn soon", window.innerWidth/8, 325);	
+	if(user.server.dead) ctx.fillText("You will respawn soon", window.innerWidth/8, 325);	
 	
 	//show note text
 	if(this.showNote){
@@ -896,9 +936,9 @@ game.stateManager = function () {
 	}
 	   
 
-	if(game.state == "game"){
+	if(game.state == "game" && game.server){
   
-	    if(!user.name = "master"){	
+	    if(user.name != "master"){	
 			inputManager.processInput();
 			game.update(delta / 1000);	
 		} 
@@ -918,21 +958,24 @@ game.stateManager = function () {
 
 	}
 	
-	if(renderer.draw[renderer.state]) renderer.draw[renderer.state]();
+	if(renderer.draw[renderer.state]) renderer.draw[renderer.state].call(renderer);
 	
 	this.then = now;
 
-	renderer.animate(this.stateManager);
-     
+	animate(game.stateManager);
+	//renderer.animate.bind(window, game.stateManager);
+	     
 };
-
 
 socket.on('name_confirmed', function(data) {
 	user.name = data.name;
 	user.confirmed = true;
 });
 
-socket.on('startgame', function(data) {
+socket.on('startgame_client', function(data) {
+
+	game.server = data.game;
+	console.log("game started");
 
 	game.started = true;
 		
@@ -947,6 +990,7 @@ socket.on('stealTotal', function(data) {
 socket.on('update_clients', function(data) {
 
 	game.server = data.game;
+	if(user.name !== "master") user.server = game.findUser();
 	game.currentSec = data.time;
 		
 });
@@ -967,7 +1011,7 @@ socket.on("death", function(data){
 
 })
 
-$(document).load(function() {
+$(document).ready(function() {
 
 	game.state = 'loading';
 	

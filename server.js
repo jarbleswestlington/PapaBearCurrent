@@ -3,7 +3,7 @@ function getRandomInt(min, max) {
 }
 
 var Game = function(){
-
+	
 	this.teams = {};
 	this.check = [];
 	this.illegal = [];
@@ -27,14 +27,14 @@ var Game = function(){
 	this.sockets = {};
 };
 
-Game.prototype.update(io) {
+Game.prototype.update = function(io) {
 			
 	var now = new Date().getTime() / 1000;
-	game.currentSec = Math.floor(now - startsecond);
+	this.currentSec = Math.floor(now - this.startsecond);
 
-	io.sockets.emit('update_clients', {game: game, time: game.currentSec});
-
-	process.nextTick(function(){ game.update(io) } );
+	io.sockets.emit('update_clients', {game: this, time: this.currentSec});
+	
+	//process.nextTick(function(){ this.update(io) }.bind(this) );
 }
 
 Game.prototype.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
@@ -60,10 +60,16 @@ Game.prototype.forAllTeams = function(func){
 
 }
 
+Game.prototype.forAllTrees = function(func){
+	
+	this.trees.forEach(function(tree){
+		if(tree.removed == false) func(tree);
+	})
+}
+
 Game.prototype.forAllPlayers = function(func){
-
+	
 	for(var name in this.teams){
-
 		for(var i = 0; i < this.teams[name].players.length; i++){
 
 			func(this.teams[name].players[i]);
@@ -109,7 +115,6 @@ Game.prototype.spawnNotesAndTrees = function(){
 				if(chance <= 65){
 				
 					this.trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
-				
 				
 				}
 				if(chance > 65 && chance <= 68){
@@ -183,11 +188,7 @@ Game.prototype.addPlayer = function(name, master){
 		
 	if(master){
 		
-		var joiningPlayer = {name: name, team: this};
-
-		joiningPlayer.team = this;
-		
-		this.master = new Player(joiningPlayer);
+		var joiningPlayer = {name: name, team: "master"};
 
 	}else{ 
 		
@@ -225,14 +226,16 @@ Game.prototype.addPlayer = function(name, master){
 
 Game.prototype.findPlayerByName = function(name){
 
-	return this.forAllPlayers(function(player){
+	var playerGot;
+		
+	this.forAllPlayers(function(player){
 
-		if(player.name = name) return player;
+		if(player.name == name) playerGot = player;
 
-	})
-
-	return false;
-}
+	});
+	
+	return playerGot;
+};
 
 Game.prototype.hasPlayer = function(name){
 
@@ -240,265 +243,4 @@ Game.prototype.hasPlayer = function(name){
 	else return false;
 }
 
-var Team = function(game, name, coord){
-	
-	this.score = 0;
-	this.name = name;
-	this.players = [];
-	this.baseX = coord.x;
-	this.baseY = coord.y;
-	this.base = coord;
-
-	game.teams[name] = this;
-};
-
-Team.prototype.addPlayer = function(name){
-	
-	var newPlayer = new Player({name: name, team: this});
-	
-	newPlayer.spawn();
-	
-	this.players.push(newPlayer);
-}
-
-var Weapon (owner, horiz, vertic){
-	
-	this.owner = owner;
-	this.hwidth = horiz.width,
-	this.hheight = horiz.height,
-	this.vwidth = vertic.width,
-	this.vheight = vertic.height,
-	
-	this.getWidth = function(){
-		if (this.owner.direction == "U" || this.owner.direction == "D"){
-			return this.vwidth;
-		}else if (this.owner.direction == "L" || this.owner.direction == "R"){
-			return this.hwidth;
-		}
-	},
-	this.getHeight: function(){
-		if (this.owner.direction == "U" || this.owner.direction == "D"){
-			return this.vheight;
-		}else if (this.owner.direction == "L" || this.owner.direction == "R"){
-			return this.hheight;
-		}
-	}
-	
-}
-
-Weapon.prototype.toPower(){
-	
-	this.hwidth = 45;
-	this.hheight = 7;
-	this.vwidth = 7;
-	this.vheight = 45;
-}
-
-
-var Player = function(args){
-	
-	this.x = 0;
-	this.y = 0;
-	this.team = args.team;
-	this.renderteam = args.team;
-	this.name = args.name;
-	this.direction = "D";
-	
-	this.attacking = false;
-	this.slashing = false;
-	this.character = Math.floor((Math.random() * 3) + 1);
-	
-	this.canDisguise = false;
-	this.swordBearer = false;
-	this.chosenOne = false;
-	this.PAPABEAR = false;
-	
-	this.dead = false;
-	
-	this.chatting = false;
-	this.chatText =  "";
-	this.illegal = false;
-	
-	this.weapon = new Weapon(this, {width:30, height:5}, {width:5, height:30});
-
-};
-
-
-
-
-Player.prototype.spawn = function(func){
-
-	var spawnCoords = {};
-	var free = true;
-
-	function getXY(){
-
-		var spawnX = 0;
-
-		var spawnY = 0;
-
-		if (this.team.name == "blue") {
-
-			spawnX = 1300 + (100 * Math.random() * 4);
-
-			spawnY = 1300 + (100 * Math.random() * 4);
-
-		}else if (this.team.name == "red") {
-
-			spawnX = 3400 - (100 * Math.random() * 4);
-
-			spawnY = 2300 + (100 * Math.random() * 4);
-
-		}else if (this.team.name == "green") {
-
-			spawnX = 1300 + (100 * Math.random() * 4);
-
-			spawnY = 3400 - (100 * Math.random() * 4); 
-
-		}
-
-		return {x: spawnX, y: spawnY};
-	}
-
-
-	do{
-
-		free = true;
-
-		var collision = getXY();
-
-		game.forAllOtherPlayers(this, function(player){
-
-			if(player !== this){
-
-				if(checkCollision(collision, player, 41, 36, 41, 36, 0, 0)){
-				
-					free = false;
-		
-				}
-
-			}
-
-		});
-		
-	}while(!free);
-
-	if(!func){
-
-		this.x = collision.x;
-		this.y = collision.y;
-
-	}else{
-
-		func(collision);
-	}
-
-}
-
-Player.prototype.checkCollisions = function(dummy){
-	
-	var illegal = false;
-	
-	if(!this.PAPABEAR){
-	
-		game.forAllOtherAlivePlayers(this, function(oPlayer){
-					
-   			if(!oPlayer.PAPABEAR && game.checkCollision(dummy, oPlayer, 41, 36, 41, 36, 0, 0)){
-			
-   				illegal = true;
-					
-			}
-			
-		});
-	
-	}
-		
-   	for(i = 0; i < game.trees.length; i++){
-		
-		if(game.trees[i].removed == false){
-		
-			if(this.PAPABEAR){
-			
-				if(game.checkCollision(dummy, game.trees[i], 63, 63, 78, 78, 0, 0)){
-		
-					illegal = true;
-			
-				}
-		
-			}else{
-			
-				if(game.checkCollision(dummy, game.trees[i], 41, 36, 78, 78, 0, 0)){
-		
-					illegal = true;
-			
-				}
-			}
-		
-		}
-		
-   	}
-	
-   	if(!illegal){
-		
-		this.x = dummy.x;
-		this.y = dummy.y;
-		
-   	}
-	
-	
-}
-
-
-
-Player.prototype.checkHits = function(){
-	
-	var hit = false;
-	
-	game.forAllOtherAlivePlayers(this, function(oPlayer){
-
-		if(this.PAPABEAR){
-						
-			if(game.checkCollision(oPlayers, this, 41, 36, 63, 63, 0, 0)) hit = true;
-
-		}
-		
-		if(this.attacking){
-			
-			var directions = {
-				U:{x: 36,y: -22},
-				D:{x:0,y:20},
-				R:{x:36,y:22},
-				L:{x:-26,y:+22}
-			}
-			
-			if(game.checkCollision({x: this.x + directions[this.direction].x, y: this.y + directions[this.direction].x}, oPlayer, this.weapon.getWidth(), this.weapon.getHeight(), oPlayer.PAPABEAR ? 41 + game.bearX : 41, oPlayer.PAPABEAR ? 36 + game.bearX : 36, 0, 0)) hit = true;
-	
-		}		
-		
-		if(hit){
-	
-			oPlayer.dead = true;
-
-			game.sockets[oPlayer.name].emit("death", {});
-
-			oPlayer.spawn(function(spawn){
-
-				setTimeout(function() { 
-					oPlayer.x = spawn.x;
-					oPlayer.y = spawn.y;
-					oPlayer.dead = false;
-					oPlayer.PAPABEAR = false;
-					
-				 }, 8000);
-
-			});
-		
-		}
-		
-	}.bind(this));
-
-}
-
-
-
-module.exports = {game: Game, player: Player, team: Team};
+module.exports = Game;

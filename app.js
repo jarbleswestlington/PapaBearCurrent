@@ -1,13 +1,13 @@
 var http = require('http'),
 express = require("express"),
 app = express(),
-fs   = require('fs'),
-Game = require('./server.js').game;
-Player = require('./server.js').player;
-Team = require('./server.js').team;
+fs   = require('fs');
 
 //setUp game
-var game = new Game();
+var Game = require('./server.js');
+game = new Game();
+var Team = require('./team-player.js')(game).Team;
+var Player = require('./team-player.js')(game).Player;
 
 game.spawnNotesAndTrees();
 
@@ -28,7 +28,11 @@ app.get('/player/:name', function (req, res){
 
    var pName = req.params.name;
    
-   if(!game.hasPlayer(pName)) game.addPlayer(pName, pName == "master" ? true : false);
+   if(!game.hasPlayer(pName)){
+	   
+	  // console.log("wouldnt have run");
+   }
+   game.addPlayer(pName, pName == "master" ? true : false);
 
    res.write(index);
 
@@ -38,21 +42,27 @@ app.get('/player/:name', function (req, res){
 
 //setUp sockets
 var server = app.listen(process.env.PORT || 3000);
-var io = require('socket.io').listen(server);
+var io = require('socket.io').listen(server, { log: false });
+io.set('log level', 1);
+
+var elephant = {};
 
 io.sockets.on('connection', function(socket) {
 
-	if(game.started == true){
+	if(game.state == "started"){
 		
-    	socket.emit('startgame_client', game);
+		console.log("started game on " + socket.id)
+    	socket.emit('startgame_client', {game:game});
 	  
 	}
 	
 	socket.on("confirm_name", function(data){
 		
-		game.sockets[data.name] = socket;
+		console.log("confirmed name: "+data.name+" on " + socket.id)
+
+		elephant[data.name] = socket;
 		
-		game.sockets[data.name].emit("name_confirmed", {name: data.name});
+		elephant[data.name].emit("name_confirmed", {name: data.name});
 		
 	});
 
@@ -61,8 +71,13 @@ io.sockets.on('connection', function(socket) {
 		game.startsecond = new Date().getTime() / 1000;
 
 		game.state = "started";	
-		
-		process.nextTick(function(){ game.update(io) } );
+			
+		io.sockets.emit("startgame_client", {game: game});
+
+		console.log("started game on " + socket.id)
+
+		setInterval( game.update.bind(game, io) , 200);
+		//process.nextTick(function(){ game.update(io) } );
 	  
  	});
 
@@ -92,7 +107,7 @@ io.sockets.on('connection', function(socket) {
 	
 	socket.on("sendChat", function(data){
 
-		var player = game.findPlayerByName(data.player.name);
+		var player = game.findPlayerByName(data.name);
 	 
 	 	player.chatText = data.message;
 	 	player.chatting = true;
@@ -105,7 +120,7 @@ io.sockets.on('connection', function(socket) {
 		
     socket.on('arm', function(data){
 
-    	var player = game.findPlayerByName(data.player.name);
+    	var player = game.findPlayerByName(data.name);
 	
 		player.attacking = data.armed;
 	
@@ -119,30 +134,31 @@ io.sockets.on('connection', function(socket) {
 	
 	});
 	
+	
     socket.on('getNote', function(data){
 		
-	 	game.notes[data.number].removed = true;
+	 	game.notes[data.id].removed = true;
 			
 	});
 	
     socket.on('depLog', function(data){
-				
-		game.teams[data.team] += data.amount;
+		
+		game.teams[data.team].score += data.amount;
 			
 	});
 	
-	
     socket.on('chopTree', function(data){
 		
-	 	game.trees[data.number].removed = true;
+	 	game.trees[data.id].removed = true;
 			
 	});
 	
    socket.on('move_input', function(data){
 
    	var dummy = {};
-	var player = game.findPlayerByName(data.player.name);
-	
+	var player = game.findPlayerByName(data.name);
+
+	if(!player) return;
 	dummy.x = player.x;
 	dummy.y = player.y;
 	   	   
@@ -175,6 +191,14 @@ io.sockets.on('connection', function(socket) {
 	player.checkCollisions(dummy);
 	player.checkHits();
  
+  });
+  
+  socket.on("give_power", function(data){
+	  
+		var player = game.findPlayerByName(data.name);
+
+		player[data.power] = true;
+	
   });
 
 /*
