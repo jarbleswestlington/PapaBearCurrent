@@ -27,18 +27,6 @@ var Game = function(){
 	this.sockets = {};
 };
 
-Game.prototype.colCheck = function(smaller, bigger, padding){
-	if( (smaller.x >= bigger.x + padding.x && smaller.x <= bigger.x + bigger.width - padding.x) || (smaller.x + smaller.width >= bigger.x + padding.x && smaller.x + smaller.width <= bigger.x + bigger.width - padding.x) ){
-
-       if( (smaller.y >= bigger.y + padding.y && smaller.y <= bigger.y + bigger.height - padding.y) || (smaller.y + smaller.height >= bigger.y + padding.y && smaller.y + smaller.height <= bigger.y + bigger.height - padding.y) ){
-
-           return true;
-       }
-
-   }
-	
-}
-
 Game.prototype.update = function(io) {
 			
 	var now = new Date().getTime() / 1000;

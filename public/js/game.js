@@ -117,6 +117,7 @@ game.forAllTeams = function(func){
 }
 
 game.colCheck = function(smaller, bigger, padding){
+	
 	if( (smaller.x >= bigger.x + padding.x && smaller.x <= bigger.x + bigger.width - padding.x) || (smaller.x + smaller.width >= bigger.x + padding.x && smaller.x + smaller.width <= bigger.x + bigger.width - padding.x) ){
 
        if( (smaller.y >= bigger.y + padding.y && smaller.y <= bigger.y + bigger.height - padding.y) || (smaller.y + smaller.height >= bigger.y + padding.y && smaller.y + smaller.height <= bigger.y + bigger.height - padding.y) ){
@@ -126,6 +127,13 @@ game.colCheck = function(smaller, bigger, padding){
 
    }
 	
+}
+
+game.colCheckRelative = function(smallerGroup, bigger, padding){
+
+	var smaller = {x: smallerGroup.item.x + smallerGroup.influence.x, y: smallerGroup.item.y + smallerGroup.influence.y, width: smallerGroup.item.width, height: smallerGroup.item.height};
+
+	return this.colCheck(smaller, bigger, padding);
 }
 
 game.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
