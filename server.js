@@ -39,6 +39,7 @@ Game.prototype.update = function(io) {
 
 Game.prototype.start = function(io){
 	
+	console.log(io);
 	io.sockets.emit("startgame_client", {game: game, trees:game.trees, notes: game.notes});
 
 }
@@ -240,13 +241,15 @@ Game.prototype.findPlayerByName = function(name){
 
 	});
 	
-	return playerGot;
+	if(playerGot) return playerGot;
+	else return false;
+	
 };
 
 Game.prototype.hasPlayer = function(name){
 
-	if(!this.findPlayerByName(name)) return true;
-	else return false;
+	if(!this.findPlayerByName(name)) return false;
+	else return true;
 }
 
 module.exports = Game;

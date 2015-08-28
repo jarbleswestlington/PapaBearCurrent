@@ -1,3 +1,11 @@
+//dont send trees
+//socket org -- elephant and all the naming
+//file names/ dependency injections
+//master player
+//spectator
+//collisions with bases
+//work with powers array -- accept one single message that will set the correct power
+
 var http = require('http'),
 express = require("express"),
 app = express(),
@@ -28,11 +36,7 @@ app.get('/player/:name', function (req, res){
 
    var pName = req.params.name;
    
-   if(!game.hasPlayer(pName)){
-	   
-	  // console.log("wouldnt have run");
-   }
-   game.addPlayer(pName, pName == "master" ? true : false);
+   if(!game.hasPlayer(pName)) game.addPlayer(pName, pName == "master" ? true : false);
 
    res.write(index);
 

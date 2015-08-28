@@ -1,3 +1,13 @@
+//render style
+//socket organization
+//html organization
+//make multiple files
+//dashing not working
+//check stealing
+//allow various render contexts
+//pass in any object into a render function//draw function on all objects
+//change key direction from UPLEFTDOWNRIGHT to ULDR for consistency
+
 //connect to sockets on server
 var socket = io.connect(window.location.hostname);
 socket.on('connect', function(data) {
