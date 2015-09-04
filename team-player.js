@@ -28,6 +28,8 @@ module.exports = function(game){
 		
 		this.x = 0;
 		this.y = 0;
+		this.height = 41;
+		this.width = 36;
 		this.team = args.team;
 		this.renderteam = args.team;
 		this.name = args.name;
@@ -74,7 +76,7 @@ module.exports = function(game){
 					return this.weapon.hheight;
 				}
 			}
-			
+			 
 		},
 		
 		this.log = {
@@ -102,6 +104,7 @@ module.exports = function(game){
 			spawnY = game.teams[this.team].baseY + (100 * Math.random() * 4);
 
 			return {x: spawnX, y: spawnY};
+			
 		}.bind(this);
 
 		do{
@@ -138,87 +141,88 @@ module.exports = function(game){
 
 	Player.prototype.checkCollisions = function(dummy){
 	
-	var illegal = false;
-	
-	if(!this.PAPABEAR){
-	
-		game.forAllOtherAlivePlayers(this, function(oPlayer){
-					
-   			if(!oPlayer.PAPABEAR && game.checkCollision(dummy, oPlayer, 41, 36, 41, 36, 0, 0)){
-			
-   				illegal = true;
-					
-			}
-			
-		});
-	
-	}
+		var illegal = false;
 		
-   	for(i = 0; i < game.trees.length; i++){
+		if(!this.powers.papaBear){
 		
-		if(game.trees[i].removed == false){
-		
-			if(this.PAPABEAR){
-			
-				if(game.checkCollision(dummy, game.trees[i], 63, 63, 78, 78, 0, 0)){
-		
+			game.forAllOtherAlivePlayers(this, function(oPlayer){
+						
+				if(!oPlayer.powers.papaBear && game.checkCollision(dummy, oPlayer, 41, 36, 41, 36, 0, 0)){
+				
 					illegal = true;
-			
+						
 				}
-		
-			}else{
-			
-				if(game.checkCollision(dummy, game.trees[i], 41, 36, 78, 78, 0, 0)){
-		
-					illegal = true;
-			
-				}
-			}
+				
+			});
 		
 		}
+			
+		for(i = 0; i < game.trees.length; i++){
+			
+			if(game.trees[i].removed == false){
+			
+				if(this.powers.papaBear){
+				
+					if(game.checkCollision(dummy, game.trees[i], 63, 63, 78, 78, 0, 0)){
+			
+						illegal = true;
+				
+					}
+			
+				}else{
+				
+					if(game.checkCollision(dummy, game.trees[i], 41, 36, 78, 78, 0, 0)){
+			
+						illegal = true;
+				
+					}
+				}
+			
+			}
+			
+		}
 		
-   	}
-	
-   	if(!illegal){
+		if(!illegal){
+			
+			this.x = dummy.x;
+			this.y = dummy.y;
+			
+		}
 		
-		this.x = dummy.x;
-		this.y = dummy.y;
 		
-   	}
-	
-	
-}
+	}
 
 	Player.prototype.checkHits = function(){
-	
-	var hit = false;
-	
+		
 	game.forAllOtherAlivePlayers(this, function(oPlayer){
+		
+		var hit = false;
 
-		if(this.PAPABEAR){
+		if(this.powers.papaBear){
 						
-			if(game.checkCollision(oPlayers, this, 41, 36, 63, 63, 0, 0)) hit = true;
+			if(game.checkCollision(oPlayer, this, 41, 36, 63, 63, 0, 0)) hit = true;
 
 		}
 		
 		if(this.attacking){
 			
 			var directions = {
-				U:{x: 36,y: -22},
-				D:{x:0,y:20},
-				R:{x:36,y:22},
-				L:{x:-26,y:+22}
+				U:{x: 36,y: -22, width:5, height:30},
+				D:{x:0,y:20, width: 5, height:30},
+				R:{x:36,y:22, width: 30, height:5},
+				L:{x:-26,y:+22, width: 30, height:5}
 			}
 			
-			if(game.checkCollision({x: this.x + directions[this.direction].x, y: this.y + directions[this.direction].x}, oPlayer, this.weapon.getWidth(), this.weapon.getHeight(), oPlayer.PAPABEAR ? 41 + game.bearX : 41, oPlayer.PAPABEAR ? 36 + game.bearX : 36, 0, 0)) hit = true;
-	
+			//if(game.colCheckRelative({x: this.x + directions[this.direction].x, y: this.y + directions[this.direction].x}, oPlayer, this.weapon.getWidth(), this.weapon.getHeight(), oPlayer.powers.papaBear ? 41 + game.bearX : 41, oPlayer.powers.papaBear ? 36 + game.bearX : 36, 0, 0)) hit = true;
+			if(game.colCheckRelative({item: directions[this.direction], influencer: this}, oPlayer, {x:0, y:0})) hit = true;
 		}		
 		
 		if(hit){
 	
 			oPlayer.dead = true;
 
-			elephant[oPlayer.name].emit("death", {});
+			console.log(this.name + " killed " + oPlayer.name);
+			game.elephant[oPlayer.name].emit("death", {});
 
 			oPlayer.spawn(function(spawn){
 
@@ -226,7 +230,7 @@ module.exports = function(game){
 					oPlayer.x = spawn.x;
 					oPlayer.y = spawn.y;
 					oPlayer.dead = false;
-					oPlayer.PAPABEAR = false;
+					oPlayer.powers.papaBear = false;
 					
 				 }, 8000);
 

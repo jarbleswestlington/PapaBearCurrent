@@ -18,13 +18,15 @@ var Game = function(){
 	
 	this.started = false;
 
-	this.trees = [];
-	this.notes = [];
 	this.currentTeamMax = 1;
 	
 	this.bearX = 22;
 	this.bearY = 27;
 	this.sockets = {};
+	
+	Object.defineProperty(this, 'trees', {value: [], enumerable: false});
+	Object.defineProperty(this, 'notes', {value: [], enumerable: false});
+
 };
 
 Game.prototype.update = function(io) {
@@ -39,9 +41,27 @@ Game.prototype.update = function(io) {
 
 Game.prototype.start = function(io){
 	
-	console.log(io);
 	io.sockets.emit("startgame_client", {game: game, trees:game.trees, notes: game.notes});
 
+}
+
+Game.prototype.colCheck = function(smaller, bigger, padding){
+	if( (smaller.x >= bigger.x + padding.x && smaller.x <= bigger.x + bigger.width - padding.x) || (smaller.x + smaller.width >= bigger.x + padding.x && smaller.x + smaller.width <= bigger.x + bigger.width - padding.x) ){
+
+       if( (smaller.y >= bigger.y + padding.y && smaller.y <= bigger.y + bigger.height - padding.y) || (smaller.y + smaller.height >= bigger.y + padding.y && smaller.y + smaller.height <= bigger.y + bigger.height - padding.y) ){
+
+           return true;
+       }
+
+   }
+	
+}
+
+Game.prototype.colCheckRelative = function(smallerGroup, bigger, padding){
+
+	var smaller = {x: smallerGroup.item.x + smallerGroup.influencer.x, y: smallerGroup.item.y + smallerGroup.influencer.y, width: smallerGroup.item.width, height: smallerGroup.item.height};
+
+	return this.colCheck(smaller, bigger, padding);
 }
 
 Game.prototype.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
@@ -214,6 +234,7 @@ Game.prototype.addPlayer = function(name, master){
 				
 				this.teams[tName].addPlayer(name);
 				
+				console.log('about to0 break');
 				break;
 				
 			}

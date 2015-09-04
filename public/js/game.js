@@ -79,6 +79,8 @@ var game = {
 		trees:[],
 		notes:[]
 	}
+	
+
 };
 
 game.getCurrentSec = function(){
@@ -150,6 +152,22 @@ game.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, s
    return false;
 }
 
+game.getPowerStats = function(power){
+	
+	var stats = {has: false, total :0};
+	
+	game.forAllPlayers(function(player){
+		
+		if(player.server.powers[power]){
+			stats.total++;
+			stats.has = true;
+		}
+		
+	});
+	
+	return stats;
+}
+
 game.findUser = function(){
 	
 	var playerGot;
@@ -198,6 +216,7 @@ var user = {
 			stolenFrom: "",
 			wood: 0,
 		},
+		powers:{}
 	}
 
 	
@@ -207,7 +226,7 @@ user.interactWBase = function(){
 	
 	renderer.stealText = false;
 
-	if(!this.PAPABEAR){
+	if(!this.server.powers.papaBear){
 			
 		game.forAllTeams(function(team){
 			
@@ -285,10 +304,10 @@ user.interactWNote = function(){
 					var probability = 1;
 					
 					//customize this
-					if(chance < 50){
+					if(chance < 10){
 						probability = 1;	
 					}else{
-						probability = 1;
+						probability = 2;
 					}
 					
 					
@@ -368,7 +387,9 @@ user.depLog = function(){
 };
 
 user.givePower = function(power){
+	
 	socket.emit('give_power', {name: this.name, power: power});
+	
 };
 
 user.dash = function(){
@@ -393,7 +414,7 @@ user.move = function(modifier){
 		
 		this.amount = 256 * modifier;
 		
-		if(this.PAPABEAR){
+		if(this.server.powers.papaBear){
 			
 			this.amount = this.amount * 1.2;
 		}
@@ -406,6 +427,22 @@ user.move = function(modifier){
 		socket.emit('move_input', {direction: this.direction, name: this.name, amount: this.amount});
 	}
 }
+
+var getWidth = function(player){
+	if (player.direction == "U" || player.direction == "D"){
+		return player.weapon.vwidth;
+	}else if (player.direction == "L" || player.direction == "R"){
+		return player.weapon.hwidth;
+	}
+};
+
+var getHeight = function(player){
+	if (player.direction == "U" || player.direction == "D"){
+		return player.weapon.vheight;
+	}else if (player.direction == "L" || player.direction == "R"){
+		return player.weapon.hheight;
+	}
+};
 
 //setUp Renderer
 var renderer = {
@@ -662,17 +699,16 @@ inputManager.processInput = function(){
 	else user.action = false;
 	//equip sword
 	if (75 in inputManager.keys) {		
-		if(inputManager.pressable.k && user.server.weapon.has == true){
+		if(inputManager.pressable.k && user.server.powers.weapon == true){
 			inputManager.pressable.k = false;
 			
 			if (user.server.attacking == false) {
 				
-				user.server.attacking = true;
+				console.log("just armed knife");
 			    socket.emit('arm', {name: user.name, armed: true});
 
 			}else {
 				
-				user.server.attacking = false;
 			    socket.emit('arm', {name: user.name, armed: false});
 			}
 		}
@@ -737,21 +773,49 @@ var Note = function(lines, options){
 	
 }
 
-game.client.notes = [ new Note(["If you manage to steal your opponent's wood, there is a considerable payoff."], {prob: 1, condition: 0}),
+game.client.notes = [ 
+
+ new Note(["If you manage to steal your opponent's wood, there is a considerable payoff."], {prob: 1, condition: 0}),
  
  new Note(["Press Z to dash forward"], {prob: 1, condition: 0}),
  
  new Note(["Press ENTER to chat with nearby users"], {prob: 1, condition: 0}),
  
- new Note(["You can now press 'k' to wield a deadly weapon."], {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
+ new Note(["You can now press 'k' to wield a deadly weapon."], 
+ {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
  
- new Note(["You have picked up a knife. Press 'k' to use it, but be careful where you point it."], {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
+ new Note(["You have picked up a knife. Press 'k' to use it, but be careful where you point it."],
+ {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
 
- new Note(["Press 'k' to brandish your knife and then press 'k' again to hide it."], {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
+ new Note(["Press 'k' to brandish your knife and then press 'k' again to hide it."],
+ {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
 
  new Note(["Appearances can be deceiving...stay on guard"], {prob: 1, condition: 0}),
  
- new Note(["You have picked up a disguise. Hold 'm' and then", "press r,g or b to impersonate another team."],{prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}), ];
+ new Note(["You have picked up a disguise. Hold 'm' and then", 
+ "press r,g or b to impersonate another team."],
+ {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}), 
+ 
+ new Note(["What sort of notes have your teammates read? Are they hiding something?"],
+ {prob: 1, condition: 0}), 
+
+ new Note(["Press 'k' to sheath and unsheathe a golden sword. This weapon can kill PAPA BEAR"], 
+ {prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&!game.getPowerStats("powerWeapon").has}, 
+ action:{func: user.givePower, args: ["powerWeapon"]} }), 
+
+ new Note(["Someone has a special sword that can kill PAPA BEAR"], 
+ {prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
+
+  new Note(["Only the golden sword can defeat PAPA BEAR"], 
+ {prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
+
+   new Note(["Some notes can give you immense power. This note does not."], 
+ {prob: 1, condition: function(){ return !game.getPowerStats("papaBear").has} }),
+ 
+   new Note(["You are now Papa Bear"], 
+ {prob: 2, condition: function(){ return !game.getPowerStats("papaBear").has}, action:{func: user.givePower, args: ["papaBear"]} }), 
+ 
+];
 
 game.update = function (modifier) {
 	
@@ -846,15 +910,15 @@ renderer.draw["game"] = function () {
 		//CHARACTER DRAWING
 		if(player.dead){
 			
-			this.drawImage(game.server[player.team].name + "Corpse", player.x- 4, player.y);
+			this.drawImage(game.server.teams[player.team].name + "corpse", player.x- 4, player.y);
 		
-		}else if(player.PAPABEAR){
+		}else if(player.powers.papaBear){
 			
 			var papaSpriteFinder= {
-				"R":{x:0, y:0, width:63, height:129},
-				"D":{x:0, y:66, width:63, height:129},
-				"L":{x:66, y:0, width:63, height:129},
-				"U":{x:66, y:66, width:63, height:129},
+				"R":{x:0, y:0, width:63, height:63},
+				"D":{x:0, y:66, width:63, height:63},
+				"L":{x:66, y:0, width:63, height:63},
+				"U":{x:66, y:66, width:63, height:63},
 			}
 			
 			this.drawSprite("bear", player.x,player.y, papaSpriteFinder[player.direction]);
@@ -886,7 +950,7 @@ renderer.draw["game"] = function () {
 				this.drawImage("backpack", player.x + backpackSpriteFinder[player.direction].playerDelta.x, player.y + backpackSpriteFinder[player.direction].playerDelta.y, backpackSpriteFinder[player.direction]);
 			}
 		
-			if (player.attacking && player.PAPABEAR == false){
+			if (player.attacking && !player.papaBear){
 				//SWORD DRAWING		
 				
 				var swordHelper = {
@@ -896,8 +960,10 @@ renderer.draw["game"] = function () {
 					"L":{x:-26, y:22},
 				}
 				
-				this.drawRect("rgb(200,200,200)", player.x + swordHelper[player.direction].x, player.y + swordHelper[player.direction].y, player.weapon.vwidth, player.weapon.vheight);	
-			}		
+				console.log("should be drawing sowrd");
+				
+				this.drawRect("rgb(200,200,200)", player.x + swordHelper[player.direction].x, player.y + swordHelper[player.direction].y, getWidth(player), getHeight(player));	
+			}	
 		
 		}	
 		

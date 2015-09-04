@@ -5,6 +5,7 @@
 //spectator
 //collisions with bases
 //work with powers array -- accept one single message that will set the correct power
+//abstract game design into config files
 
 var http = require('http'),
 express = require("express"),
@@ -49,7 +50,9 @@ var server = app.listen(process.env.PORT || 3000);
 var io = require('socket.io').listen(server, { log: false });
 io.set('log level', 1);
 
-var elephant = {};
+
+// being explicit
+Object.defineProperty(game, 'elephant', {value: {}, enumerable: false});
 
 io.sockets.on('connection', function(socket) {
 
@@ -63,9 +66,9 @@ io.sockets.on('connection', function(socket) {
 		
 		console.log("confirmed name: "+data.name+" on " + socket.id)
 
-		elephant[data.name] = socket;
+		game.elephant[data.name] = socket;
 		
-		elephant[data.name].emit("name_confirmed", {name: data.name});
+		game.elephant[data.name].emit("name_confirmed", {name: data.name});
 		
 	});
 
@@ -162,7 +165,7 @@ io.sockets.on('connection', function(socket) {
    	var dummy = {};
 	var player = game.findPlayerByName(data.name);
 
-	if(!player) return;
+	if(!player || player.dead) return;
 	dummy.x = player.x;
 	dummy.y = player.y;
 	   	   
@@ -200,8 +203,8 @@ io.sockets.on('connection', function(socket) {
 	socket.on("give_power", function(data){
 	  
 		var player = game.findPlayerByName(data.name);
-
 		player.powers[data.power] = true;
+		console.log(data.power + " given to Player:" + data.name);
 	
   });
   
