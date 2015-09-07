@@ -39,9 +39,10 @@ addEventListener("keyup", function (e) {
 	delete inputManager.keys[e.keyCode];
 }, false);
 
-inputManager.masterKeys = function(modifier){			   	
-
+inputManager.masterKeys = function(modifier){	
+	console.log("yo");		   	
 	if(13 in this.keys){
+		
 		if(this.pressable.enter){
 			this.pressable.enter = false;
 			socket.emit("startgame_server", {});
@@ -78,9 +79,8 @@ var game = {
 	client:{
 		trees:[],
 		notes:[]
-	}
+	},
 	
-
 };
 
 game.getCurrentSec = function(){
@@ -158,7 +158,7 @@ game.getPowerStats = function(power){
 	
 	game.forAllPlayers(function(player){
 		
-		if(player.server.powers[power]){
+		if(player.powers[power]){
 			stats.total++;
 			stats.has = true;
 		}
@@ -289,50 +289,55 @@ user.interactWTree = function(){
 }
 
 user.interactWNote = function(){
-	//messages
 	
-	if(this.server.hasPapa == false){
-
-		for (var z = 0; z < game.client.notes.length; z++){
-						
-			if(game.client.notes[z].removed == false){
-						
-				if (game.checkCollision({x: game.client.notes[z].x + 29, y: game.client.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)){
+	if(this.server.powers.papaBear) return;
+	
+	for (var z = 0; z < game.client.notes.length; z++){
+					
+		if(game.client.notes[z].removed == false){
+					
+			if (game.checkCollision({x: game.client.notes[z].x + 29, y: game.client.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)){
+				
+				var redo = true;
+				
+				do{
 					
 					var chance = Math.floor(Math.random() * 100);
-					
+				
 					var probability = 1;
-					
+				
 					//customize this
 					if(chance < 10){
 						probability = 1;	
 					}else{
 						probability = 2;
 					}
-					
-					
+				
+				
 					var notes = noteIndex[probability].filter(function(note){
 						return note.condition();
 					});
-								
-					var random = Math.floor(Math.random() * notes.length);
-
-					renderer.currentNote = notes[random];
-
-					renderer.showNote = true;
+				
+					if(notes.length > 0) redo = false;
 					
-					if(renderer.currentNote.func) renderer.currentNote.func.apply(this, renderer.currentNote.args)
+				}while(redo);
+							
+				var random = Math.floor(Math.random() * notes.length);
 
-					this.getNote(z);
-					
-				}
+				renderer.currentNote = notes[random];
 
+				renderer.showNote = true;
+				
+				if(renderer.currentNote.func) renderer.currentNote.func.apply(this, renderer.currentNote.args)
+
+				this.getNote(z);
+				
 			}
-			
-		}
-	
-	}
 
+		}
+		
+	}
+	
 }
 
 user.stealWood = function(team){
@@ -353,7 +358,7 @@ user.stealWood = function(team){
 
 user.chopTree = function(treeId){
 	
-	if(!this.log.has){
+	if(!this.log.has && !this.server.powers.papaBear){
 		
 		this.log.has = true;
 		
@@ -531,31 +536,99 @@ renderer.fillText = function(text, coordX, coordY){
 
 renderer.draw = {};
 
-renderer.draw["loading"] = function(){
-	
-	ctx.fillText("Loading....99%", window.innerWidth/4, 100);
+var Style = function(color, options){
 
+	if(!color) color = "white";
+	
+	if(options.fontSize) this.fontSize = canvas.width/(40 / options.fontSize);
+	else this.fontSize = 1;
+	
+	this.apply = function(){
+
+		ctx.fillStyle = color;
+		ctx.font = this.fontSize + "px Helvetica";
+		
+	}
+	if(options.lineWidth) this.lineWidth = (canvas.width/(40/ options.lineWidth)) + this.fontSize;
+	else this.lineWidth = 0;
+	
+	//if(!renderer.styles[name]) renderer.styles[name] = this;
+	
+}
+
+renderer.styles = {
+	"large": new Style("rgb(255,255,255)", {fontSize: 2, lineWidth: 1}),
+	"block text": new Style("rgb(255,255,255)", {fontSize: 1, lineWidth: .2}),
+}
+
+var UI = function(style, box, options){
+	
+	for(var prop in box){
+		
+		if(typeof box[prop] == "string"){
+			
+			var windowProp = "";
+			if(prop == "x" || prop == "width") windowProp = "innerWidth";
+			else if (prop == "y" || prop == "height") windowProp = "innerHeight";
+
+			if(box[prop].charAt(0) == "-"){
+				box[prop] = window[windowProp] + parseFloat(box[prop]);	
+			}else if(box[prop].charAt(0) == "/"){
+				box[prop] = box[prop].slice(1);
+				box[prop] = window[windowProp]/parseFloat(box[prop]);
+			}else{
+				box[prop] == 0;
+			}
+		}
+	}
+	this.draw = function(array){
+		var styleInUse = renderer.styles[style];
+		
+		styleInUse.apply();
+		
+		var y = 0;	
+		
+		for(var i = 0; i < array.length; i++){
+
+			ctx.fillText(array[i], box.x, box.y + (styleInUse.lineWidth * i), box.width);
+			
+		}
+	}
+	//if(!renderer.UI[name]) renderer.UI[name] = this;
+}
+
+renderer.UI = {
+	"action prompt" : new UI("large", {x: "/4", y: "-100", width: "/2", height: "/1"}),
+	"big screen" : new UI("block text", {x: "/10", y: 100, width: "/1.2", height: "-100"}),
+	"game screen" : new UI("block text", {x: "/6", y: 200, width: "/1.3", height: "-200"})
+}
+
+renderer.draw["loading"] = function(){
+	ctx.fillText("Loading....99%", window.innerWidth/4, 100);
 }	
 
-renderer.draw["wait"] = function(){
+renderer.draw["intro"] = function(style){
+	
+	this.UI["big screen"].draw([
+		"There are three villages. You are " + user.name + " of the " + user.server.team + " village.",
+		"Only one village will survive this harsh winter, so you must stockpile as much wood as you can.",
+		"Learn how better to survive by searching the woods for notes.",
+		"",
+		"Good luck.",
+		"Waiting for game to start...."
+	]);
+	
+}
 
-	ctx.fillStyle = "rgb(0,0,0)";
+renderer.draw["server"] = function(){
+
+	ctx.fillStyle = "rgb(255,255,255)";
 
 	ctx.font = "24px Helvetica";
 	ctx.textAlign = "left";
-   
 	
-	 ctx.fillText("There are three villages. You are " + user.name + " of the " + user.server.team + " village.", 100, 120);
+	 ctx.fillText("Connecting to server...", 100, 120);
 
-	 ctx.fillText("Only one village will survive this harsh winter, so you must stockpile as much wood as you can.", 100, 160);
-
-	 ctx.fillText("Learn how better to survive by searching the woods for notes.", 100,240);
-
-	 //ctx.fillText("with the arrow keys. Confer with your allies by using enter key to type.", 100, 250);
-
-	 ctx.fillText("Good luck.", 100, 340);
-
-	 ctx.fillText("Waiting for game to game.start....", 100, 480);
 }
 
 renderer.draw["score"] = function(){
@@ -564,7 +637,7 @@ renderer.draw["score"] = function(){
 	ctx.font = "24px Helvetica";
 	ctx.textAlign = "left";
    
-	var y = 100;
+	var y = 20;
 	game.forAllTeams(function(team){
 			
 		ctx.fillText(team.name + " : " + team.score , window.innerWidth/4, y+=100);
@@ -775,47 +848,60 @@ var Note = function(lines, options){
 
 game.client.notes = [ 
 
- new Note(["If you manage to steal your opponent's wood, there is a considerable payoff."], {prob: 1, condition: 0}),
- 
- new Note(["Press Z to dash forward"], {prob: 1, condition: 0}),
- 
- new Note(["Press ENTER to chat with nearby users"], {prob: 1, condition: 0}),
- 
- new Note(["You can now press 'k' to wield a deadly weapon."], 
- {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
- 
- new Note(["You have picked up a knife. Press 'k' to use it, but be careful where you point it."],
- {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
+	new Note(["If you manage to steal your opponent's wood, there is a considerable payoff."], {prob: 1, condition: 0}),
 
- new Note(["Press 'k' to brandish your knife and then press 'k' again to hide it."],
- {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
+	new Note(["Press Z to dash forward"], {prob: 1, condition: 0}),
 
- new Note(["Appearances can be deceiving...stay on guard"], {prob: 1, condition: 0}),
- 
- new Note(["You have picked up a disguise. Hold 'm' and then", 
- "press r,g or b to impersonate another team."],
- {prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}), 
- 
- new Note(["What sort of notes have your teammates read? Are they hiding something?"],
- {prob: 1, condition: 0}), 
+	new Note(["Press ENTER to chat with nearby users"], {prob: 1, condition: 0}),
 
- new Note(["Press 'k' to sheath and unsheathe a golden sword. This weapon can kill PAPA BEAR"], 
- {prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&!game.getPowerStats("powerWeapon").has}, 
- action:{func: user.givePower, args: ["powerWeapon"]} }), 
+	new Note(["You can now press 'k' to wield a deadly weapon."], 
+	{prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
 
- new Note(["Someone has a special sword that can kill PAPA BEAR"], 
- {prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
+	new Note(["You have picked up a knife. Press 'k' to use it, but be careful where you point it."],
+	{prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
 
-  new Note(["Only the golden sword can defeat PAPA BEAR"], 
- {prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
+	new Note(["Press 'k' to brandish your knife and then press 'k' again to hide it."],
+	{prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
 
-   new Note(["Some notes can give you immense power. This note does not."], 
- {prob: 1, condition: function(){ return !game.getPowerStats("papaBear").has} }),
- 
-   new Note(["You are now Papa Bear"], 
- {prob: 2, condition: function(){ return !game.getPowerStats("papaBear").has}, action:{func: user.givePower, args: ["papaBear"]} }), 
+	new Note(["Appearances can be deceiving...stay on guard"], {prob: 1, condition: 0}),
+
+	new Note(["You have picked up a disguise. Hold 'm' and then", 
+	"press r,g or b to impersonate another team."],
+	{prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}), 
+
+	new Note(["What sort of notes have your teammates read? Are they hiding something?"],
+	{prob: 1, condition: 0}), 
+
+	new Note(["Press 'k' to sheath and unsheathe a golden sword. This weapon can kill PAPA BEAR"], 
+	{prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&!game.getPowerStats("powerWeapon").has}, 
+	action:{func: user.givePower, args: ["powerWeapon"]} }), 
+
+	new Note(["Someone has a special sword that can kill PAPA BEAR"], 
+	{prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
+
+	new Note(["Only the golden sword can defeat PAPA BEAR"], 
+	 {prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
+
+	new Note(["Some notes can give you immense power. This note does not."], 
+	{prob: 1, condition: function(){ return !game.getPowerStats("papaBear").has} }),
+
+	new Note(["You are now Papa Bear"], 
+	{prob: 2, condition: function(){ return !game.getPowerStats("papaBear").has}, 
+	action:{func: user.givePower, args: ["papaBear"]} }), 
  
 ];
+
+powerIndex = {};
+
+var Power = function(name, actions){
+	this.name = name;
+	if(actions.receive) this.receive = actions.receive;
+	if(actions.expire) this.expire = actions.expire;
+	if(actions.use){
+		this.use = actions.use.func;
+		powerIndex[name] = this;
+	}
+}
 
 game.update = function (modifier) {
 	
@@ -829,7 +915,7 @@ game.update = function (modifier) {
 };
 
 renderer.draw['clear_frame'] = function(){
-	ctx.fillStyle = "rgb(105,175,105)";
+	ctx.fillStyle = "rgb(0,0,0)";
 	ctx.fillRect(0,0, canvas.width, canvas.height);
 }
 
@@ -974,16 +1060,12 @@ renderer.draw["game"] = function () {
 	
 	}.bind(this));
 	
-	
-	//TEXT OVERLAYS
-    ctx.font = '40px Calibri';
-	ctx.fillStyle = "rgb(0,0,0)";
 
 	//show text for chopping
 	if(this.treeText && !user.log.has) ctx.fillText("Press space to cut wood!", window.innerWidth/4, window.innerHeight - 100);
 
 	//show text for stealing
-	if(this.stealText) ctx.fillText("Press space to steal wood!", window.innerWidth/4, window.innerHeight - 100);
+	if(this.stealText && !user.log.has) ctx.fillText("Press space to steal wood!", window.innerWidth/4, window.innerHeight - 100);
 		
 	//show respawn text
 	if(user.server.dead) ctx.fillText("You will respawn soon", window.innerWidth/8, 325);	
@@ -1041,8 +1123,7 @@ game.stateManager = function () {
 
 		if(game.started) game.state = "game";
 
-	}
-	   
+	}	   
 
 	if(game.state == "game" && game.server){
   
@@ -1070,13 +1151,14 @@ game.stateManager = function () {
 	
 	this.then = now;
 
+	//console.log("gamesate");
 	animate(game.stateManager);
 	//renderer.animate.bind(window, game.stateManager);
 	     
 };
 
 socket.on('name_confirmed', function(data) {
-	user.name = data.name;
+	user.server = data.player;
 	user.confirmed = true;
 });
 
@@ -1143,4 +1225,3 @@ $(document).ready(function() {
 	game.stateManager();
 
 });
-

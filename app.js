@@ -68,7 +68,9 @@ io.sockets.on('connection', function(socket) {
 
 		game.elephant[data.name] = socket;
 		
-		game.elephant[data.name].emit("name_confirmed", {name: data.name});
+		var player = game.findPlayerByName(data.name)
+		
+		game.elephant[data.name].emit("name_confirmed", {player: player});
 		
 	});
 

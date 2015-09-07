@@ -194,53 +194,52 @@ module.exports = function(game){
 
 	Player.prototype.checkHits = function(){
 		
-	game.forAllOtherAlivePlayers(this, function(oPlayer){
+		game.forAllOtherAlivePlayers(this, function(oPlayer){
 		
-		var hit = false;
+			var hit = false;
 
-		if(this.powers.papaBear){
+			if(this.powers.papaBear){
 						
-			if(game.checkCollision(oPlayer, this, 41, 36, 63, 63, 0, 0)) hit = true;
+				if(game.checkCollision(oPlayer, this, 41, 36, 63, 63, 0, 0)) hit = true;
 
-		}
-		
-		if(this.attacking){
-			
-			var directions = {
-				U:{x: 36,y: -22, width:5, height:30},
-				D:{x:0,y:20, width: 5, height:30},
-				R:{x:36,y:22, width: 30, height:5},
-				L:{x:-26,y:+22, width: 30, height:5}
 			}
+		
+			if(this.attacking){
 			
-			//if(game.colCheckRelative({x: this.x + directions[this.direction].x, y: this.y + directions[this.direction].x}, oPlayer, this.weapon.getWidth(), this.weapon.getHeight(), oPlayer.powers.papaBear ? 41 + game.bearX : 41, oPlayer.powers.papaBear ? 36 + game.bearX : 36, 0, 0)) hit = true;
-			if(game.colCheckRelative({item: directions[this.direction], influencer: this}, oPlayer, {x:0, y:0})) hit = true;
-		}		
+				var directions = {
+					U:{x: 36,y: -22, width:5, height:30},
+					D:{x:0,y:20, width: 5, height:30},
+					R:{x:36,y:22, width: 30, height:5},
+					L:{x:-26,y:+22, width: 30, height:5}
+				}
+			
+				if(game.colCheckRelative({item: directions[this.direction], influencer: this}, oPlayer, {x:0, y:0})) hit = true;
+			}		
 		
-		if(hit){
+			if(hit){
 	
-			oPlayer.dead = true;
+				oPlayer.dead = true;
 
-			console.log(this.name + " killed " + oPlayer.name);
-			game.elephant[oPlayer.name].emit("death", {});
+				console.log(this.name + " killed " + oPlayer.name);
+				game.elephant[oPlayer.name].emit("death", {});
 
-			oPlayer.spawn(function(spawn){
+				oPlayer.spawn(function(spawn){
 
-				setTimeout(function() { 
-					oPlayer.x = spawn.x;
-					oPlayer.y = spawn.y;
-					oPlayer.dead = false;
-					oPlayer.powers.papaBear = false;
+					setTimeout(function() { 
+						oPlayer.x = spawn.x;
+						oPlayer.y = spawn.y;
+						oPlayer.dead = false;
+						oPlayer.powers.papaBear = false;
 					
-				 }, 8000);
+					 }, 8000);
 
-			});
+				});
 		
-		}
+			}
 		
-	}.bind(this));
+		}.bind(this));
 
-}
+	}
 
 	return {Team:Team, Player:Player};
 };

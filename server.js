@@ -234,7 +234,6 @@ Game.prototype.addPlayer = function(name, master){
 				
 				this.teams[tName].addPlayer(name);
 				
-				console.log('about to0 break');
 				break;
 				
 			}
