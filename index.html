@@ -2,9 +2,7 @@
 <html>
    <head>
        <style>
-
 		body, canvas{
-		
 			padding:0px;
 			margin:0px;
 			background:white;
@@ -12,29 +10,43 @@
 			font-family:Helvetica;
 		
 		}
-	
 		canvas{
 			position:fixed;
 			top:0px;
 			z-index:1;
 		}
-
+		#chatView {
+		
+			position:fixed;
+			top:35%;
+			z-index:2;
+			left:20%;
+			width:60%;
+			display:none;
+			padding:3px;
+			background-color:black;
+		}
+		#chatInput{
+			width:100%;
+		}
        </style>
-       <script src='//code.jquery.com/jquery-1.7.2.min.js'></script>
-       <script src='socket.io/socket.io.js'></script>
-       <script>
-
-           var socket = io.connect(window.location.hostname);
-
-           socket.on('connect', function(data) { });
-		   
-           socket.on('error', function() { console.error(arguments) });
-           socket.on('message', function() { console.log(arguments) });
-       </script>
+    <script src='/js/jquery.js'></script>
+	<script src="/socket.io/socket.io.js"></script>
    </head>
    <body>
+   <div id = "chatView"><input type = "text" id = "chatInput"></div>
     <br>
-         <script src="js/game.js"></script>
-       <div class = "infobox"></div>
+    <script src='/js/app.js'></script>
+	<script src="/js/inputManager.js"></script>
+ 	<script src="/js/game.js"></script>
+	<script src="/js/user.js"></script>
+	<script src="/js/renderer.js"></script>
+	<script src="/js/notes.js"></script>
+	<script src="/js/chat.js"></script>
+	<script src="/js/socketManager.js"></script>
+	<script src="/js/config.js"></script>
+	
+	
+    <div class = "infobox"></div>
    </body>
 </html>
