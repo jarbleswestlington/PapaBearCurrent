@@ -6,6 +6,9 @@ var user = {
 	amount:0,
 	dashing:false,
 	dashStart:0,
+	moved: false,
+	frozen: false,
+	
 	log:{
 		has: false,
 		stolen: false,
@@ -34,12 +37,30 @@ var user = {
 			wood: 0,
 		},
 		powers:{}
-	}
+	},
 
-	
+
 };
 
+user.swipe = function(){
+	
+	user.weapon.state = "winding up";
+		
+	setTimeout(function() { 
+		user.weapon.state = "attacking";
+		socket.emit("attacked", {name: player.name});
+	}, 250);
 
+	setTimeout(function() { 
+		user.frozen = true;
+	}, 600);
+	
+	setTimeout(function() { 
+		user.weapon.state = "ready";
+		user.frozen = false;
+	}, 1800);
+
+}
 
 user.interactWBase = function(){
 	
@@ -217,23 +238,24 @@ user.givePower = function(power){
 
 user.dash = function(){
 	
-	if(Date.now() > this.dashStart + 100 && this.dashing){
+	this.dashing = true;
+	
+	setTimeout(function(){
+		this.dashing = false;
+		this.frozen = true;
 		
-		this.moved = false;
-		
-		if(Date.now() > this.dashStart + 700){
-			
-			this.dashing = false;
-		}
-		
-	}
+	}, 100);
+	
+	setTimeout(function(){
+		this.frozen = false;
+	
+	}, 700);
+	
 }
 
 user.move = function(modifier){
-	
-	this.dash();
-	
-	if((this.moved || this.dashing) && !this.dead){
+		
+	if( (this.moved || this.dashing) && !(this.dead || this.frozen) ){
 		
 		this.amount = 256 * modifier;
 		

@@ -19,20 +19,8 @@ inputManager.processInput = function(){
 						
 			inputManager.pressable.shift = false;
 			
-			user.weapon.state = "winding up";
-				
-			setTimeout(function() { 
-				user.weapon.state = "attacking";
-				socket.emit("attacked", {name: player.name});
-			}, 250);
-
-			setTimeout(function() { 
-				user.weapon.state == "frozen"
-				setTimeout(function() { 
-					user.weapon.state = "ready";
-				 }, 1200);
-			}, 600);
-       
+			user.swipe();
+			
 		}
 
 	}else{
@@ -62,10 +50,8 @@ inputManager.processInput = function(){
 		if(inputManager.pressable.z && user.dashing == false){
 			
 			inputManager.pressable.z = false;
-			
-			user.dashing = true;
-			
-			user.dashStart = Date.now();
+		
+			user.dash();
 		}
 		
 	}else{

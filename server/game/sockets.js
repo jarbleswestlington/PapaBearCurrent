@@ -83,6 +83,14 @@ module.exports = function(server, game){
 			player.attacking = data.armed;
 	
 		});
+		
+	    socket.on('attacked', function(data){
+		
+	    	var player = game.findPlayerByName(data.name);
+			
+			player.swipe();
+		
+		});
 	    
 		socket.on('slash', function(data){
 
