@@ -1,0 +1,27 @@
+body, canvas{
+	padding:0px;
+	margin:0px;
+	background:white;
+	overflow-y:hidden;
+	font-family:Helvetica;
+
+}
+canvas{
+	position:fixed;
+	top:0px;
+	z-index:1;
+}
+#chatView {
+
+	position:fixed;
+	top:35%;
+	z-index:2;
+	left:20%;
+	width:60%;
+	display:none;
+	padding:3px;
+	background-color:black;
+}
+#chatInput{
+	width:100%;
+}
