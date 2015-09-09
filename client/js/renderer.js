@@ -37,18 +37,28 @@ renderer.updateCamera = function(){
 };
 
 renderer.drawImage = function(image, coordX, coordY){
-	
-	ctx.drawImage(this.refs[image], coordX + this.camera.x, coordY + this.camera.y);
+	if(typeof image == "object") this.drawImage(image.image, image.x, image.y);
+	else ctx.drawImage(this.refs[image], coordX + this.camera.x, coordY + this.camera.y);
 };
 
-renderer.drawSprite= function(image, coordX, coordY, sprite){
+renderer.drawImageRelative = function(item , influence){
+	var newItem = {};
+	newItem.x = item.x + influence.x;
+	newItem.y = item.y + influence.y;
+	newItem.image = item.image;
+	console.dir(newItem);
+	this.drawImage(newItem);
+	
+}
+
+renderer.drawSprite = function(image, coordX, coordY, sprite){
 	
 	ctx.drawImage(this.refs[image], sprite.x, sprite.y, sprite.width, sprite.height, coordX + this.camera.x, coordY + this.camera.y, sprite.width, sprite.height
 	);
 
 };
 
-renderer.drawRect= function(color, coordX, coordY, width, height){
+renderer.drawRect = function(color, coordX, coordY, width, height){
 	
 	ctx.fillStyle = color;
 	ctx.fillRect(coordX + this.camera.x, coordY + this.camera.y, width, height);
@@ -241,6 +251,8 @@ renderer.draw["game"] = function () {
 		4:{x:115, y:132, width:111, height:131},
 	}
 	
+	
+	
 	//trees
 	for(var i = 0; i < game.client.trees.length; i++){
 		
@@ -321,12 +333,20 @@ renderer.draw["game"] = function () {
 		
 		}	
 		
+	    var weapon = user.client.weapon;
+	    weapon.renderData.drawBlur(player, weapon.renderData.blur[player.direction]);
+    	
+	    if(weapon.renderData[player.weapon.state]){
+			console.log("showed up brah");
+			console.log(player.weapon.state);
+	        this.drawImageRelative(weapon.renderData[player.weapon.state][player.direction], player);
+	    }
+		
 		//chat drawing
 		ctx.font = '20px Calibri';
 		ctx.fillStyle = "rgb(255,255,0)";
 		if(player.chatting) this.fillText(player.chatText, player.x - 40, player.y - 20);
 		
-
 	
 	}.bind(this));
 	

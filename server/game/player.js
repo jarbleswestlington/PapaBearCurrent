@@ -25,35 +25,41 @@ module.exports = function(game){
 	
 		this.dead = false;
 	
-	
 		this.chatting = false;
 		this.chatText =  "";
 		this.illegal = false;
 	
-		this.weapon = {
+
+	
+		this.oldWeapon = {
 			has:false,
 			attacking:false,
 			hwidth : 30,
 			hheight : 5,
 			vwidth : 5,
 			vheight : 30,
-		
+
 			getWidth: function(){
 				if (this.direction == "U" || this.direction == "D"){
-					return this.weapon.vwidth;
+					return this.oldWeapon.vwidth;
 				}else if (this.direction == "L" || this.direction == "R"){
-					return this.weapon.hwidth;
+					return this.oldWeapon.hwidth;
 				}
 			},
 			getHeight: function(){
 				if (this.direction == "U" || this.direction == "D"){
-					return this.weapon.vheight;
+					return this.oldWeapon.vheight;
 				}else if (this.direction == "L" || this.direction == "R"){
-					return this.weapon.hheight;
+					return this.oldWeapon.hheight;
 				}
 			}
-		 
+
 		},
+		
+		
+		this.weapon = {
+		    state: "ready"
+		}
 	
 		this.log = {
 			has: false,
@@ -63,6 +69,7 @@ module.exports = function(game){
 		}
 
 	};
+
 
 	Player.prototype.spawn = function(func){
 
@@ -217,6 +224,115 @@ module.exports = function(game){
 	
 	}
 	
+	Player.prototype.swipe = function(){
+		
+		game.forAllOtherAlivePlayers(this, function(oPlayer){
+			
+			console.log(oPlayer);
+			
+
+		    var boxes = this.weaponColBoxes[this.direction];
+
+		    boxes.forEach(function(box){
+
+				console.log(box);
+				
+		        if(game.colCheckRelative({item: box, influencer: this}, oPlayer, {x:0, y:0})){
+            		console.log(this.name + "killed" + oPlayer.name);
+					
+		            game.elephant[oPlayer.name].emit("death", {});
+		        }
+
+			}.bind(this));
+
+		}.bind(this));	
+	};
+		
+	Player.prototype.weaponColBoxes = {
+
+	     "U": [{
+	        x:  - 14.5, y: - 30,
+	        width: 70, height: 50
+	     }, {
+	        x:  - 33.5, y:  -9,
+	        width: 19,height: 29
+	     }, {
+	        x:  - 7, y:  -35,
+	        width: 9, height: 5
+	     }, {
+	        x:   2, y:  - 35,
+	        width: 35,height: 9
+	     }, {
+	        x:   53, y:  - 35,
+	        width: 9,height: 5
+	     }, {
+	        x:   54, y:  - 9,
+	        width: 19,height: 29
+	    }], 
+            
+            
+	    "D": [{
+	        x: - 14.5, y: 20,
+	        width: 70,height: 50
+	     }, {
+	        x: - 33.5, y:  20,
+	        width: 19,height: 29
+	     }, {
+	        x: - 7, y:  70,
+	        width: 9,height: 5
+	     }, {
+	        x:  2, y: 70,
+	        width: 35,height: 9
+	     }, {
+	        x: 53, y: 70,
+	        width: 9,height: 5
+	     }, {
+	        x: 54, y: 20,
+	        width: 19,height: 29
+	    }], 
+        
+        
+	     "L": [{
+	        x: - 30, y: - 18,
+	        width: 50, height: 70
+	     }, {
+	        x: - 9, y: 53,
+	        width: 29,height: 19
+	     }, {
+	        x: - 35, y: -35,
+	        width: 5, height: 9
+	     }, {
+	        x: -35, y:  0 ,
+	        width: 9,height: 35
+	     }, {
+	        x:  - 35, y: - 9,
+	        width: 5,height: 9
+	     }, {
+	        x: - 9, y: - 37,
+	        width: 29,height: 19
+	    }], 
+        
+	     "R": [{
+	        x: 20, y: - 18,
+	        width: 50, height: 70
+	     }, {
+	        x: 20, y: 53,
+	        width: 29,height: 19
+	     }, {
+	        x: 70, y: -35,
+	        width: 5, height: 9
+	     }, {
+	        x: 70, y: 0,
+	        width: 9,height: 35
+	     }, {
+	        x: 70, y: - 9,
+	        width: 5,height: 9
+	     }, {
+	        x: 20, y: - 37,
+	        width: 29,height: 19
+	    }]
+	};
+
 	return Player;
 	
 }

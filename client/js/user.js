@@ -8,56 +8,84 @@ var user = {
 	dashStart:0,
 	moved: false,
 	frozen: false,
+	client:{},
 	
+
+};
+
+user.server = {
+	x:0,
+	y:0,
+	
+	attacking:false,
+
+	hasPapa:false,
+	hasSword:false,
+	
+	dead:false,
+	oldWeapon:{
+		has:false,
+		power:false,
+	},
+	weapon:{
+		state:"ready",
+	},
 	log:{
 		has: false,
 		stolen: false,
 		stolenFrom: "",
 		wood: 0,
-	},	
-	
-	server:{
-		x:0,
-		y:0,
-		
-		attacking:false,
+	},
+	powers:{}
+}
 
-		hasPapa:false,
-		hasSword:false,
-		
-		dead:false,
-		weapon:{
-			has:false,
-			power:false,
-		},
-		log:{
-			has: false,
-			stolen: false,
-			stolenFrom: "",
-			wood: 0,
-		},
-		powers:{}
+
+user.log = {
+	has: false,
+	stolen: false,
+	stolenFrom: "",
+	wood: 0,
+};
+
+user.client.weapon = {};
+user.client.weapon.renderData = {
+
+	"winding up": {
+	    "U": {x: 42, y: 12, image: "swordU" },               
+	    "D": {x: - 42, y: 12, image: "swordD"},
+	    "L": {x: 10, y: 42, image: "swordL"},
+	    "R": {x: 10, y: 38, image: "swordR"}
 	},
 
-};
+	"attacking": {
+	    "U": {x: -42, y: 12, image: "swordD" },               
+	    "D": {x: 41, y: 12, image: "swordU" },
+	    "L": {x: 10, y: 38, image: "swordR" },
+	    "R": {x: 10, y: -42, image: "swordL"}
+	},
+
+	"blur": {
+	    "U": {x: 19, y: 19 },               
+	    "D": {x: 19, y: 19 },
+	    "L": {x: 19, y: 17 },
+	    "R": {x: 19, y: 17}
+	},
+	
+	//drawing a swipe using only code
+	"drawBlur": function(player, data){
+	    swipeX = data.x + player.x;
+	    swipeY = data.y + player.y;
+	    radius = 55;
+	    ctx.arc(swipeX, swipeY, radius, 0, Math.PI, true);
+	    ctx.lineWidth = 10;
+	    ctx.strokeStyle = "rgb(255,255,0)";
+	    ctx.stroke();   
+	}
+}
 
 user.swipe = function(){
 	
-	user.weapon.state = "winding up";
-		
-	setTimeout(function() { 
-		user.weapon.state = "attacking";
-		socket.emit("attacked", {name: player.name});
-	}, 250);
-
-	setTimeout(function() { 
-		user.frozen = true;
-	}, 600);
-	
-	setTimeout(function() { 
-		user.weapon.state = "ready";
-		user.frozen = false;
-	}, 1800);
+	socket.emit("begin_swipe", {name: user.name});
 
 }
 
@@ -241,31 +269,35 @@ user.dash = function(){
 	setTimeout(function(){
 		this.dashing = false;
 		this.frozen = true;
-		
-	}, 100);
+	}.bind(this), 100);
 	
 	setTimeout(function(){
-		this.frozen = false;
+		this.frozen = false;	
+	}.bind(this), 700);
 	
-	}, 700);
-	
+};
+
+user.arm = function(){
+	if (user.server.attacking == false) {
+		
+	    socket.emit('arm', {name: user.name, armed: true});
+
+	}else {
+		
+	    socket.emit('arm', {name: user.name, armed: false});
+	}
 }
 
 user.move = function(modifier){
-		
+	
+	
 	if( (this.moved || this.dashing) && !(this.dead || this.frozen) ){
 		
 		this.amount = 256 * modifier;
 		
-		if(this.server.powers.papaBear){
-			
-			this.amount = this.amount * 1.2;
-		}
+		if(this.server.powers.papaBear) this.amount = this.amount * 1.2;
 		
-		if(this.dashing){
-			
-			this.amount = this.amount * 5;
-		}
+		if(this.dashing) this.amount = this.amount * 5;
 		
 		socket.emit('move_input', {direction: this.direction, name: this.name, amount: this.amount});
 	}
@@ -273,16 +305,16 @@ user.move = function(modifier){
 
 var getWidth = function(player){
 	if (player.direction == "U" || player.direction == "D"){
-		return player.weapon.vwidth;
+		return player.oldWeapon.vwidth;
 	}else if (player.direction == "L" || player.direction == "R"){
-		return player.weapon.hwidth;
+		return player.oldWeapon.hwidth;
 	}
 };
 
 var getHeight = function(player){
 	if (player.direction == "U" || player.direction == "D"){
-		return player.weapon.vheight;
+		return player.oldWeapon.vheight;
 	}else if (player.direction == "L" || player.direction == "R"){
-		return player.weapon.hheight;
+		return player.oldWeapon.hheight;
 	}
 };

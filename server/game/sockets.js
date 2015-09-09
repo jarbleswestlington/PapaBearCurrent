@@ -7,180 +7,194 @@ module.exports = function(server, game){
 	io.sockets.on('connection', function(socket) {
 
 		if(game.state == "started"){
-		
+
 			console.log("started game on " + socket.id)
 			game.start(io);
 		}
-	
+
 		socket.on("confirm_name", function(data){
-		
+
 			console.log("confirmed name: "+data.name+" on " + socket.id)
 
 			game.elephant[data.name] = socket;
-		
+
 			var player = game.findPlayerByName(data.name)
-		
+
 			game.elephant[data.name].emit("name_confirmed", {player: player});
-		
+
 		});
 
 		socket.on('startgame_server', function(data){
-		 
+
 			game.startsecond = new Date().getTime() / 1000;
 
 			game.state = "started";	
-		
+
 			game.start(io);
 
 			console.log("started game on " + socket.id)
 
 			setInterval( game.update.bind(game, io) , 200);
 			//process.nextTick(function(){ game.update(io) } );
-	  
-	 	});
+
+		});
 
 		socket.on('stealWood', function(data){
-		  
+
 			var woodTotal = 250;
-		
+
 			var team = game.teams[data.team];
-		
+
 			if(team.score >= 250){
-			
-	  			team.score -= 250;
-				
-			
-			}else{
-			
-				woodTotal = team.score;
-			
-				team.score = 0;
-			
-				
-			}
-			
-	    	var player = game.findPlayerByName(data.name);
-			
-			player.log.has = true;
-				 		 
-			socket.emit('stealTotal', {total: woodTotal})
-		
-		});
+
+				team.score -= 250;
 	
-		socket.on("sendChat", function(data){
+
+			}else{
+
+				woodTotal = team.score;
+
+				team.score = 0;
+
+	
+			}
 
 			var player = game.findPlayerByName(data.name);
-	 
-		 	player.chatText = data.message;
-		 	player.chatting = true;
-		
+
+			player.log.has = true;
+	 		 
+			socket.emit('stealTotal', {total: woodTotal})
+
+			});
+
+			socket.on("sendChat", function(data){
+
+			var player = game.findPlayerByName(data.name);
+
+			player.chatText = data.message;
+			player.chatting = true;
+
 			setTimeout(function() { 
 			 	player.chatting = false;	
 			 }, 5000);
 
 		});
-		
-	    socket.on('arm', function(data){
 
-	    	var player = game.findPlayerByName(data.name);
-	
+		socket.on('arm', function(data){
+
+			var player = game.findPlayerByName(data.name);
+
 			player.attacking = data.armed;
+
+		});
+
+		socket.on('begin_swipe', function(data){
+
+			var player = game.findPlayerByName(data.name);
+
+			player.weapon.state = "winding up";
+		
+			setTimeout(function() { 
+				player.weapon.state = "attacking";
+				player.swipe();
+			}.bind(this), 250);
+
+			setTimeout(function() { 
+				player.frozen = true;
+			}.bind(this), 600);
 	
+			setTimeout(function() { 
+				player.weapon.state = "ready";
+				player.frozen = false;
+			}.bind(this), 1800);
+ 
+
 		});
-		
-	    socket.on('attacked', function(data){
-		
-	    	var player = game.findPlayerByName(data.name);
-			
-			player.swipe();
-		
-		});
-	    
+
 		socket.on('slash', function(data){
 
 			var player = game.findPlayerByName(data.player.name);
-	
+
 			player.slashing = data.slashed;
-	
+
 		});
-	
-	    socket.on('getNote', function(data){
-		
-		 	game.notes[data.id].removed = true;
+
+		socket.on('getNote', function(data){
+
+			game.notes[data.id].removed = true;
 			io.sockets.emit('noteGot', {number: data.id});
 
 		});
-	
-	    socket.on('depLog', function(data){
-			
-	    	var player = game.findPlayerByName(data.name);
-			
+
+		socket.on('depLog', function(data){
+
+			var player = game.findPlayerByName(data.name);
+
 			player.log.has = false;
-		
+
 			game.teams[data.team].score += data.amount;
-			
+
 		});
-	
-	    socket.on('chopTree', function(data){
-			
-	    	var player = game.findPlayerByName(data.name);
-			
+
+		socket.on('chopTree', function(data){
+
+			var player = game.findPlayerByName(data.name);
+
 			player.log.has = true;
-		
-		 	game.trees[data.id].removed = true;
-			
+
+			game.trees[data.id].removed = true;
+
 			io.sockets.emit('treeChopped', {number: data.id});
 
 		});
-	
+
 		socket.on('move_input', function(data){
 
-	   	var dummy = {};
-		var player = game.findPlayerByName(data.name);
+			var dummy = {};
+			var player = game.findPlayerByName(data.name);
 
-		if(!player || player.dead) return;
-		dummy.x = player.x;
-		dummy.y = player.y;
-	   	   
-		if(data.direction == "up"){
-	   
-		   dummy.y = player.y - data.amount;
-	   
-		   player.direction = "U";
+			if(!player || player.dead) return;
+			dummy.x = player.x;
+			dummy.y = player.y;
 
-		}
-		if(data.direction == "down"){
+			if(data.direction == "up"){
 
-		   dummy.y = player.y + data.amount;
-		   player.direction = "D";
+			   dummy.y = player.y - data.amount;
 
-		}
-		if(data.direction == "left"){
+			   player.direction = "U";
 
-		   dummy.x = player.x - data.amount;
-		   player.direction = "L";
+			}
+			if(data.direction == "down"){
 
-		}
-		if(data.direction == "right"){
+			   dummy.y = player.y + data.amount;
+			   player.direction = "D";
 
-		   dummy.x = player.x + data.amount;
-		   player.direction = "R";
+			}
+			if(data.direction == "left"){
 
-		}
+			   dummy.x = player.x - data.amount;
+			   player.direction = "L";
 
-		player.checkCollisions(dummy);
-		player.checkHits();
- 
-	  });
+			}
+			if(data.direction == "right"){
+
+			   dummy.x = player.x + data.amount;
+			   player.direction = "R";
+
+			}
+
+			player.checkCollisions(dummy);
+			player.checkHits();
+
+		});
   
 		socket.on("give_power", function(data){
-	  
+
 			var player = game.findPlayerByName(data.name);
 			player.powers[data.power] = true;
 			console.log(data.power + " given to Player:" + data.name);
-	
-	  });
-  
+
+		});
 
 	});
 	

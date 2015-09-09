@@ -15,7 +15,7 @@ inputManager.processInput = function(){
 	
 	if (16 in inputManager.keys) { // Player pressed shift
 		
-		if(inputManager.pressable.shift && user.weapon.state == "ready"){
+		if(inputManager.pressable.shift && user.server.weapon.state == "ready"){
 						
 			inputManager.pressable.shift = false;
 			
@@ -61,23 +61,27 @@ inputManager.processInput = function(){
 
 	//Check key inputs
 	user.moved = false;
-	user.direction = "";
 	
-	if (38 in inputManager.keys) 
+	if (38 in inputManager.keys) {
 		user.direction = "up";
 		user.moved = true;
+	}
 		
-	if (40 in inputManager.keys)
+	if (40 in inputManager.keys){
 		user.direction = "down";
 		user.moved = true;
+	}
 	
-	if (37 in inputManager.keys)
+	if (37 in inputManager.keys){
 		user.direction = "left";
 		user.moved = true;
+	}
 	
-	if (39 in inputManager.keys)
+	if (39 in inputManager.keys){
 		user.direction = "right";
 		user.moved = true;
+	}
+		
 		
 	if(88 in inputManager.keys){
 		renderer.showNote = false;
@@ -87,31 +91,19 @@ inputManager.processInput = function(){
 	else user.action = false;
 	//equip sword
 	if (75 in inputManager.keys) {		
-		if(inputManager.pressable.k && user.server.powers.weapon == true){
+		if(inputManager.pressable.k && user.server.powers.oldWeapon == true){
 			inputManager.pressable.k = false;
 			
-			if (user.server.attacking == false) {
-				
-				console.log("just armed knife");
-			    socket.emit('arm', {name: user.name, armed: true});
-
-			}else {
-				
-			    socket.emit('arm', {name: user.name, armed: false});
-			}
+			user.arm();
 		}
 	}else{
 		inputManager.pressable.k = true;	
 	}
 	
 
-
 	if (48 in inputManager.keys) {
-	
 		socket.emit('user_killed', {name: user.name});
-	
 	}
-	
 	
 	//special ability: change color
 	if (77 in inputManager.keys) { // change color of character
@@ -133,7 +125,6 @@ inputManager.processInput = function(){
 
 inputManager.masterKeys = function(modifier){	
 	if(13 in this.keys){
-		
 		if(this.pressable.enter){
 			this.pressable.enter = false;
 			socket.emit("startgame_server", {});
