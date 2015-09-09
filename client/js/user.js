@@ -39,7 +39,6 @@ var user = {
 		powers:{}
 	},
 
-
 };
 
 user.swipe = function(){
@@ -206,7 +205,7 @@ user.chopTree = function(treeId){
 		this.log.wood = 50;
 		
 		game.client.trees[treeId].removed = true;
-	    socket.emit('chopTree', {id: treeId});
+	    socket.emit('chopTree', {id: treeId, name: this.name});
 				
  	}
 		
@@ -224,8 +223,7 @@ user.depLog = function(){
 	if(this.log.has){
 		
 		this.log.has = false;
-		console.log('depositing');
-	   	socket.emit('depLog', {team: this.server.team, amount: this.log.wood});
+	   	socket.emit('depLog', {team: this.server.team, name: this.name, amount: this.log.wood});
 	
 	}
 };

@@ -257,9 +257,10 @@ renderer.draw["game"] = function () {
 	}
 		
 	game.forAllPlayers(function(player){
+		
 		//shadows
-		this.drawImage("playershadow", player.x -1 , player.y + 11);
-
+		this.drawImage("playershadow", player.x-1 , player.y+ 21);
+	
 		//CHARACTER DRAWING
 		if(player.dead){
 			
@@ -299,8 +300,8 @@ renderer.draw["game"] = function () {
 					"U":{x:0, y:83, width:60, height:39, playerDelta:{x: -20, y:-5}},
 					"L":{x:0, y:126, width:60, height:40, playerDelta:{x: 0, y:-3}},	
 				}
-
-				this.drawImage("backpack", player.x + backpackSpriteFinder[player.direction].playerDelta.x, player.y + backpackSpriteFinder[player.direction].playerDelta.y, backpackSpriteFinder[player.direction]);
+				
+				this.drawSprite("backpacks", player.x + backpackSpriteFinder[player.direction].playerDelta.x, player.y + backpackSpriteFinder[player.direction].playerDelta.y, backpackSpriteFinder[player.direction]);
 			}
 		
 			if (player.attacking && !player.papaBear){
@@ -324,9 +325,13 @@ renderer.draw["game"] = function () {
 		ctx.font = '20px Calibri';
 		ctx.fillStyle = "rgb(255,255,0)";
 		if(player.chatting) this.fillText(player.chatText, player.x - 40, player.y - 20);
+		
+
 	
 	}.bind(this));
 	
+	
+
 
 	//show text for chopping
 	if(this.treeText && !user.log.has) ctx.fillText("Press space to cut wood!", window.innerWidth/4, window.innerHeight - 100);

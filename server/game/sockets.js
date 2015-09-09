@@ -58,6 +58,10 @@ module.exports = function(server, game){
 			
 				
 			}
+			
+	    	var player = game.findPlayerByName(data.name);
+			
+			player.log.has = true;
 				 		 
 			socket.emit('stealTotal', {total: woodTotal})
 		
@@ -108,14 +112,23 @@ module.exports = function(server, game){
 		});
 	
 	    socket.on('depLog', function(data){
+			
+	    	var player = game.findPlayerByName(data.name);
+			
+			player.log.has = false;
 		
 			game.teams[data.team].score += data.amount;
 			
 		});
 	
 	    socket.on('chopTree', function(data){
+			
+	    	var player = game.findPlayerByName(data.name);
+			
+			player.log.has = true;
 		
 		 	game.trees[data.id].removed = true;
+			
 			io.sockets.emit('treeChopped', {number: data.id});
 
 		});
