@@ -73,7 +73,9 @@ renderer.fillText = function(text, coordX, coordY){
 renderer.draw = {};
 
 renderer.draw["loading"] = function(){
-	ctx.fillText("Loading....99%", window.innerWidth/4, 100);
+	this.UI["big screen"].draw([
+		"Loading..."
+	]);
 }	
 
 renderer.draw["intro"] = function(style){
@@ -91,27 +93,25 @@ renderer.draw["intro"] = function(style){
 
 renderer.draw["server"] = function(){
 
-	ctx.fillStyle = "rgb(255,255,255)";
-
-	ctx.font = "24px Helvetica";
-	ctx.textAlign = "left";
+	this.UI["big screen"].draw([
+		"Connecting to server..."
+	]);
 	
-	 ctx.fillText("Connecting to server...", 100, 120);
-
 }
 
 renderer.draw["score"] = function(){
 	
-	ctx.fillStyle = "rgb(0,0,0)";
-	ctx.font = "24px Helvetica";
-	ctx.textAlign = "left";
-   
-	var y = 20;
+
+	var textArr = []
+	
 	game.forAllTeams(function(team){
 			
-		ctx.fillText(team.name + " : " + team.score , window.innerWidth/4, y+=100);
+		textArr.push(team.name + " : " + team.score);
 			
 	});
+	
+	this.UI["big screen"].draw(textArr);
+	
 
 }
 
@@ -176,16 +176,25 @@ var UI = function(style, box, options){
 				box[prop] = box[prop].slice(1);
 				box[prop] = window[windowProp]/parseFloat(box[prop]);
 			}else{
-				box[prop] == 0;
+				box[prop] = 0;
 			}
 		}
+		
+		
 	}
+		
 	this.draw = function(array){
+		
 		var styleInUse = renderer.styles[style];
 		
 		styleInUse.apply();
 		
 		var y = 0;	
+		
+		if(typeof array == "string" || typeof array == "number" ){
+			 ctx.fillText(array, box.x, box.y, box.width);
+			 return;
+		}
 		
 		for(var i = 0; i < array.length; i++){
 
@@ -251,8 +260,6 @@ renderer.draw["game"] = function () {
 		4:{x:115, y:132, width:111, height:131},
 	}
 	
-	
-	
 	//trees
 	for(var i = 0; i < game.client.trees.length; i++){
 		
@@ -298,11 +305,11 @@ renderer.draw["game"] = function () {
 				"U":{x:2 + ((player.character-1) * 43), y:113, width:41, height:36},
 			}
 			
-			this.drawSprite(game.server.teams[player.team].name + "team", player.x,player.y, playerSpriteFinder[player.direction]);
+			this.drawSprite(game.server.teams[player.renderteam].name + "team", player.x,player.y, playerSpriteFinder[player.direction]);
 	
 		}
 		
-		if(player.dead == false){
+		if(!player.dead && !player.powers.papaBear){
 			
 			if(player.log.has){
 
@@ -316,7 +323,7 @@ renderer.draw["game"] = function () {
 				this.drawSprite("backpacks", player.x + backpackSpriteFinder[player.direction].playerDelta.x, player.y + backpackSpriteFinder[player.direction].playerDelta.y, backpackSpriteFinder[player.direction]);
 			}
 		
-			if (player.attacking && !player.papaBear){
+			if (player.attacking){
 				//SWORD DRAWING		
 				
 				var swordHelper = {
@@ -325,22 +332,15 @@ renderer.draw["game"] = function () {
 					"R":{x:36, y:22},
 					"L":{x:-26, y:22},
 				}
-				
-				console.log("should be drawing sowrd");
-				
+								
 				this.drawRect("rgb(200,200,200)", player.x + swordHelper[player.direction].x, player.y + swordHelper[player.direction].y, getWidth(player), getHeight(player));	
 			}	
 		
 		}	
 		
 	    var weapon = user.client.weapon;
-	    weapon.renderData.drawBlur(player, weapon.renderData.blur[player.direction]);
-    	
-	    if(weapon.renderData[player.weapon.state]){
-			console.log("showed up brah");
-			console.log(player.weapon.state);
-	        this.drawImageRelative(weapon.renderData[player.weapon.state][player.direction], player);
-	    }
+		if(player.weapon.state == "attacking") weapon.renderData.drawBlur(player, weapon.renderData.blur[player.direction]);
+	    if(weapon.renderData[player.weapon.state]) this.drawImageRelative(weapon.renderData[player.weapon.state][player.direction], player);
 		
 		//chat drawing
 		ctx.font = '20px Calibri';
@@ -354,31 +354,21 @@ renderer.draw["game"] = function () {
 
 
 	//show text for chopping
-	if(this.treeText && !user.log.has) ctx.fillText("Press space to cut wood!", window.innerWidth/4, window.innerHeight - 100);
+	if(this.treeText && !user.log.has) this.UI['action prompt'].draw("Press space to cut wood!");
 
 	//show text for stealing
-	if(this.stealText && !user.log.has) ctx.fillText("Press space to steal wood!", window.innerWidth/4, window.innerHeight - 100);
+	if(this.stealText && !user.log.has) this.UI['action prompt'].draw("Press space to steal wood!");
 		
 	//show respawn text
-	if(user.server.dead) ctx.fillText("You will respawn soon", window.innerWidth/8, 325);	
+	if(user.server.dead) this.UI['game screen'].draw("You will respawn soon!");
 	
 	//time limit
 	if(game.currentSec > game.timeLimit - 100) ctx.fillStyle = "rgb(255,0,0)";
 	else ctx.fillStyle = "rgb(0,0,0)";
 
-	ctx.fillText((game.timeLimit - game.currentSec) + " Seconds Left", 50, 80);
+	this.UI["timer"].draw((game.timeLimit - game.currentSec) + " seconds remaining");
 	
 	//show note text
-	if(this.showNote){
-		
-		ctx.font = '28px Calibri';
+	if(this.showNote) this.UI["big screen"].draw(this.currentNote.lines);
 
-		this.currentNote.lines.forEach(function(line, i){
-			
-			ctx.fillText(line, window.innerWidth/8, 200 + (i*25));
-			
-		}.bind(this));
-	
-	}
-		
 };

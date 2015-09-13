@@ -7,8 +7,8 @@ var user = {
 	dashing:false,
 	dashStart:0,
 	moved: false,
-	frozen: false,
 	client:{},
+	frozen:false,
 	
 
 };
@@ -51,32 +51,34 @@ user.client.weapon = {};
 user.client.weapon.renderData = {
 
 	"winding up": {
-	    "U": {x: 42, y: 12, image: "swordU" },               
-	    "D": {x: - 42, y: 12, image: "swordD"},
-	    "L": {x: 10, y: 42, image: "swordL"},
+	    "U": {x: 42, y: 12, image: "swordD" },               
+	    "D": {x: - 42, y: 12, image: "swordU"},
+	    "L": {x: 10, y: -42, image: "swordL"},
 	    "R": {x: 10, y: 38, image: "swordR"}
 	},
 
 	"attacking": {
-	    "U": {x: -42, y: 12, image: "swordD" },               
-	    "D": {x: 41, y: 12, image: "swordU" },
+	    "U": {x: -42, y: 12, image: "swordU" },               
+	    "D": {x: 41, y: 12, image: "swordD" },
 	    "L": {x: 10, y: 38, image: "swordR" },
 	    "R": {x: 10, y: -42, image: "swordL"}
 	},
 
 	"blur": {
-	    "U": {x: 19, y: 19 },               
-	    "D": {x: 19, y: 19 },
-	    "L": {x: 19, y: 17 },
-	    "R": {x: 19, y: 17}
+	    "U": {x: 19, y: 19, num1: 0, num2: (Math.PI), reversal: true},               
+	    "D": {x: 19, y: 19, num1: 0, num2: (Math.PI), reversal: false},
+	    "L": {x: 19, y: 17, num1: 4.7, num2: (Math.PI*.5), reversal: true},
+	    "R": {x: 19, y: 17, num1: 4.7, num2: (Math.PI*.5), reversal: false}
+
 	},
 	
 	//drawing a swipe using only code
 	"drawBlur": function(player, data){
-	    swipeX = data.x + player.x;
-	    swipeY = data.y + player.y;
+	    swipeX = data.x + player.x + renderer.camera.x;
+	    swipeY = data.y + player.y + renderer.camera.y;
+	    ctx.beginPath();
 	    radius = 55;
-	    ctx.arc(swipeX, swipeY, radius, 0, Math.PI, true);
+	    ctx.arc(swipeX, swipeY, radius, data.num1, data.num2, data.reversal);
 	    ctx.lineWidth = 10;
 	    ctx.strokeStyle = "rgb(255,255,0)";
 	    ctx.stroke();   
@@ -177,7 +179,7 @@ user.interactWNote = function(){
 					if(chance < 10){
 						probability = 1;	
 					}else{
-						probability = 2;
+						probability = 1;
 					}
 				
 					var notes = noteIndex[probability].filter(function(note){
@@ -216,7 +218,7 @@ user.stealWood = function(team){
 		
 		this.log.stolenFrom = team;
 		
-	    socket.emit('stealWood', {team: team});
+	    socket.emit('stealWood', {team: team, name: this.name});
 				
  	}
 	
@@ -289,9 +291,8 @@ user.arm = function(){
 }
 
 user.move = function(modifier){
-	
-	
-	if( (this.moved || this.dashing) && !(this.dead || this.frozen) ){
+
+	if( (this.moved || this.dashing) && !(this.dead || this.frozen || this.server.frozen) ){
 		
 		this.amount = 256 * modifier;
 		

@@ -19,7 +19,7 @@ game.client.notes = [
 
 	new Note(["You have picked up a disguise. Hold 'm' and then", 
 	"press r,g or b to impersonate another team."],
-	{prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}), 
+	{prob: 1, condition: 0, action:{func: user.givePower, args: ["disguise"]}}), 
 
 	new Note(["What sort of notes have your teammates read? Are they hiding something?"],
 	{prob: 1, condition: 0}), 
@@ -38,20 +38,24 @@ game.client.notes = [
 	{prob: 1, condition: function(){ return !game.getPowerStats("papaBear").has} }),
 
 	new Note(["You are now Papa Bear"], 
-	{prob: 2, condition: function(){ return !game.getPowerStats("papaBear").has}, 
+	{prob: 1, condition: function(){ return !game.getPowerStats("papaBear").has}, 
 	action:{func: user.givePower, args: ["papaBear"]} }), 
  
 ];
 
 renderer.styles = {
-	"large": new Style("rgb(255,255,255)", {fontSize: 2, lineWidth: 1}),
-	"block text": new Style("rgb(255,255,255)", {fontSize: 1, lineWidth: .2}),
+	"large": new Style("rgb(255,255,255)", {fontSize: 1.8, lineWidth: 1}),
+	"block text": new Style("rgb(255,255,255)", {fontSize: .75, lineWidth: .2}),
+	"note": new Style("rgb(255,255,255)", {fontSize: 1.5, lineWidth: .2}),
+	
 }
 
 renderer.UI = {
-	"action prompt" : new UI("large", {x: "/4", y: "-100", width: "/2", height: "/1"}),
 	"big screen" : new UI("block text", {x: "/10", y: 100, width: "/1.2", height: "-100"}),
-	"game screen" : new UI("block text", {x: "/6", y: 200, width: "/1.3", height: "-200"})
+	"game screen" : new UI("block text", {x: "/6", y: 200, width: "/1.3", height: "-200"}),
+	"action prompt" : new UI("large", {x: "/4", y: "-100", width: "/2", height: "/1"}),
+	"timer" : new UI("block text", {x: "/30", y: "/15", width: "/5", height: "/8"}),
+	
 }
 
 //upload all images

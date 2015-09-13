@@ -62,24 +62,28 @@ inputManager.processInput = function(){
 	//Check key inputs
 	user.moved = false;
 	
-	if (38 in inputManager.keys) {
-		user.direction = "up";
-		user.moved = true;
-	}
-		
-	if (40 in inputManager.keys){
-		user.direction = "down";
-		user.moved = true;
-	}
+	if(!user.server.frozen && !user.frozen){
 	
-	if (37 in inputManager.keys){
-		user.direction = "left";
-		user.moved = true;
-	}
+		if (38 in inputManager.keys) {
+			user.direction = "up";
+			user.moved = true;
+		}
+			
+		if (40 in inputManager.keys){
+			user.direction = "down";
+			user.moved = true;
+		}
+
+		if (37 in inputManager.keys){
+			user.direction = "left";
+			user.moved = true;
+		}
+
+		if (39 in inputManager.keys){
+			user.direction = "right";
+			user.moved = true;
+		}
 	
-	if (39 in inputManager.keys){
-		user.direction = "right";
-		user.moved = true;
 	}
 		
 		
@@ -93,7 +97,6 @@ inputManager.processInput = function(){
 	if (75 in inputManager.keys) {		
 		if(inputManager.pressable.k && user.server.powers.oldWeapon == true){
 			inputManager.pressable.k = false;
-			
 			user.arm();
 		}
 	}else{
@@ -107,16 +110,16 @@ inputManager.processInput = function(){
 	
 	//special ability: change color
 	if (77 in inputManager.keys) { // change color of character
-		if (user.server.canDisguise == true){// has ability
+		if (user.server.powers.disguise == true){// has ability
 			//pick team
 			if (66 in inputManager.keys) {
-				socket.emit('changeteam', {name: user.name, canDisguise: false, team: "blue"});
+				socket.emit('change_team', {name: user.server.name, team: "blue"});
 			}
 			if (82 in inputManager.keys) {
-				socket.emit('changeteam', {name: user.name, canDisguise: false, team: "red"});
+				socket.emit('change_team', {name: user.server.name, team: "red"});
 			} 
 			if (71 in inputManager.keys) {
-				socket.emit('changeteam', {name: user.name, canDisguise: false, team: "green"});
+				socket.emit('change_team', {name: user.server.name, team: "green"});
 			} 
 		}
 	}	
@@ -127,7 +130,11 @@ inputManager.masterKeys = function(modifier){
 	if(13 in this.keys){
 		if(this.pressable.enter){
 			this.pressable.enter = false;
-			socket.emit("startgame_server", {});
+			if(game.state == "game"){
+				//socket.emit()
+			}else{
+				socket.emit("startgame_server", {});
+			}
 		} 
 	}
 	if (38 in this.keys) { // user holding up

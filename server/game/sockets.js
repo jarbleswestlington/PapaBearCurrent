@@ -93,14 +93,14 @@ module.exports = function(server, game){
 			var player = game.findPlayerByName(data.name);
 
 			player.weapon.state = "winding up";
-		
+			player.frozen = true;
+
 			setTimeout(function() { 
 				player.weapon.state = "attacking";
 				player.swipe();
 			}.bind(this), 250);
 
 			setTimeout(function() { 
-				player.frozen = true;
 			}.bind(this), 600);
 	
 			setTimeout(function() { 

@@ -17,6 +17,7 @@ module.exports = function(game){
 	
 		this.powers = {};
 
+		this.frozen = false;
 		this.canDisguise = false;
 		this.swordBearer = false;
 		this.chosenOne = false;
@@ -227,10 +228,7 @@ module.exports = function(game){
 	Player.prototype.swipe = function(){
 		
 		game.forAllOtherAlivePlayers(this, function(oPlayer){
-			
-			console.log(oPlayer);
-			
-
+					
 		    var boxes = this.weaponColBoxes[this.direction];
 
 		    boxes.forEach(function(box){
