@@ -1,3 +1,17 @@
+//make weapon.js, put spear and sword in there
+//prevent duplicate notes
+//allow various texts to appear for each note
+//config probability definitions
+//remove all non input key logic from InpuntManager
+//create a mapping function to map keys to functions
+//remove socket emitting from other turn into functions
+//remove non socket logic from socket.js
+//move everything to server side eventually
+//add tree lighting power
+//player can self config powers
+//configurable random generation of trees and bases and stuff
+//bow and arrow
+
 game.client.notes = [ 
 
 	new Note(["If you manage to steal your opponent's wood, there is a considerable payoff."], {prob: 1, condition: 0}),
@@ -6,14 +20,14 @@ game.client.notes = [
 
 	new Note(["Press ENTER to chat with nearby users"], {prob: 1, condition: 0}),
 
-	new Note(["You can now press 'k' to wield a deadly weapon."], 
-	{prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
+	new Note(["You can now press 'k' to wield a deadly spear."], 
+	{prob: 1, condition: 0, action:{func: user.givePower, args: ["spear"]}}),
 
-	new Note(["You have picked up a knife. Press 'k' to use it, but be careful where you point it."],
-	{prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
+	new Note(["You have picked up a spear. Press 'k' to use it, but be careful where you point it."],
+	{prob: 1, condition: 0, action:{func: user.givePower, args: ["spear"]}}),
 
-	new Note(["Press 'k' to brandish your knife and then press 'k' again to hide it."],
-	{prob: 1, condition: 0, action:{func: user.givePower, args: ["weapon"]}}),
+	new Note(["Press 'k' to brandish your spear and then press 'k' again to hide it."],
+	{prob: 1, condition: 0, action:{func: user.givePower, args: ["spear"]}}),
 
 	new Note(["Appearances can be deceiving...stay on guard"], {prob: 1, condition: 0}),
 

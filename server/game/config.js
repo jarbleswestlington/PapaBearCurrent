@@ -1,3 +1,12 @@
+//collision objects
+//remove non socket logic from socket.js
+//allow master to enter as a player
+//allow spectator
+//collisions with bases
+//setup Server
+//start with test config
+//fix papabear getting stuck
+
 module.exports = function(game){
 	
 	var Team = require('./team.js')(game);

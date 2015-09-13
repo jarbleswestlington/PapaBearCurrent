@@ -46,7 +46,6 @@ renderer.drawImageRelative = function(item , influence){
 	newItem.x = item.x + influence.x;
 	newItem.y = item.y + influence.y;
 	newItem.image = item.image;
-	console.dir(newItem);
 	this.drawImage(newItem);
 	
 }
@@ -324,16 +323,16 @@ renderer.draw["game"] = function () {
 			}
 		
 			if (player.attacking){
-				//SWORD DRAWING		
+				//spear DRAWING		
 				
-				var swordHelper = {
+				var spearHelper = {
 					"U":{x: 36, y: -22},
 					"D":{x:0, y: 20},
 					"R":{x:36, y:22},
 					"L":{x:-26, y:22},
 				}
 								
-				this.drawRect("rgb(200,200,200)", player.x + swordHelper[player.direction].x, player.y + swordHelper[player.direction].y, getWidth(player), getHeight(player));	
+				this.drawRect("rgb(200,200,200)", player.x + spearHelper[player.direction].x, player.y + spearHelper[player.direction].y, getWidth(player), getHeight(player));	
 			}	
 		
 		}	
@@ -349,9 +348,6 @@ renderer.draw["game"] = function () {
 		
 	
 	}.bind(this));
-	
-	
-
 
 	//show text for chopping
 	if(this.treeText && !user.log.has) this.UI['action prompt'].draw("Press space to cut wood!");

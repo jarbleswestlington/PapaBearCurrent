@@ -1,9 +1,4 @@
-//socket org -- elephant and all the naming
-//file names/ dependency injections
-//master player
-//spectator
-//collisions with bases
-//setup Server
+
 var game = require('./game/game');
 
 var app = require("./app/index")(game);

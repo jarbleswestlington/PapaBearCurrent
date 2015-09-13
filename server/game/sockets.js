@@ -87,6 +87,21 @@ module.exports = function(server, game){
 			player.attacking = data.armed;
 
 		});
+		
+		socket.on('change_team', function(data){
+
+			var player = game.findPlayerByName(data.name);
+			
+			if(player.renderteam != data.team){ player.renderteam = data.team;
+			
+				console.log(player.name + " disguised themself as the " + data.team + " team");
+				
+			}else{
+				
+				console.log("yo");
+			}
+			
+		});
 
 		socket.on('begin_swipe', function(data){
 

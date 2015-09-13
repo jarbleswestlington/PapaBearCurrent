@@ -10,7 +10,10 @@ var user = {
 	client:{},
 	frozen:false,
 	
-
+	spear:{
+		
+		
+	}
 };
 
 user.server = {
@@ -23,7 +26,7 @@ user.server = {
 	hasSword:false,
 	
 	dead:false,
-	oldWeapon:{
+	spear:{
 		has:false,
 		power:false,
 	},
@@ -38,7 +41,6 @@ user.server = {
 	},
 	powers:{}
 }
-
 
 user.log = {
 	has: false,
@@ -288,7 +290,7 @@ user.arm = function(){
 		
 	    socket.emit('arm', {name: user.name, armed: false});
 	}
-}
+};
 
 user.move = function(modifier){
 
@@ -302,20 +304,20 @@ user.move = function(modifier){
 		
 		socket.emit('move_input', {direction: this.direction, name: this.name, amount: this.amount});
 	}
-}
+};
 
 var getWidth = function(player){
 	if (player.direction == "U" || player.direction == "D"){
-		return player.oldWeapon.vwidth;
+		return player.spear.vwidth;
 	}else if (player.direction == "L" || player.direction == "R"){
-		return player.oldWeapon.hwidth;
+		return player.spear.hwidth;
 	}
 };
 
 var getHeight = function(player){
 	if (player.direction == "U" || player.direction == "D"){
-		return player.oldWeapon.vheight;
+		return player.spear.vheight;
 	}else if (player.direction == "L" || player.direction == "R"){
-		return player.oldWeapon.hheight;
+		return player.spear.hheight;
 	}
 };

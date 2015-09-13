@@ -12,17 +12,12 @@ module.exports = function(game){
 		this.direction = "D";
 	
 		this.attacking = false;
-		this.slashing = false;
+		
 		this.character = Math.floor((Math.random() * 3) + 1);
 	
 		this.powers = {};
 
 		this.frozen = false;
-		this.canDisguise = false;
-		this.swordBearer = false;
-		this.chosenOne = false;
-		this.hasPapa = false;
-		this.hasSword = false;
 	
 		this.dead = false;
 	
@@ -30,9 +25,7 @@ module.exports = function(game){
 		this.chatText =  "";
 		this.illegal = false;
 	
-
-	
-		this.oldWeapon = {
+		this.spear = {
 			has:false,
 			attacking:false,
 			hwidth : 30,
@@ -42,16 +35,16 @@ module.exports = function(game){
 
 			getWidth: function(){
 				if (this.direction == "U" || this.direction == "D"){
-					return this.oldWeapon.vwidth;
+					return this.spear.vwidth;
 				}else if (this.direction == "L" || this.direction == "R"){
-					return this.oldWeapon.hwidth;
+					return this.spear.hwidth;
 				}
 			},
 			getHeight: function(){
 				if (this.direction == "U" || this.direction == "D"){
-					return this.oldWeapon.vheight;
+					return this.spear.vheight;
 				}else if (this.direction == "L" || this.direction == "R"){
-					return this.oldWeapon.hheight;
+					return this.spear.hheight;
 				}
 			}
 
@@ -175,6 +168,24 @@ module.exports = function(game){
 	
 	
 	}
+	
+	Player.prototype.die = function(){
+		
+		this.dead = true;
+		 
+
+		this.spawn(function(spawn){
+
+			setTimeout(function() { 
+				this.x = spawn.x;
+				this.y = spawn.y;
+				this.dead = false;
+				this.powers.papaBear = false;
+		
+			 }.bind(this), 8000);
+
+		}.bind(this));
+	}
 
 	Player.prototype.checkHits = function(){
 	
@@ -201,23 +212,11 @@ module.exports = function(game){
 			}		
 	
 			if(hit){
+        		
+				console.log(this.name + "killed" + oPlayer.name);
 
-				oPlayer.dead = true;
-
-				console.log(this.name + " killed " + oPlayer.name);
 				game.elephant[oPlayer.name].emit("death", {});
-
-				oPlayer.spawn(function(spawn){
-
-					setTimeout(function() { 
-						oPlayer.x = spawn.x;
-						oPlayer.y = spawn.y;
-						oPlayer.dead = false;
-						oPlayer.powers.papaBear = false;
-				
-					 }, 8000);
-
-				});
+				oPlayer.die();
 	
 			}
 	
@@ -232,13 +231,12 @@ module.exports = function(game){
 		    var boxes = this.weaponColBoxes[this.direction];
 
 		    boxes.forEach(function(box){
-
-				console.log(box);
 				
 		        if(game.colCheckRelative({item: box, influencer: this}, oPlayer, {x:0, y:0})){
             		console.log(this.name + "killed" + oPlayer.name);
 					
 		            game.elephant[oPlayer.name].emit("death", {});
+					oPlayer.die();
 		        }
 
 			}.bind(this));

@@ -95,7 +95,7 @@ inputManager.processInput = function(){
 	else user.action = false;
 	//equip sword
 	if (75 in inputManager.keys) {		
-		if(inputManager.pressable.k && user.server.powers.oldWeapon == true){
+		if(inputManager.pressable.k && user.server.powers.spear == true){
 			inputManager.pressable.k = false;
 			user.arm();
 		}
