@@ -14,7 +14,7 @@ module.exports = function(server, game){
 
 		socket.on("confirm_name", function(data){
 
-			console.log("confirmed name: "+data.name+" on " + socket.id)
+			console.log("confirmed player "+data.name+" on socket" + socket.id)
 
 			game.elephant[data.name] = socket;
 
@@ -34,7 +34,7 @@ module.exports = function(server, game){
 
 			console.log("started game on " + socket.id)
 
-			setInterval( game.update.bind(game, io) , 200);
+			setTimeout( game.update.bind(game, io) , 0);
 			//process.nextTick(function(){ game.update(io) } );
 
 		});
@@ -92,13 +92,9 @@ module.exports = function(server, game){
 
 			var player = game.findPlayerByName(data.name);
 			
-			if(player.renderteam != data.team){ player.renderteam = data.team;
-			
+			if(player.renderteam != data.team){ 
+				player.renderteam = data.team;
 				console.log(player.name + " disguised themself as the " + data.team + " team");
-				
-			}else{
-				
-				console.log("yo");
 			}
 			
 		});
@@ -108,10 +104,10 @@ module.exports = function(server, game){
 			var player = game.findPlayerByName(data.name);
 
 			player.weapon.state = "winding up";
-			player.frozen = true;
 
 			setTimeout(function() { 
 				player.weapon.state = "attacking";
+				player.frozen = true;
 				player.swipe();
 			}.bind(this), 250);
 
