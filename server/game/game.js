@@ -37,7 +37,7 @@ Game.prototype.update = function(io) {
 
 	io.sockets.emit('update_clients', {game: this, time: this.currentSec});
 	
-	setTimeout( this.update.bind(this, io) , 0);
+	setTimeout( this.update.bind(this, io) , 50);
 	
 	
 }

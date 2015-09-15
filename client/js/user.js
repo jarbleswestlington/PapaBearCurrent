@@ -253,7 +253,7 @@ user.getNote = function(noteId){
 user.depLog = function(){
 	
 	if(this.log.has){
-		
+		if(this.log.stolen) this.log.stolen = false; 
 		this.log.has = false;
 	   	socket.emit('depLog', {team: this.server.team, name: this.name, amount: this.log.wood});
 	

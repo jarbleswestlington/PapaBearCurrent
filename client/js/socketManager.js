@@ -36,7 +36,7 @@ socket.on("death", function(data){
 	
 		user.log.stolen = false;
 
-		socket.emit("depLog", {team: user.log.stolenFrom, amount: user.log.wood})
+		socket.emit("depLog", {team: user.log.stolenFrom, name: user.name, amount: user.log.wood})
 
 		user.log.stolenFrom = "";
 	

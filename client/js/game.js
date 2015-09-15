@@ -133,7 +133,6 @@ game.update = function (modifier) {
 
 game.stateManager = function () {
 
-	//delta modifier
     var now = Date.now();
     var delta = now - this.then;
 	
@@ -143,7 +142,7 @@ game.stateManager = function () {
       
 	if(game.state == "loading"){
 		
-		if(renderer.hasLoaded()) game.state = "waiting";
+		if(renderer.hasLoaded() && soundscape.hasLoaded()) game.state = "waiting";
 
 	}
    
@@ -191,8 +190,6 @@ game.stateManager = function () {
 	
 	this.then = now;
 
-	//console.log("gamesate");
 	animate(game.stateManager);
-	//renderer.animate.bind(window, game.stateManager);
 	     
 };
