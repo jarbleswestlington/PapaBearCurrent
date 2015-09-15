@@ -97,3 +97,13 @@ var imageArray = ["bear",
 imageArray.forEach(function(image){
 	renderer.upload(image);
 });
+
+var audioArray = ["bear"];
+audioArray.forEach(function(audio){
+	soundscape.upload(audio);
+});
+
+//example of how to play a sound
+soundscape.play("bear");
+
+
