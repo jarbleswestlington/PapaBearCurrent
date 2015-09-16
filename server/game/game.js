@@ -39,7 +39,6 @@ Game.prototype.update = function(io) {
 	
 	setTimeout( this.update.bind(this, io) , 50);
 	
-	
 }
 
 Game.prototype.start = function(io){
