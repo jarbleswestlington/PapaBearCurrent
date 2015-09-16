@@ -33,6 +33,18 @@ soundscape.play = function(ref){
 	this.refs[ref].play();
 }
 
+soundscape.playOnce = function(ref){
+	
+	var played = false;
+
+	return function(){
+		if(!played) {
+			this.refs[ref].play();
+			played = true;
+		}
+	}
+}
+
 
 // Sound.prototype = Object.create(Audio.prototype);
 // Sound.prototype.constructor = Sound;
