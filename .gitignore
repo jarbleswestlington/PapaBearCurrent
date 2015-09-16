@@ -1,1 +1,5 @@
-#Ignore these directories node_modules js images
+.idea
+node_modules
+npm-debug.log
+.DS_Store
+coverage
