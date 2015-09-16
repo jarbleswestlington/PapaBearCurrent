@@ -109,17 +109,16 @@ module.exports = function(server, game){
 				player.weapon.state = "attacking";
 				player.frozen = true;
 				player.swipe();
-			}.bind(this), 250);
+			}, 250);
 
 			setTimeout(function() { 
-			}.bind(this), 600);
+			}, 600);
 	
 			setTimeout(function() { 
 				player.weapon.state = "ready";
 				player.frozen = false;
-			}.bind(this), 1800);
+			}, 1800);
  
-
 		});
 
 		socket.on('slash', function(data){
