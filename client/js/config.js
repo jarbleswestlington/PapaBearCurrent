@@ -98,12 +98,13 @@ imageArray.forEach(function(image){
 	renderer.upload(image);
 });
 
-var audioArray = ["bear"];
+var audioArray = ["bear", 
+"swipe"];
 audioArray.forEach(function(audio){
 	soundscape.upload(audio);
 });
 
 //example of how to play a sound
-soundscape.play("bear");
+//soundscape.play("bear");
 
 
