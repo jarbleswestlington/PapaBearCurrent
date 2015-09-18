@@ -10,10 +10,7 @@ var user = {
 	client:{},
 	frozen:false,
 	
-	spear:{
-		
-		
-	}
+	spear:{}
 };
 
 user.server = {

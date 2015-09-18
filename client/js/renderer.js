@@ -340,9 +340,6 @@ renderer.draw["game"] = function () {
 	    var weapon = user.client.weapon;
 		if(player.weapon.state == "attacking") weapon.renderData.drawBlur(player, weapon.renderData.blur[player.direction]);
 	    if(weapon.renderData[player.weapon.state]) this.drawImageRelative(weapon.renderData[player.weapon.state][player.direction], player);
-		if(player.weapon.state == "attacking"){
-			soundscape.play("swipe");
-			}
 		//chat drawing
 		ctx.font = '20px Calibri';
 		ctx.fillStyle = "rgb(255,255,0)";

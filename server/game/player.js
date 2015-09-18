@@ -64,7 +64,6 @@ module.exports = function(game){
 
 	};
 
-
 	Player.prototype.spawn = function(func){
 
 		var spawnCoords = {};
