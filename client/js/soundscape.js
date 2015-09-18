@@ -35,7 +35,8 @@ soundscape.checkToPlay = function(){
 		if(item.cond()){
 			item.audio.play();
 			item.audio.onended = function(){ 
-				delete this.conditionals[i] }.bind(this);
+				this.conditionals.splice(i); 
+			}.bind(this);
 		}
 	}.bind(this));
 	

@@ -1,5 +1,5 @@
 socket.on('name_confirmed', function(data) {
-	user.server = data.player;
+	if(user.name !== "master") user.server = data.player;
 	user.confirmed = true;
 });
 
