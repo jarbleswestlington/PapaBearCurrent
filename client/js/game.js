@@ -189,6 +189,8 @@ game.stateManager = function () {
 	if(renderer.draw[renderer.state]) renderer.draw[renderer.state].call(renderer);
 	
 	this.then = now;
+	
+	soundscape.checkToPlay();
 
 	animate(game.stateManager);
 	     

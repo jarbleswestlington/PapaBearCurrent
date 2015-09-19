@@ -340,17 +340,15 @@ renderer.draw["game"] = function () {
 	    var weapon = user.client.weapon;
 		if(player.weapon.state == "attacking") weapon.renderData.drawBlur(player, weapon.renderData.blur[player.direction]);
 	    if(weapon.renderData[player.weapon.state]) this.drawImageRelative(weapon.renderData[player.weapon.state][player.direction], player);
-		if(player.weapon.state == "attacking"){
-			soundscape.play("swipe");
-			}
 		//chat drawing
 		ctx.font = '20px Calibri';
 		ctx.fillStyle = "rgb(255,255,0)";
 		if(player.chatting) this.fillText(player.chatText, player.x - 40, player.y - 20);
 		
-	
 	}.bind(this));
-
+	
+    if(this.displayPoints) this.fillText("+" + user.log.wood, user.server.x - 10, user.server.y - 16);
+	
 	//show text for chopping
 	if(this.treeText && !user.log.has) this.UI['action prompt'].draw("Press space to cut wood!");
 
