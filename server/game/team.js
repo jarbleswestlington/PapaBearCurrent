@@ -10,14 +10,19 @@ module.exports = function(game){
 		this.y = coord.y;
 		this.baseX = (coord.x + (coord.width/2)) * 78;
 		this.baseY = (coord.y + (coord.height/2)) * 78;
-		this.base = coord;
 		this.width = coord.width;
 		this.height = coord.height;
-		
+		this.base = { x:(coord.x + (coord.width/2)) * 78, y: (coord.y + (coord.height/2)) * 78}
 		game.defineTerritory("team", coord);
 		game.teams[name] = this;
-		
 	};
+	
+	Team.prototype.baseColBoxes = [
+		{x: 0, y: 20, width: 40, height: 50},
+		{x: 40, y: 8, width: 80, height: 62},
+		{x: 120, y: 20, width: 40, height: 50},
+		
+	];
 
 	Team.prototype.addPlayer = function(name){
 		

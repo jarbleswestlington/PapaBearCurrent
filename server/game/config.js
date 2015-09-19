@@ -19,8 +19,8 @@ module.exports = function(game){
 
 	new Team("green", {x: 50, y: 50, width: 10, height: 10});
 	
-	// game.defineTerritory("forest", {x: 0, y: 0, height: game.size.height, width: 5});
-	// game.defineTerritory("forest", {x: 0, y: 0, height: 5, width: game.size.width});
+	game.defineTerritory("forest", {x: 0, y: 0, height: game.size.height, width: 5});
+	game.defineTerritory("forest", {x: 0, y: 0, height: 5, width: game.size.width});
 	
 	game.spawnNotesAndTrees();
 	

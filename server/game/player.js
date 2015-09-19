@@ -85,28 +85,18 @@ module.exports = function(game){
 
 		do{
 
-			free = true;
+			illegal = false;
 
-			var collision = getXY();
+			var spawnLoc = getXY();
 
-			game.forAllOtherPlayers(this, function(player){
-
-				if(game.checkCollision(collision, player, 41, 36, 41, 36, 0, 0)) free = false;
-
-			});
+			illegal = this.checkCollisions(spawnLoc);
 		
-			game.forAllTrees(function(tree){
-			
-				if(game.checkCollision(collision, tree, 41, 36, 78, 78, 0, 0)) free = false;
-			
-			});
-		
-		}while(!free);
+		}while(illegal);
 
 		if(!func){
 
-			this.x = collision.x;
-			this.y = collision.y;
+			this.x = spawnLoc.x;
+			this.y = spawnLoc.y;
 
 		}else{
 
@@ -124,8 +114,19 @@ module.exports = function(game){
 			if(dummy.x > game.pixels.width || dummy.y > game.pixels.height || dummy.x < 0 || dummy.y < 0){
 				
 				illegal = true;
-				return;
+				return true;
 			} 
+			
+			game.forAllTeams(function(team){
+				
+				var boxes = team.baseColBoxes;
+				
+				boxes.forEach(function(box){
+					
+					if(game.colCheckRelative(dummy, {item: box, influencer: {x: team.baseX, y: team.baseY} } )) illegal = true;
+					
+				}.bind(this));
+			}.bind(this));
 			
 			if(!this.powers.papaBear){
 	
@@ -150,7 +151,7 @@ module.exports = function(game){
 						if(game.checkCollision(dummy, game.trees[i], 63, 63, 78, 78, 0, 0)){
 		
 							illegal = true;
-							return;
+							return true;
 			
 						}
 		
@@ -159,7 +160,7 @@ module.exports = function(game){
 						if(game.checkCollision(dummy, game.trees[i], 41, 36, 78, 78, 0, 0)){
 		
 							illegal = true;
-							return;
+							return true;
 			
 						}
 					}
@@ -172,14 +173,8 @@ module.exports = function(game){
 		
 		check();
 	
-		if(!illegal){
-		
-			this.x = dummy.x;
-			this.y = dummy.y;
-		
-		}
-	
-	
+		if(illegal) return true;
+		else return false;	
 	}
 	
 	Player.prototype.die = function(){

@@ -110,12 +110,14 @@ Game.prototype.colCheck = function(smaller, bigger, padding){
 	
 }
 
-Game.prototype.colCheckRelative = function(smallerGroup, bigger, padding){
+Game.prototype.colCheckRelative = function(smallerGroup, biggerGroup, padding){
 	if(!padding) padding = {x:0, y: 0, width:0, height: 0};
+	
+	if(biggerGroup.item) biggerGroup = {x: biggerGroup.item.x + biggerGroup.influencer.x, y: biggerGroup.item.y + biggerGroup.influencer.y, width: biggerGroup.item.width, height: biggerGroup.item.height};
 
-	var smaller = {x: smallerGroup.item.x + smallerGroup.influencer.x, y: smallerGroup.item.y + smallerGroup.influencer.y, width: smallerGroup.item.width, height: smallerGroup.item.height};
+	if(smallerGroup.item) smallerGroup = {x: smallerGroup.item.x + smallerGroup.influencer.x, y: smallerGroup.item.y + smallerGroup.influencer.y, width: smallerGroup.item.width, height: smallerGroup.item.height};
 
-	return this.colCheck(smaller, bigger, padding);
+	return this.colCheck(smallerGroup, biggerGroup, padding);
 }
 
 Game.prototype.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){

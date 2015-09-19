@@ -213,7 +213,6 @@ renderer.draw["game"] = function () {
 	for(var x = 0; x < ((game.server.size.width/12.1)); x++){
 	
 		for(var y = 0; y < ((game.server.size.height/10.34)); y++){
-
 			this.drawImage("background", x * 944, y * 807);
 
 		}
