@@ -234,6 +234,7 @@ user.chopTree = function(treeId){
 		this.log.wood = 50;
 		
 		game.client.trees[treeId].removed = true;
+		
 	    socket.emit('chopTree', {id: treeId, name: this.name});
 				
  	}
@@ -250,6 +251,13 @@ user.getNote = function(noteId){
 user.depLog = function(){
 
 	if(this.log.has){
+		
+	    renderer.displayPoints = true;
+
+	      setTimeout(function(){
+	          renderer.displayPoints = false;
+	      }, 1000);
+		  
 		if(this.log.stolen) this.log.stolen = false; 
 		this.log.has = false;
 	   	socket.emit('depLog', {team: this.server.team, name: this.name, amount: this.log.wood});

@@ -345,9 +345,10 @@ renderer.draw["game"] = function () {
 		ctx.fillStyle = "rgb(255,255,0)";
 		if(player.chatting) this.fillText(player.chatText, player.x - 40, player.y - 20);
 		
-	
 	}.bind(this));
-
+	
+    if(this.displayPoints) this.fillText("+" + user.log.wood, user.server.x - 10, user.server.y - 16);
+	
 	//show text for chopping
 	if(this.treeText && !user.log.has) this.UI['action prompt'].draw("Press space to cut wood!");
 

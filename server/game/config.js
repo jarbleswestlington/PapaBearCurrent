@@ -6,6 +6,7 @@
 //setup Server
 //start with test config
 //fix papabear getting stuck
+//move all log stuff to server
 
 module.exports = function(game){
 	
