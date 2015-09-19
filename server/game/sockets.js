@@ -157,6 +157,12 @@ module.exports = function(server, game){
 			io.sockets.emit('treeChopped', {number: data.id});
 
 		});
+		
+		socket.on('play_everywhere', function(data){
+
+			socket.broadcast.emit('play_sound', {sound: data.name, coords: data.coords, level: data.level});
+
+		});
 
 		socket.on('move_input', function(data){
 

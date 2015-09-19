@@ -28,6 +28,13 @@ socket.on('update_clients', function(data) {
 		
 });
 
+socket.on('play_sound', function(data) {
+
+	console.log(data);
+	soundscape.playFrom(data.sound, data.coords, data.level);
+		
+});
+
 socket.on("death", function(data){
 	
 	user.log.has = false;

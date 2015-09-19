@@ -105,8 +105,10 @@ audioArray.forEach(function(audio){
 });
 
 //soundscape.playWhen("swipe", function(){ return user.server.weapon.state == "attacking" });
-soundscape.playFrom("bear", {x: 2000, y:2000});
+//soundscape.playFrom("bear", {x: 2000, y:2000});
 
+
+//soundscape.broadcast("bear", {})
 //example of how to play a sound
 //soundscape.play("bear");
 

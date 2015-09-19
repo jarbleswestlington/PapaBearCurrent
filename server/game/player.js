@@ -100,7 +100,7 @@ module.exports = function(game){
 
 		}else{
 
-			func(collision);
+			func(spawnLoc);
 		}
 
 	}
