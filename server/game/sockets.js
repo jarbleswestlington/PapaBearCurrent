@@ -33,7 +33,7 @@ module.exports = function(server, game){
 			game.start(io);
 
 			console.log("started game on " + socket.id)
-
+			
 			setTimeout( game.update.bind(game, io) , 0);
 			//process.nextTick(function(){ game.update(io) } );
 

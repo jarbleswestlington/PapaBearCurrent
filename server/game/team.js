@@ -7,11 +7,13 @@ module.exports = function(game){
 		this.score = 0;
 		this.name = name;
 		this.players = [];
-		this.baseX = coord.x;
-		this.baseY = coord.y;
+		this.x = coord.x;
+		this.y = coord.y;
+		this.baseX = (coord.x + (coord.width/2)) * 78;
+		this.baseY = (coord.y + (coord.height/2)) * 78;
 		this.base = coord;
-
-		game.teams[name] = this;
+		this.width = coord.width;
+		this.height = coord.height;
 
 	};
 

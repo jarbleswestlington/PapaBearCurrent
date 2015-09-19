@@ -2,7 +2,11 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-var Game = function(){
+var Team = require('./team.js')(null);
+
+var Game = function(x, y){
+	
+	this.size = {x: x, y: y};
 	
 	this.teams = {};
 	this.check = [];
@@ -12,7 +16,6 @@ var Game = function(){
 	
 	this.currentSec = 0;
 	
-	this.treeNum = 1;
 	this.joined = 0;
 	this.playerCount = 0;
 	
@@ -48,6 +51,9 @@ Game.prototype.start = function(io){
 }
 
 Game.prototype.colCheck = function(smaller, bigger, padding){
+	
+	if(!padding) padding = {x:0, y: 0, width:0, height: 0};
+	
 	if( (smaller.x >= bigger.x + padding.x && smaller.x <= bigger.x + bigger.width - padding.x) || (smaller.x + smaller.width >= bigger.x + padding.x && smaller.x + smaller.width <= bigger.x + bigger.width - padding.x) ){
 
        if( (smaller.y >= bigger.y + padding.y && smaller.y <= bigger.y + bigger.height - padding.y) || (smaller.y + smaller.height >= bigger.y + padding.y && smaller.y + smaller.height <= bigger.y + bigger.height - padding.y) ){
@@ -60,6 +66,7 @@ Game.prototype.colCheck = function(smaller, bigger, padding){
 }
 
 Game.prototype.colCheckRelative = function(smallerGroup, bigger, padding){
+	if(!padding) padding = {x:0, y: 0, width:0, height: 0};
 
 	var smaller = {x: smallerGroup.item.x + smallerGroup.influencer.x, y: smallerGroup.item.y + smallerGroup.influencer.y, width: smallerGroup.item.width, height: smallerGroup.item.height};
 
@@ -131,86 +138,103 @@ Game.prototype.forAllOtherAlivePlayers = function(player, func){
 
 }
 
+Game.prototype.inTerritory = function(obj){
+	
+	var illegal = false;
+	
+	this.forAllTeams(function(team){
+
+		if(this.colCheck(obj, team)){
+			console.log("collided");
+			illegal = true;
+		} 
+		
+	}.bind(this));
+	
+	return illegal;
+}
+
 Game.prototype.spawnNotesAndTrees = function(){
 	
-	for(var i = 0; i < 60; i++){
+	for(var x = 0; x < this.size.x; x++){
 		
-		for(var j = 0; j < 60; j++){
+		for(var y = 0; y < this.size.y; y++){
 			
-			if((j < 15 || i < 15) || (j > 45 || i > 45)){
+			if(!this.inTerritory({x:x, y: y, width:1, height:1})){
 
 				var chance = Math.random() * 100;
 			
 				if(chance <= 65){
 				
-					this.trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
+					this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
 				
 				}
 				if(chance > 65 && chance <= 68){
 				
-					this.notes.push({x: i * 78, y: j * 78, removed: false});
-				
-				
-				}
-				if(chance > 68){
-				
+					this.notes.push({x: x * 78, y: y * 78, removed: false});
 				
 				}
 			
 			}
-			if(j > 14 && i > 14 && j < 46 && i < 46){
-
-				if(j > 14 && i > 19 && j < 24 && i < 46){
-
-						var chance = Math.random() * 100;
-			
-						if(chance <= 40){
-						
-							this.trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
-						
-						
-						}
-						if(chance > 89 && chance <= 90){
-						
-							this.notes.push({x: i * 78, y: j * 78, removed: false});
-						}
-
-				}else if (j > 23 && i > 14 && j < 38 && i < 41) {
-
-						var chance = Math.random() * 100;
-			
-						if(chance <= 40){
-						
-							this.trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
-						
-						
-						}
-						if(chance > 89 && chance <= 90){
-						
-							this.notes.push({x: i * 78, y: j * 78, removed: false});
-						}
-
-				}else if (j > 37 && i > 19 && j < 46 && i < 46) {
-
-						var chance = Math.random() * 100;
-			
-						if(chance <= 40){
-						
-							this.trees.push({x: i * 78, y: j * 78, removed: false, treeNum : getRandomInt(1,4)});
-						
-						
-						}
-						if(chance > 89 && chance <= 90){
-						
-							this.notes.push({x: i * 78, y: j * 78, removed: false});
-						}
-
-				}
-		
-			}	
+//			 if(y > 14 && x > 14 && y < 46 && x < 46){
+//
+// 				if(y > 14 && x > 19 && y < 24 && x < 46){
+//
+// 						var chance = Math.random() * 100;
+//
+// 						if(chance <= 40){
+//
+// 							this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
+//
+//
+// 						}
+// 						if(chance > 89 && chance <= 90){
+//
+// 							this.notes.push({x: x * 78, y: y * 78, removed: false});
+// 						}
+//
+// 				}else if (y > 23 && x > 14 && y < 38 && x < 41) {
+//
+// 						var chance = Math.random() * 100;
+//
+// 						if(chance <= 40){
+//
+// 							this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
+//
+//
+// 						}
+// 						if(chance > 89 && chance <= 90){
+//
+// 							this.notes.push({x: x * 78, y: y * 78, removed: false});
+// 						}
+//
+// 				}else if (y > 37 && x > 19 && y < 46 && x < 46) {
+//
+// 						var chance = Math.random() * 100;
+//
+// 						if(chance <= 40){
+//
+// 							this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
+//
+//
+// 						}
+// 						if(chance > 89 && chance <= 90){
+//
+// 							this.notes.push({x: x * 78, y: y * 78, removed: false});
+// 						}
+//
+// 				}
+//
+			//}
 		}
 	}
 	
+}
+
+Game.prototype.addTeam = function(name, coords){
+	
+	
+	this.teams[name] = new Team(name, coords);
 }
 
 Game.prototype.addPlayer = function(name, master){
@@ -274,4 +298,4 @@ Game.prototype.hasPlayer = function(name){
 	else return true;
 }
 
-module.exports = new Game();
+module.exports = new Game(60, 60);
