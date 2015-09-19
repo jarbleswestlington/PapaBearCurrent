@@ -2,21 +2,44 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-var Team = require('./team.js')(null);
+function buildGrid(width, height){
+	
+	var grid = [];
+	
+	for(var x = 0; x < width; x++){
+		grid.push([]);
+		for(var y = 0; y < width; y++){
+			grid[x].push(new GridNode({x: x, y:y}));
+		}
+	}
+	
+	return grid;
+}
 
-var Game = function(x, y){
+function GridNode(data){
+		
+	this.x = data.x || null;
+	this.y = data.y || null;
+	this.coords = {x: data.x * 78, y: data.y * 78};
+	this.width = 78;
+	this.height = 78;
+	this.territory = data.territory || "";
+	this.collidable = data.collidable || false;
+	this.contains = data.contains || null;
+	this.teleports = data.teleports || false;
+	this.teleportTo = data.teleportTo || null;
+	this.spriteRef = data.spriteRef || null;
 	
-	this.size = {x: x, y: y};
+}
+
+function Game(width, height){
 	
+	this.size = {width: width, height: width};
+	this.pixels = {width: width * 78, height: height * 78};
 	this.teams = {};
-	this.check = [];
-	this.illegal = [];
-	
-	this.master = undefined;
-	
+		
 	this.currentSec = 0;
 	
-	this.joined = 0;
 	this.playerCount = 0;
 	
 	this.started = false;
@@ -24,14 +47,36 @@ var Game = function(x, y){
 	this.currentTeamMax = 1;
 	
 	this.bearX = 22;
-	this.bearY = 27;
-	this.sockets = {};
+	this.bearY = 27;	
 	
+	this.grid = buildGrid(width, height)
+	this.size = {width: width, height: width};
+	
+	Object.defineProperty(this, 'grid', {value: buildGrid(width, height), enumerable: false});
 	Object.defineProperty(this, 'elephant', {value: {}, enumerable: false});
 	Object.defineProperty(this, 'trees', {value: [], enumerable: false});
 	Object.defineProperty(this, 'notes', {value: [], enumerable: false});
 
 };
+
+Game.prototype.addNode = function(data){
+	
+	this.grid[data.x][data.y] = new GridNode(data);
+	
+}
+
+Game.prototype.updateNode = function(data){
+	
+	var node = this.grid[data.x][data.y];
+	
+	for(var prop in data){
+		if(data.hasOwnProperty(prop)){
+			node[prop] = data[prop];
+		}
+		
+	}
+	
+}
 
 Game.prototype.update = function(io) {
 			
@@ -138,141 +183,89 @@ Game.prototype.forAllOtherAlivePlayers = function(player, func){
 
 }
 
-Game.prototype.inTerritory = function(obj){
-	
-	var illegal = false;
-	
-	this.forAllTeams(function(team){
+Game.prototype.inTerritory = function(type, obj){
 
-		if(this.colCheck(obj, team)){
-			console.log("collided");
-			illegal = true;
-		} 
-		
-	}.bind(this));
-	
-	return illegal;
+	if(this.grid[obj.x][obj.y].territory == type) return true;
+	else return false;
+}
+
+Game.prototype.defineTerritory = function(type, coords){
+	for(var x = coords.x; x < coords.x+coords.width; x++){
+		for(var y = coords.y; y < coords.y+coords.height; y++){
+			if(this.grid[x][y]) this.updateNode({x:x, y:y, territory: type});
+			else this.addNode({x:x, y:y, territory: type});
+		}
+	}
 }
 
 Game.prototype.spawnNotesAndTrees = function(){
 	
-	for(var x = 0; x < this.size.x; x++){
+	for(var x = 0; x < this.size.width; x++){
 		
-		for(var y = 0; y < this.size.y; y++){
+		for(var y = 0; y < this.size.height; y++){
 			
-			if(!this.inTerritory({x:x, y: y, width:1, height:1})){
+			if(this.inTerritory("team", {x:x, y: y})){
+				
+			}else if( this.inTerritory("forest", {x:x, y:y}) ){
 
 				var chance = Math.random() * 100;
-			
-				if(chance <= 65){
-				
+
+				if(chance <= 89){
 					this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
-				
 				}
-				if(chance > 65 && chance <= 68){
-				
+				if(chance > 89 && chance <= 93){
 					this.notes.push({x: x * 78, y: y * 78, removed: false});
-				
 				}
-			
+				
+			}else{
+				
+				var chance = Math.random() * 100;
+
+				if(chance <= 40){
+					this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
+				}
+				if(chance > 89 && chance <= 91){
+					this.notes.push({x: x * 78, y: y * 78, removed: false});
+				}
+				
+				
 			}
-//			 if(y > 14 && x > 14 && y < 46 && x < 46){
-//
-// 				if(y > 14 && x > 19 && y < 24 && x < 46){
-//
-// 						var chance = Math.random() * 100;
-//
-// 						if(chance <= 40){
-//
-// 							this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
-//
-//
-// 						}
-// 						if(chance > 89 && chance <= 90){
-//
-// 							this.notes.push({x: x * 78, y: y * 78, removed: false});
-// 						}
-//
-// 				}else if (y > 23 && x > 14 && y < 38 && x < 41) {
-//
-// 						var chance = Math.random() * 100;
-//
-// 						if(chance <= 40){
-//
-// 							this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
-//
-//
-// 						}
-// 						if(chance > 89 && chance <= 90){
-//
-// 							this.notes.push({x: x * 78, y: y * 78, removed: false});
-// 						}
-//
-// 				}else if (y > 37 && x > 19 && y < 46 && x < 46) {
-//
-// 						var chance = Math.random() * 100;
-//
-// 						if(chance <= 40){
-//
-// 							this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
-//
-//
-// 						}
-// 						if(chance > 89 && chance <= 90){
-//
-// 							this.notes.push({x: x * 78, y: y * 78, removed: false});
-// 						}
-//
-// 				}
-//
-			//}
+
 		}
 	}
 	
 }
 
-Game.prototype.addTeam = function(name, coords){
-	
-	
-	this.teams[name] = new Team(name, coords);
-}
-
 Game.prototype.addPlayer = function(name, master){
 		
-	if(master){
+	if(master) return;
 		
-		var joiningPlayer = {name: name, team: "master"};
-
-	}else{ 
+	var allMax = true;
+	var aTeam = "";
+	
+	for(var tName in this.teams){
 		
-		var allMax = true;
-		var aTeam = "";
+		var tLength = this.teams[tName].players.length;
 		
-		for(var tName in this.teams){
+		//check if all teams are at max
+		if(tLength !== this.currentTeamMax) allMax = false;
+		else aTeam = tName;
+		
+		if(tLength < this.currentTeamMax){
 			
-			var tLength = this.teams[tName].players.length;
+			this.teams[tName].addPlayer(name);
 			
-			//check if all teams are at max
-			if(tLength !== this.currentTeamMax) allMax = false;
-			else aTeam = tName;
+			break;
 			
-			if(tLength < this.currentTeamMax){
-				
-				this.teams[tName].addPlayer(name);
-				
-				break;
-				
-			}
 		}
+	}
+	
+	//if all teams are at max
+	if(allMax && aTeam != ""){
 		
-		//if all teams are at max
-		if(allMax && aTeam != ""){
-			
-			this.currentTeamMax++;
-			
-			this.teams[aTeam].addPlayer(name);
-		}
-
+		this.currentTeamMax++;
+		
+		this.teams[aTeam].addPlayer(name);
 	}
 
 }

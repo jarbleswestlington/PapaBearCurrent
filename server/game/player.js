@@ -118,45 +118,59 @@ module.exports = function(game){
 	Player.prototype.checkCollisions = function(dummy){
 
 		var illegal = false;
+		
+		var check = function(){
+			
+			if(dummy.x > game.pixels.width || dummy.y > game.pixels.height || dummy.x < 0 || dummy.y < 0){
+				
+				illegal = true;
+				return;
+			} 
+			
+			if(!this.powers.papaBear){
 	
-		if(!this.powers.papaBear){
-	
-			game.forAllOtherAlivePlayers(this, function(oPlayer){
+				game.forAllOtherAlivePlayers(this, function(oPlayer){
 					
-				if(!oPlayer.powers.papaBear && game.checkCollision(dummy, oPlayer, 41, 36, 41, 36, 0, 0)){
+					if(!illegal && !oPlayer.powers.papaBear && game.checkCollision(dummy, oPlayer, 41, 36, 41, 36, 0, 0)){
 			
-					illegal = true;
-					
-				}
-			
-			});
-	
-		}
-		
-		for(i = 0; i < game.trees.length; i++){
-		
-			if(game.trees[i].removed == false){
-		
-				if(this.powers.papaBear){
-			
-					if(game.checkCollision(dummy, game.trees[i], 63, 63, 78, 78, 0, 0)){
-		
 						illegal = true;
+					
+					}
 			
+				});
+	
+			}
+					
+			for(i = 0; i < game.trees.length; i++){
+		
+				if(game.trees[i].removed == false){
+		
+					if(this.powers.papaBear){
+			
+						if(game.checkCollision(dummy, game.trees[i], 63, 63, 78, 78, 0, 0)){
+		
+							illegal = true;
+							return;
+			
+						}
+		
+					}else{
+			
+						if(game.checkCollision(dummy, game.trees[i], 41, 36, 78, 78, 0, 0)){
+		
+							illegal = true;
+							return;
+			
+						}
 					}
 		
-				}else{
-			
-					if(game.checkCollision(dummy, game.trees[i], 41, 36, 78, 78, 0, 0)){
-		
-						illegal = true;
-			
-					}
 				}
 		
 			}
 		
-		}
+		}.bind(this);
+		
+		check();
 	
 		if(!illegal){
 		

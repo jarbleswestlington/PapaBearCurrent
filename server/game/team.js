@@ -1,7 +1,6 @@
 module.exports = function(game){
-	
-	var Player = require("./player.js")(game);
-	
+	var Player = require('./player.js')(game);
+		
 	var Team = function(name, coord){
 	
 		this.score = 0;
@@ -14,12 +13,15 @@ module.exports = function(game){
 		this.base = coord;
 		this.width = coord.width;
 		this.height = coord.height;
-
+		
+		game.defineTerritory("team", coord);
+		game.teams[name] = this;
+		
 	};
 
 	Team.prototype.addPlayer = function(name){
-
-		var newPlayer = new Player({name: name, team: this.name});
+		
+		newPlayer = new Player({name: name, team: this.name})
 		
 		newPlayer.spawn();
 		
