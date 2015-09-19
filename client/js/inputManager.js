@@ -47,7 +47,7 @@ inputManager.processInput = function(){
 	
 	if (90 in inputManager.keys) { // user holding z
 		
-		if(inputManager.pressable.z && user.dashing == false){
+		if(inputManager.pressable.z && !user.dashing && !user.frozen && !user.server.frozen){
 			
 			inputManager.pressable.z = false;
 		
