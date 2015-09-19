@@ -204,14 +204,15 @@ var UI = function(style, box, options){
 	//if(!renderer.UI[name]) renderer.UI[name] = this;
 }
 
+
 renderer.draw["game"] = function () {
 	
 	ctx.fillStyle = "rgb(255,255,255)";
 		
 	//tiled background
-	for(var x = 0; x < 6; x++){
+	for(var x = 0; x < ((game.server.size.x/12.1)); x++){
 	
-		for(var y = 0; y < 6; y++){
+		for(var y = 0; y < ((game.server.size.y/10.34)); y++){
 
 			this.drawImage("background", x * 944, y * 807);
 
