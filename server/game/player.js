@@ -85,32 +85,22 @@ module.exports = function(game){
 
 		do{
 
-			free = true;
+			illegal = false;
 
-			var collision = getXY();
+			var spawnLoc = getXY();
 
-			game.forAllOtherPlayers(this, function(player){
-
-				if(game.checkCollision(collision, player, 41, 36, 41, 36, 0, 0)) free = false;
-
-			});
+			illegal = this.checkCollisions(spawnLoc);
 		
-			game.forAllTrees(function(tree){
-			
-				if(game.checkCollision(collision, tree, 41, 36, 78, 78, 0, 0)) free = false;
-			
-			});
-		
-		}while(!free);
+		}while(illegal);
 
 		if(!func){
 
-			this.x = collision.x;
-			this.y = collision.y;
+			this.x = spawnLoc.x;
+			this.y = spawnLoc.y;
 
 		}else{
 
-			func(collision);
+			func(spawnLoc);
 		}
 
 	}
@@ -118,54 +108,73 @@ module.exports = function(game){
 	Player.prototype.checkCollisions = function(dummy){
 
 		var illegal = false;
-	
-		if(!this.powers.papaBear){
-	
-			game.forAllOtherAlivePlayers(this, function(oPlayer){
+		
+		var check = function(){
+			
+			if(dummy.x > game.pixels.width || dummy.y > game.pixels.height || dummy.x < 0 || dummy.y < 0){
+				
+				illegal = true;
+				return true;
+			} 
+			
+			game.forAllTeams(function(team){
+				
+				var boxes = team.baseColBoxes;
+				
+				boxes.forEach(function(box){
 					
-				if(!oPlayer.powers.papaBear && game.checkCollision(dummy, oPlayer, 41, 36, 41, 36, 0, 0)){
-			
-					illegal = true;
+					if(game.colCheckRelative(dummy, {item: box, influencer: {x: team.baseX, y: team.baseY} } )) illegal = true;
 					
-				}
+				}.bind(this));
+			}.bind(this));
 			
-			});
+			if(!this.powers.papaBear){
 	
-		}
-		
-		for(i = 0; i < game.trees.length; i++){
-		
-			if(game.trees[i].removed == false){
-		
-				if(this.powers.papaBear){
+				game.forAllOtherAlivePlayers(this, function(oPlayer){
+					
+					if(!illegal && !oPlayer.powers.papaBear && game.checkCollision(dummy, oPlayer, 41, 36, 41, 36, 0, 0)){
 			
-					if(game.checkCollision(dummy, game.trees[i], 63, 63, 78, 78, 0, 0)){
-		
 						illegal = true;
+					
+					}
 			
+				});
+	
+			}
+					
+			for(i = 0; i < game.trees.length; i++){
+		
+				if(game.trees[i].removed == false){
+		
+					if(this.powers.papaBear){
+			
+						if(game.checkCollision(dummy, game.trees[i], 63, 63, 78, 78, 0, 0)){
+		
+							illegal = true;
+							return true;
+			
+						}
+		
+					}else{
+			
+						if(game.checkCollision(dummy, game.trees[i], 41, 36, 78, 78, 0, 0)){
+		
+							illegal = true;
+							return true;
+			
+						}
 					}
 		
-				}else{
-			
-					if(game.checkCollision(dummy, game.trees[i], 41, 36, 78, 78, 0, 0)){
-		
-						illegal = true;
-			
-					}
 				}
 		
 			}
 		
-		}
-	
-		if(!illegal){
+		}.bind(this);
 		
-			this.x = dummy.x;
-			this.y = dummy.y;
-		
-		}
+		check();
 	
-	
+		if(illegal) return true;
+		else return false;	
 	}
 	
 	Player.prototype.die = function(){

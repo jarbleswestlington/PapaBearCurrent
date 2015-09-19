@@ -157,6 +157,12 @@ module.exports = function(server, game){
 			io.sockets.emit('treeChopped', {number: data.id});
 
 		});
+		
+		socket.on('play_everywhere', function(data){
+
+			socket.broadcast.emit('play_sound', {sound: data.name, coords: data.coords, level: data.level});
+
+		});
 
 		socket.on('move_input', function(data){
 
@@ -166,6 +172,8 @@ module.exports = function(server, game){
 			if(!player || player.dead) return;
 			dummy.x = player.x;
 			dummy.y = player.y;
+			dummy.width = player.width;
+			dummy.height = player.height;
 
 			if(data.direction == "up"){
 
@@ -192,8 +200,13 @@ module.exports = function(server, game){
 			   player.direction = "R";
 
 			}
-
-			player.checkCollisions(dummy);
+			
+			if(!player.checkCollisions(dummy)){
+				
+				player.x = dummy.x;
+				player.y = dummy.y;
+			}
+			
 			player.checkHits();
 
 		});

@@ -85,8 +85,8 @@ user.client.weapon.renderData = {
 }
 
 user.swipe = function(){
-	
-	socket.emit("begin_swipe", {name: user.name});
+	soundscape.broadcast("swipe", 121);
+	socket.emit("begin_swipe", {name: user.name,});
 
 }
 

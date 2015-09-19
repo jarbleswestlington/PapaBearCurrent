@@ -9,11 +9,7 @@ socket.on('startgame_client', function(data) {
 	game.client.trees = data.trees;
 	game.client.notes = data.notes;
 	game.started = true;
-	
-	console.log((game.server.size.x/12.1) + 1);
-	console.log((game.server.size.y/10.34) + 1);
-	
-	
+
 	console.log("game started by server");
 	
 });
@@ -29,6 +25,13 @@ socket.on('update_clients', function(data) {
 	game.server = data.game;
 	if(user.name !== "master") user.server = game.findUser();
 	game.currentSec = data.time;
+		
+});
+
+socket.on('play_sound', function(data) {
+
+	console.log(data);
+	soundscape.playFrom(data.sound, data.coords, data.level);
 		
 });
 
