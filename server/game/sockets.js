@@ -73,18 +73,20 @@ module.exports = function(server, game){
 	 		 
 			socket.emit('stealTotal', {total: woodTotal})
 
-			});
+		});
 
-			socket.on("sendChat", function(data){
+		socket.on("sendChat", function(data){
 
 			var player = game.findPlayerByName(data.name);
 
 			player.chatText = data.message;
 			player.chatting = true;
+		
+			if(!data.time) data.time = 5000;
 
 			setTimeout(function() { 
 			 	player.chatting = false;	
-			 }, 5000);
+			 }, data.time);
 
 		});
 
@@ -176,7 +178,6 @@ module.exports = function(server, game){
 			}
 		});
 		
-		
 		socket.on('remove_object', function(data){
 			
 			game.objects[data.index].removed = true;
@@ -256,7 +257,6 @@ module.exports = function(server, game){
 			io.sockets.emit("remove_object", data);
 			
 		});
-  
   
 		socket.on("give_power", function(data){
 

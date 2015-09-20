@@ -54,11 +54,12 @@ socket.on("death", function(data){
 	if(user.log.stolen){
 	
 		user.log.stolen = false;
+				
+		chatController.submit(user.log.wood);
 
 		socket.emit("depLog", {team: user.log.stolenFrom, name: user.name, amount: user.log.wood})
 
 		user.log.stolenFrom = "";
-	
 	}
 
 })

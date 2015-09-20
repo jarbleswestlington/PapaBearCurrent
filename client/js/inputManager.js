@@ -35,11 +35,11 @@ inputManager.processInput = function(){
 	
 		if(inputManager.pressable.w){
 			inputManager.pressable.w = false;	
-			if(builder.on) builder.request();
-			else if(user.server.log.has) builder.start("wall");
+			if(user.server.log.has) builder.start("wall");
 		}
 		
 	}else{
+		if(builder.on) builder.request();
 		inputManager.pressable.w = true;
 		
 	}

@@ -165,6 +165,8 @@ module.exports = function(game, io){
 	
 	Player.prototype.die = function(){
 		
+		game.elephant[this.name].emit("death", {});
+		
 		this.dead = true;
 		this.attacking = false;		
 		this.width = 41;
@@ -222,7 +224,6 @@ module.exports = function(game, io){
         		
 				console.log(this.name + "killed" + oPlayer.name);
 
-				game.elephant[oPlayer.name].emit("death", {});
 				oPlayer.die();
 	
 			}
@@ -244,7 +245,6 @@ module.exports = function(game, io){
 		        if(game.colCheckRelative({item: box, influencer: this}, oPlayer, {x:0, y:0})){
             		console.log(this.name + "killed" + oPlayer.name);
 					
-		            game.elephant[oPlayer.name].emit("death", {});
 					oPlayer.die();
 		        }
 

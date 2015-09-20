@@ -286,14 +286,8 @@ user.interactWNote = function(){
 
 user.chopWall = function(index, amount){
 	
-    renderer.displayPoints = true;
+	chatController.submit("Chop!", 60);
 
-	setTimeout(function(){
-	  renderer.displayPoints = false;
-	}, 30);
-
-	renderer.pointsToDisplay = "Chop!";
-	
 	socket.emit("chop_wall", {index: index, amount:amount});
 	
 };
@@ -343,13 +337,7 @@ user.depLog = function(){
 
 	if(this.log.has){
 		
-	    renderer.displayPoints = true;
-
-	      setTimeout(function(){
-	          renderer.displayPoints = false;
-	      }, 1000);
-		  
-		  renderer.pointsToDisplay = user.log.wood;
+		chatController.submit(user.log.wood, 1000);
 		  
 		if(this.log.stolen) this.log.stolen = false; 
 		this.log.has = false;

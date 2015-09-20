@@ -17,18 +17,21 @@ chatController.show = function(){
 	$('#chatInput').focus();
 }
 
-chatController.submit = function(){
+chatController.submit = function(text, time){
 	
 	this.started = false;
 
 	$('#chatView').hide();
 	
 	//$('#game').focus();
-
-	chatMessage = $('#chatInput').val();
+	
+	if(!time) time = 5000;
+	
+	if(!text) chatMessage = $('#chatInput').val();
+	else chatMessage = text;
 	
 	$('#chatInput').val(" ");
 	
-	if(chatMessage != "") socket.emit("sendChat", {message: chatMessage, name: user.name});
+	if(chatMessage != "") socket.emit("sendChat", {message: chatMessage, name: user.name, time: time});
 	
 }
