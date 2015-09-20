@@ -8,10 +8,10 @@
 //fix papabear getting stuck
 //move all log stuff to server
 
-module.exports = function(game){
+module.exports = function(game, io){
 	
-	var Team = require('./team.js')(game);
-	var Player = require('./player.js')(game);
+	var Team = require('./team.js')(game, io);
+	var Player = require('./player.js')(game, io);
 
 	new Team('blue', {x: 10, y: 10, width: 10, height: 10});
 

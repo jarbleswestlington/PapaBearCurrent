@@ -136,7 +136,7 @@ Game.prototype.collide = function(dummy){
 		
 		for(i = 0; i < this.objects.length; i++){
 	
-			if(this.objects[i].removed == false){
+			if(!this.objects[i].removed && this.objects[i].hard){
 			
 				if(this.colCheck(this.objects[i], dummy)){
 

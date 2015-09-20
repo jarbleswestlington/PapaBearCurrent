@@ -1,4 +1,4 @@
-module.exports = function(game){
+module.exports = function(game, io){
 	
 	var Player = function(args){
 	
@@ -143,7 +143,7 @@ module.exports = function(game){
 			
 			for(i = 0; i < game.objects.length; i++){
 		
-				if(game.objects[i].removed == false){
+				if(!game.objects[i].removed && game.objects[i].hard){
 				
 					if(game.colCheck(game.objects[i], dummy)){
 	
@@ -166,17 +166,33 @@ module.exports = function(game){
 	Player.prototype.die = function(){
 		
 		this.dead = true;
-		 
+		this.attacking = false;		
+		this.width = 41;
+		this.height = 36;		
+		this.renderteam = this.team;
+		this.log.has = false;
+		
+		var droppable = ["powerWeapon", "spear", "sword", "disguise"];
+		var loseable = ["powerWeapon", "spear", "sword", "disguise", "papaBear"];
+		
+		for(var power in this.powers){
+			if(loseable.indexOf( power ) >= 0){
+				delete this.powers[power];
+			}
+			if(droppable.indexOf( power ) >= 0){
+				var obj = {power: power, type: "power", hard: false, removed:false, x: this.x, y: this.y, width: 20, height: 20 };
+				game.objects.push(obj);
+				io.sockets.emit("add_object", obj);
+			}
+		
+		}
 
 		this.spawn(function(spawn){
 
 			setTimeout(function() { 
 				this.x = spawn.x;
 				this.y = spawn.y;
-				this.width = 41;
-				this.height = 36;
 				this.dead = false;
-				this.powers.papaBear = false;
 		
 			 }.bind(this), 8000);
 
@@ -197,9 +213,10 @@ module.exports = function(game){
 	
 			if(this.attacking){
 		
+				if(oPlayers.powers.papaBear && !this.powers.powerSword) return;
 	
 				if(game.colCheckRelative({item: this.spearColBoxes[this.direction], influencer: this}, oPlayer, {x:0, y:0})) hit = true;
-			}		
+			}
 	
 			if(hit){
         		

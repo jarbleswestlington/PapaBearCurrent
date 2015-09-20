@@ -130,7 +130,7 @@ game.update = function (modifier) {
 	user.interactWBase();
 	user.interactWTree();
 	user.interactWNote();
-	user.interactWWall();
+	user.interactWObject();
 	
 	renderer.updateCamera();
 	
