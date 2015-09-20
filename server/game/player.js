@@ -53,7 +53,6 @@ module.exports = function(game){
 		R:{x:36,y:22, width: 30, height:5},
 		L:{x:-26,y:+22, width: 30, height:5}
 	};
-		
 
 	Player.prototype.spawn = function(func){
 
@@ -219,6 +218,8 @@ module.exports = function(game){
 		
 		game.forAllOtherAlivePlayers(this, function(oPlayer){
 					
+			if(oPlayer.powers.papaBear) return;
+			
 		    var boxes = this.weaponColBoxes[this.direction];
 
 		    boxes.forEach(function(box){

@@ -191,6 +191,27 @@ user.interactWTree = function(){
 	}
 }
 
+user.interactWWall = function(){
+	
+	renderer.wallText = false;
+		
+	for(var i = 0; i < game.client.objects.length; i++){		
+				
+		if(game.client.objects[i].removed || this.server.dead || !game.client.objects[i].type == "wall") continue;	
+		
+		if(!game.colCheck(this.server, game.client.objects[i], {x: -25, y:-25})) continue;
+		
+		renderer.wallText = true;	
+			
+		if(!this.action) continue;
+
+		if(this.server.powers.papaBear) this.chopWall(i, .05);
+		else this.chopWall(i, 1);
+				
+	}
+	
+}
+
 user.interactWNote = function(){
 	
 	if(this.server.powers.papaBear) return;
@@ -242,6 +263,20 @@ user.interactWNote = function(){
 	
 }
 
+user.chopWall = function(index, amount){
+	
+    renderer.displayPoints = true;
+
+	setTimeout(function(){
+	  renderer.displayPoints = false;
+	}, 30);
+
+	renderer.pointsToDisplay = "Chop!";
+	
+	socket.emit("chop_wall", {index: index, amount:amount});
+	
+};
+
 user.stealWood = function(team){
 	
 	if(this.log.has == false){
@@ -292,6 +327,8 @@ user.depLog = function(){
 	      setTimeout(function(){
 	          renderer.displayPoints = false;
 	      }, 1000);
+		  
+		  renderer.pointsToDisplay = user.log.wood;
 		  
 		if(this.log.stolen) this.log.stolen = false; 
 		this.log.has = false;
