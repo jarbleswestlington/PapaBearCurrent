@@ -359,14 +359,13 @@ renderer.draw["game"] = function () {
 		this.fillText(this.pointsToDisplay, user.server.x - 10, user.server.y - 16);		
 	}
 	
-	//show text for chopping
 	if(this.treeText && !user.log.has) this.UI['action prompt'].draw("Press space to cut wood!");
 	else if(this.stealText && !user.log.has) this.UI['action prompt'].draw("Press space to steal wood!");
 	else if(this.wallText) this.UI['action prompt'].draw("Press space to chop wall!");
 	
-		
-	//show respawn text
-	if(user.server.dead) this.UI['game screen'].draw("You will respawn soon!");
+
+	if(user.server.dead) this.UI['game screen'].draw("You will respawn soon");
+	else if(this.pickedUp) this.UI['game screen'].draw("You just picked up a " + this.pickedUpItem);
 	else if(this.buildReject) this.UI["game screen"].draw("You cannot build there");
 
 	//time limit

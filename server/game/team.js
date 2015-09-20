@@ -1,5 +1,5 @@
-module.exports = function(game){
-	var Player = require('./player.js')(game);
+module.exports = function(game, io){
+	var Player = require('./player.js')(game, io);
 		
 	var Team = function(name, coord){
 	
@@ -19,7 +19,7 @@ module.exports = function(game){
 	
 	Team.prototype.baseColBoxes = [
 		{x: 0, y: 20, width: 40, height: 50},
-		{x: 40, y: 8, width: 80, height: 62},
+		{x: 40, y: 4, width: 80, height: 66},
 		{x: 120, y: 20, width: 40, height: 50},
 		
 	];

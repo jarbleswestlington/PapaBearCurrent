@@ -191,22 +191,43 @@ user.interactWTree = function(){
 	}
 }
 
-user.interactWWall = function(){
+user.interactWObject = function(){
 	
 	renderer.wallText = false;
 		
 	for(var i = 0; i < game.client.objects.length; i++){		
 				
-		if(game.client.objects[i].removed || this.server.dead || !game.client.objects[i].type == "wall") continue;	
+		if(game.client.objects[i].removed || this.server.dead) continue;	
 		
-		if(!game.colCheck(this.server, game.client.objects[i], {x: -25, y:-25})) continue;
+		if(game.client.objects[i].type == "wall"){
 		
-		renderer.wallText = true;	
+			if(!game.colCheck(this.server, game.client.objects[i], {x: -25, y:-25})) continue;
+		
+			renderer.wallText = true;	
 			
-		if(!this.action) continue;
+			if(!this.action) continue;
 
-		if(this.server.powers.papaBear) this.chopWall(i, .05);
-		else this.chopWall(i, 1);
+			if(this.server.powers.papaBear) this.chopWall(i, .05);
+			else this.chopWall(i, 1);
+		
+		}else if(game.client.objects[i].type == "power"){
+			
+			if(!game.colCheck(game.client.objects[i], this.server)) continue;
+			
+			renderer.pickedUp = true;
+			renderer.pickedUpItem = game.client.objects[i].power;
+
+			setTimeout(function(){
+			  renderer.pickedUp = false;
+			}, 1000);
+			
+			this.givePower(game.client.objects[i].power);
+			
+			game.client.objects[i].removed = true;
+					
+			socket.emit("remove_object", {index: i});
+			
+		}
 				
 	}
 	
