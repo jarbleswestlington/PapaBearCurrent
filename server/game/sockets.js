@@ -11,6 +11,14 @@ module.exports = function(server, game){
 			console.log("started game on " + socket.id)
 			game.start(io);
 		}
+		
+		socket.on("drop_log", function(data){
+			var player = game.findPlayerByName(data.name)
+		
+			player.log.has = false;
+			player.log.stolen = false;
+		
+		});
 
 		socket.on("confirm_name", function(data){
 
@@ -210,11 +218,32 @@ module.exports = function(server, game){
 			player.checkHits();
 
 		});
+		
+		socket.on("add_object", function(data){
+			
+			game.objects.push(data);
+			io.sockets.emit("add_object", data);
+			
+		});
+		
+		socket.on("remove_object", function(data){
+			
+			game.objects[data.index].removed = true;
+			io.sockets.emit("remove_object", data);
+			
+		});
+  
   
 		socket.on("give_power", function(data){
 
 			var player = game.findPlayerByName(data.name);
 			player.powers[data.power] = true;
+			
+			if(data.power == "papaBear"){
+				player.width = 78;
+				player.height = 78;
+			}
+			
 			console.log(data.power + " given to Player:" + data.name);
 
 		});

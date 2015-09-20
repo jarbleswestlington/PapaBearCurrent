@@ -48,15 +48,13 @@ function Game(width, height){
 	
 	this.bearX = 22;
 	this.bearY = 27;	
-	
-	this.grid = buildGrid(width, height)
-	this.size = {width: width, height: width};
-	
+		
 	Object.defineProperty(this, 'grid', {value: buildGrid(width, height), enumerable: false});
 	Object.defineProperty(this, 'elephant', {value: {}, enumerable: false});
 	Object.defineProperty(this, 'trees', {value: [], enumerable: false});
 	Object.defineProperty(this, 'notes', {value: [], enumerable: false});
-
+	Object.defineProperty(this, 'objects', {value: [], enumerable: false});
+	
 };
 
 Game.prototype.addNode = function(data){
@@ -91,7 +89,7 @@ Game.prototype.update = function(io) {
 
 Game.prototype.start = function(io){
 	
-	io.sockets.emit("startgame_client", {game: this, trees:this.trees, notes: this.notes});
+	io.sockets.emit("startgame_client", {game: this, trees:this.trees, notes: this.notes, objects: this.objects});
 
 }
 
@@ -213,7 +211,7 @@ Game.prototype.spawnNotesAndTrees = function(){
 				var chance = Math.random() * 100;
 
 				if(chance <= 89){
-					this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
+					this.trees.push({x: x * 78, y: y * 78, removed: false, width:78, height:78, treeNum : getRandomInt(1,4)});
 				}
 				if(chance > 89 && chance <= 93){
 					this.notes.push({x: x * 78, y: y * 78, removed: false});
@@ -224,7 +222,7 @@ Game.prototype.spawnNotesAndTrees = function(){
 				var chance = Math.random() * 100;
 
 				if(chance <= 40){
-					this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
+					this.trees.push({x: x * 78, y: y * 78, width:78, height:78, removed: false, treeNum : getRandomInt(1,4)});
 				}
 				if(chance > 89 && chance <= 91){
 					this.notes.push({x: x * 78, y: y * 78, removed: false});

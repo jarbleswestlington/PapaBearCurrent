@@ -27,7 +27,7 @@ chatController.submit = function(){
 
 	chatMessage = $('#chatInput').val();
 	
-	$('#chatInput').attr('value','');
+	$('#chatInput').val(" ");
 	
 	if(chatMessage != "") socket.emit("sendChat", {message: chatMessage, name: user.name});
 	

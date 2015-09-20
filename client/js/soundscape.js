@@ -8,7 +8,6 @@ soundscape.hasLoaded = function(){
 	for(var sound in this.refs){
 		//check if loaded
 		if(this.refs.hasOwnProperty(sound)){
-			console.log(sound);
 			if(!this.refs[sound].loaded) return false;
 		}
 	
