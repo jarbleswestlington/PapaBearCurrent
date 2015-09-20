@@ -7,6 +7,16 @@ function getRandomArbitrary( numone,  numtwo) {
 	return Math.floor(Math.random() * (numtwo - numone) + 1);
 }
 
+function makeId(){
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < 5; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
+
 //setUp Game object;
 var game = {
 	
@@ -111,13 +121,15 @@ game.getPowerStats = function(power){
 	return stats;
 }
 
-game.findUser = function(){
+game.findUser = function(name){
+	
+	if(!name) name = user.name;
 	
 	var playerGot;
 	
 	this.forAllPlayers(function(player){
 
-		if(player.name == user.name) playerGot = player;
+		if(player.name == name) playerGot = player;
 
 	});
 	
@@ -143,7 +155,7 @@ game.stateManager = function () {
 	
 	renderer.draw['clear_frame']();
 	
-	if(user.name == "master") inputManager.masterKeys(delta/1000);
+	if(user.mode == "master") inputManager.masterKeys(delta/1000);
       
 	if(game.state == "loading"){
 		
@@ -171,7 +183,7 @@ game.stateManager = function () {
 
 	if(game.state == "game" && game.server){
   
-	    if(user.name != "master"){	
+	    if(user.mode == "player"){	
 			inputManager.processInput();
 			game.update(delta / 1000);	
 		} 

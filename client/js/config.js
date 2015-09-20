@@ -12,50 +12,47 @@
 //configurable random generation of trees and bases and stuff
 //bow and arrow
 
-game.client.notes = [ 
+new Note(["If you manage to steal your opponent's wood, there is a considerable payoff."], {prob: 1, condition: 0}),
 
-	new Note(["If you manage to steal your opponent's wood, there is a considerable payoff."], {prob: 1, condition: 0}),
+new Note(["Press Z to dash forward"], {prob: 1, condition: 0}),
 
-	new Note(["Press Z to dash forward"], {prob: 1, condition: 0}),
+new Note(["Press ENTER to chat with nearby users"], {prob: 1, condition: 0}),
 
-	new Note(["Press ENTER to chat with nearby users"], {prob: 1, condition: 0}),
+new Note(["You can now press 'k' to wield a deadly spear."], 
+{prob: 1, condition: 0, action:{func: user.givePower, args: ["spear"]}}),
 
-	new Note(["You can now press 'k' to wield a deadly spear."], 
-	{prob: 1, condition: 0, action:{func: user.givePower, args: ["spear"]}}),
+new Note(["You have picked up a spear. Press 'k' to use it, but be careful where you point it."],
+{prob: 1, condition: 0, action:{func: user.givePower, args: ["spear"]}}),
 
-	new Note(["You have picked up a spear. Press 'k' to use it, but be careful where you point it."],
-	{prob: 1, condition: 0, action:{func: user.givePower, args: ["spear"]}}),
+new Note(["Press 'k' to brandish your spear and then press 'k' again to hide it."],
+{prob: 1, condition: 0, action:{func: user.givePower, args: ["spear"]}}),
 
-	new Note(["Press 'k' to brandish your spear and then press 'k' again to hide it."],
-	{prob: 1, condition: 0, action:{func: user.givePower, args: ["spear"]}}),
+new Note(["Appearances can be deceiving...stay on guard"], {prob: 1, condition: 0}),
 
-	new Note(["Appearances can be deceiving...stay on guard"], {prob: 1, condition: 0}),
+new Note(["You have picked up a disguise. Hold 'm' and then", 
+"press r,g or b to impersonate another team."],
+{prob: 1, condition: 0, action:{func: user.givePower, args: ["disguise"]}}), 
 
-	new Note(["You have picked up a disguise. Hold 'm' and then", 
-	"press r,g or b to impersonate another team."],
-	{prob: 1, condition: 0, action:{func: user.givePower, args: ["disguise"]}}), 
+new Note(["What sort of notes have your teammates read? Are they hiding something?"],
+{prob: 1, condition: 0}), 
 
-	new Note(["What sort of notes have your teammates read? Are they hiding something?"],
-	{prob: 1, condition: 0}), 
+new Note(["Press 'k' to sheath and unsheathe a golden spear. This weapon can kill PAPA BEAR"], 
+{prob:1, condition: function(){ return !game.getPowerStats("powerWeapon").has}, 
+action:{func: user.givePower, args: ["powerWeapon"]} }), 
 
-	new Note(["Press 'k' to sheath and unsheathe a golden spear. This weapon can kill PAPA BEAR"], 
-	{prob:1, condition: function(){ return !game.getPowerStats("powerWeapon").has}, 
-	action:{func: user.givePower, args: ["powerWeapon"]} }), 
+new Note(["Someone has a special spear that can kill PAPA BEAR"], 
+{prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
 
-	new Note(["Someone has a special spear that can kill PAPA BEAR"], 
-	{prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
+new Note(["Only the golden spear can defeat PAPA BEAR"], 
+ {prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
 
-	new Note(["Only the golden spear can defeat PAPA BEAR"], 
-	 {prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
+new Note(["Some notes can give you immense power. This note does not."], 
+{prob: 1, condition: function(){ return !game.getPowerStats("papaBear").has} }),
 
-	new Note(["Some notes can give you immense power. This note does not."], 
-	{prob: 1, condition: function(){ return !game.getPowerStats("papaBear").has} }),
-
-	new Note(["You are now Papa Bear"], 
-	{prob: 2, condition: function(){ return !game.getPowerStats("papaBear").has}, 
-	action:{func: user.givePower, args: ["papaBear"]} }), 
+new Note(["You are now Papa Bear"], 
+{prob: 2, condition: function(){ return !game.getPowerStats("papaBear").has}, 
+action:{func: user.givePower, args: ["papaBear"]} }), 
  
-];
 
 renderer.styles = {
 	"large": new Style("rgb(255,255,255)", {fontSize: 1.8, lineWidth: 1}),
@@ -100,15 +97,85 @@ imageArray.forEach(function(image){
 
 var audioArray = ["bear", 
 "swipe"];
+
 audioArray.forEach(function(audio){
 	soundscape.upload(audio);
 });
 
+
+var happy = false;
+var sad = false;
+inputManager.registerKey("T", {
+	master: true, 
+	once: true, 
+	on: function(){ console.log("on") }, 
+	off: function(){ console.log("off") }, 
+	onCondition: function(){ return happy }, 
+	offCondition: function(){ return sad },
+	mode: "player",
+	}
+);
+
+inputManager.registerKey("M", {
+	master: true, 
+	once: true, 
+	mode: "all",
+	on: function(){ 
+			if(user.mode == "master" && user.server.name) user.mode = "player";
+			else if(user.mode == "player") user.mode = "master";
+		}, 
+	}
+);
+
+inputManager.registerKey("N", {
+	master: true, 
+	once: true, 
+	mode: "all",
+	on: function(){ 
+			socket.emit('confirm_name', { name: makeId() });
+		}, 
+	}
+);
+
+inputManager.registerKey(188, {
+	master: true, 
+	once: true, 
+	mode: "player",
+	on: function(){ 
+			var cur = user.mPlayers.indexOf(user.name);
+			if(user.mPlayers[cur-1]) user.name = user.mPlayers[cur-1];
+		}, 
+	}
+);
+inputManager.registerKey(190, {
+	master: true, 
+	once: true, 
+	mode: "player",
+	on: function(){ 
+			var cur = user.mPlayers.indexOf(user.name);
+			if(user.mPlayers[cur+1]) user.name = user.mPlayers[cur+1];
+		}, 
+	}
+);
+
+inputManager.registerKey(191, {
+	master: true, 
+	once: true, 
+	mode: "player",
+	on: function(){ 
+		for(var power in powers.index)
+			if(powers.index.hasOwnProperty(power) && !powers.index[power].exclusive){
+				user.givePower(power);
+			}
+		}, 
+	}
+);
+
+
 //soundscape.playWhen("swipe", function(){ return user.server.weapon.state == "attacking" });
 //soundscape.playFrom("bear", {x: 2000, y:2000});
 
-
-//soundscape.broadcast("bear", {})
+//soundscape.broadcast("bear", 20)
 //example of how to play a sound
 //soundscape.play("bear");
 

@@ -69,6 +69,19 @@ renderer.fillText = function(text, coordX, coordY){
 
 }
 
+renderer.playerText = function(player){
+	ctx.font = '20px Helvetica';
+	ctx.fillStyle = "rgb(255,255,0)";
+	
+	text = player.chatText.toString().match(/.{0,30}(\s|$)/g)
+	
+	text.forEach(function(line, i){
+		this.fillText(line, player.x + (player.width/2) - (ctx.measureText(line).width/2) , player.y - (21 * (text.length - i -2)) - 10);
+		
+	}.bind(this));
+	
+};
+
 renderer.draw = {};
 
 renderer.draw["loading"] = function(){
@@ -282,10 +295,7 @@ renderer.draw["game"] = function () {
 	}
 		
 	game.forAllPlayers(function(player){
-		
-		//shadows
-		this.drawImage("playershadow", player.x-1 , player.y+ 21);
-	
+			
 		//CHARACTER DRAWING
 		if(player.dead){
 			
@@ -302,7 +312,9 @@ renderer.draw["game"] = function () {
 			
 			this.drawSprite("bear", player.x,player.y, papaSpriteFinder[player.direction]);
 			
-		}else{
+		}else if(!player.powers.invisibility){
+			
+			this.drawImage("playershadow", player.x-1 , player.y+ 21);
 			
 			var playerSpriteFinder = {
 				"L":{x:2 + ((player.character-1) * 43), y:2, width:41, height:36},
@@ -312,7 +324,7 @@ renderer.draw["game"] = function () {
 			}
 			
 			this.drawSprite(game.server.teams[player.renderteam].name + "team", player.x,player.y, playerSpriteFinder[player.direction]);
-	
+
 		}
 		
 		if(!player.dead && !player.powers.papaBear){
@@ -348,16 +360,10 @@ renderer.draw["game"] = function () {
 		if(player.weapon.state == "attacking") weapon.renderData.drawBlur(player, weapon.renderData.blur[player.direction]);
 	    if(weapon.renderData[player.weapon.state]) this.drawImageRelative(weapon.renderData[player.weapon.state][player.direction], player);
 		//chat drawing
-		ctx.font = '20px Calibri';
-		ctx.fillStyle = "rgb(255,255,0)";
-		if(player.chatting) this.fillText(player.chatText, player.x - 40, player.y - 20);
+		if(player.chatting) this.playerText(player);
 		
 	}.bind(this));
 	
-    if(this.displayPoints) {
-		ctx.fillStyle = "rgb(255,255,0)";
-		this.fillText(this.pointsToDisplay, user.server.x - 10, user.server.y - 16);		
-	}
 	
 	if(this.treeText && !user.log.has) this.UI['action prompt'].draw("Press space to cut wood!");
 	else if(this.stealText && !user.log.has) this.UI['action prompt'].draw("Press space to steal wood!");

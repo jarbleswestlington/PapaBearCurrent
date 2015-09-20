@@ -31,6 +31,8 @@ module.exports = function(game, io){
 		newPlayer.spawn();
 		
 		this.players.push(newPlayer);
+		
+		return newPlayer;
 	};
 
 	return Team;

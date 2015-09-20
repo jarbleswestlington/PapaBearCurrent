@@ -27,7 +27,9 @@ module.exports = function(server, game){
 			game.elephant[data.name] = socket;
 
 			var player = game.findPlayerByName(data.name)
-
+			
+			if(!player) player = game.addPlayer(data.name);
+ 
 			game.elephant[data.name].emit("name_confirmed", {player: player});
 
 		});
@@ -57,14 +59,12 @@ module.exports = function(server, game){
 
 				team.score -= 250;
 	
-
 			}else{
 
 				woodTotal = team.score;
 
 				team.score = 0;
 
-	
 			}
 
 			var player = game.findPlayerByName(data.name);
@@ -73,18 +73,20 @@ module.exports = function(server, game){
 	 		 
 			socket.emit('stealTotal', {total: woodTotal})
 
-			});
+		});
 
-			socket.on("sendChat", function(data){
+		socket.on("sendChat", function(data){
 
 			var player = game.findPlayerByName(data.name);
 
 			player.chatText = data.message;
 			player.chatting = true;
+		
+			if(!data.time) data.time = 5000;
 
 			setTimeout(function() { 
 			 	player.chatting = false;	
-			 }, 5000);
+			 }, data.time);
 
 		});
 
@@ -176,7 +178,6 @@ module.exports = function(server, game){
 			}
 		});
 		
-		
 		socket.on('remove_object', function(data){
 			
 			game.objects[data.index].removed = true;
@@ -257,13 +258,13 @@ module.exports = function(server, game){
 			
 		});
   
-  
 		socket.on("give_power", function(data){
 
 			var player = game.findPlayerByName(data.name);
 			player.powers[data.power] = true;
 			
 			if(data.power == "papaBear"){
+				player.powers = {papaBear: true};
 				player.x -= player.x%78;
 				player.x+=6;
 				player.y -= player.y%78;

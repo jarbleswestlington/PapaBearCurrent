@@ -327,7 +327,7 @@ Game.prototype.addPlayer = function(name, master){
 		
 		if(tLength < this.currentTeamMax){
 			
-			this.teams[tName].addPlayer(name);
+			return this.teams[tName].addPlayer(name);
 			
 			break;
 			
@@ -339,7 +339,7 @@ Game.prototype.addPlayer = function(name, master){
 		
 		this.currentTeamMax++;
 		
-		this.teams[aTeam].addPlayer(name);
+		return this.teams[aTeam].addPlayer(name);
 	}
 
 }

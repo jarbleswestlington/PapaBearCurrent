@@ -4,45 +4,23 @@ var user = {
 	
 	name: URI[URI.length-1],
 	amount:0,
+	
+	master: URI[URI.length-1] == "master" ? true: false,
+	mode: URI[URI.length-1] == "master" ? "master" : "player",
 	dashing:false,
 	dashStart:0,
 	moved: false,
 	client:{},
 	frozen:false,
 	inPlace:false,
+	confirmed: false,
 	
-	spear:{},
-	
+	mPlayers : [],
 	
 	buildMode:true,
 	building: {},
+	server: {},
 };
-
-user.server = {
-	x:0,
-	y:0,
-	
-	attacking:false,
-
-	hasPapa:false,
-	hasSword:false,
-	
-	dead:false,
-	spear:{
-		has:false,
-		power:false,
-	},
-	weapon:{
-		state:"ready",
-	},
-	log:{
-		has: false,
-		stolen: false,
-		stolenFrom: "",
-		wood: 0,
-	},
-	powers:{}
-}
 
 user.log = {
 	has: false,
@@ -286,14 +264,8 @@ user.interactWNote = function(){
 
 user.chopWall = function(index, amount){
 	
-    renderer.displayPoints = true;
+	chatController.submit("Chop!", 60);
 
-	setTimeout(function(){
-	  renderer.displayPoints = false;
-	}, 30);
-
-	renderer.pointsToDisplay = "Chop!";
-	
 	socket.emit("chop_wall", {index: index, amount:amount});
 	
 };
@@ -343,13 +315,7 @@ user.depLog = function(){
 
 	if(this.log.has){
 		
-	    renderer.displayPoints = true;
-
-	      setTimeout(function(){
-	          renderer.displayPoints = false;
-	      }, 1000);
-		  
-		  renderer.pointsToDisplay = user.log.wood;
+		chatController.submit(user.log.wood, 1000);
 		  
 		if(this.log.stolen) this.log.stolen = false; 
 		this.log.has = false;
