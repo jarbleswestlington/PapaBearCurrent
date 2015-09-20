@@ -113,8 +113,16 @@ inputManager.processInput = function(){
 		renderer.showNote = false;
 	}
 	
-	if(32 in inputManager.keys) user.action = true;
-	else user.action = false;
+	user.action = false;
+	
+	if (32 in inputManager.keys) {				
+		if(inputManager.pressable.space){
+			inputManager.pressable.space = false;
+			user.action = true;
+		}
+	}else{
+		inputManager.pressable.space = true;	
+	}
 	//equip sword
 	if (75 in inputManager.keys) {				
 		if(inputManager.pressable.k && user.server.powers.spear == true){
@@ -180,4 +188,5 @@ inputManager.pressable = {
 	shift:true,
 	w:true,
 	x:true,
+	space:true,
 };

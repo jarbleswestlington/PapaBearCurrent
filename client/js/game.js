@@ -58,6 +58,7 @@ game.forAllTeams = function(func){
 }
 
 game.colCheck = function(smaller, bigger, padding){
+	if(!padding) padding = {x:0, y: 0, width:0, height: 0};
 	
 	if( (smaller.x >= bigger.x + padding.x && smaller.x <= bigger.x + bigger.width - padding.x) || (smaller.x + smaller.width >= bigger.x + padding.x && smaller.x + smaller.width <= bigger.x + bigger.width - padding.x) ){
 
@@ -70,11 +71,14 @@ game.colCheck = function(smaller, bigger, padding){
 	
 }
 
-game.colCheckRelative = function(smallerGroup, bigger, padding){
+game.colCheckRelative = function(smallerGroup, biggerGroup, padding){
+	if(!padding) padding = {x:0, y: 0, width:0, height: 0};
+	
+	if(biggerGroup.item) biggerGroup = {x: biggerGroup.item.x + biggerGroup.influencer.x, y: biggerGroup.item.y + biggerGroup.influencer.y, width: biggerGroup.item.width, height: biggerGroup.item.height};
 
-	var smaller = {x: smallerGroup.item.x + smallerGroup.influence.x, y: smallerGroup.item.y + smallerGroup.influence.y, width: smallerGroup.item.width, height: smallerGroup.item.height};
+	if(smallerGroup.item) smallerGroup = {x: smallerGroup.item.x + smallerGroup.influencer.x, y: smallerGroup.item.y + smallerGroup.influencer.y, width: smallerGroup.item.width, height: smallerGroup.item.height};
 
-	return this.colCheck(smaller, bigger, padding);
+	return this.colCheck(smallerGroup, biggerGroup, padding);
 }
 
 game.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
@@ -126,6 +130,7 @@ game.update = function (modifier) {
 	user.interactWBase();
 	user.interactWTree();
 	user.interactWNote();
+	user.interactWWall();
 	
 	renderer.updateCamera();
 	

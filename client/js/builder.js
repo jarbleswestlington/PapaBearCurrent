@@ -33,7 +33,7 @@ builder.request = function(){
 		
 	this.requestXY = user.getHoldingCoords(this.refs[this.item]);
 	
-	socket.emit("request_placement", {type: this.item, removed:false, x: this.requestXY.x, y: this.requestXY.y, width: this.refs[this.item].width, height: this.refs[this.item].height });
+	socket.emit("request_placement", {hp: 10, type: this.item, removed:false, x: this.requestXY.x, y: this.requestXY.y, width: this.refs[this.item].width, height: this.refs[this.item].height });
 		
 };
 

@@ -60,11 +60,17 @@ soundscape.playFrom = function(ref, coord, level){
 	//11-25 11: base boundary  25: 10 grids over (about the deltaX of bases)
 	//40 - will breach the boundaries of a team territory that is 10 up and 10 to the left
 	//50 -- will reach the boundaris of that teams BASE, not the territory
-	//60 -- will cover that teams whole territory
+	//60 -- will cover that neighboring teams whole territory
 	//121 -- will make it corner to corner in a 60x60 map -- but very soft in corner
 	
-	var deltaX = Math.abs(user.server.x - coord.x);
-	var deltaY = Math.abs(user.server.y - coord.y);
+	if(user.name == "master"){
+		var deltaX = Math.abs(renderer.camera.x - coord.x);
+		var deltaY = Math.abs(renderer.camera.y - coord.y);
+	}else{
+		var deltaX = Math.abs(user.server.x - coord.x);
+		var deltaY = Math.abs(user.server.y - coord.y);
+	}
+
 	
 	var distance = deltaX + deltaY;
 	if(distance < 5 * level)  distance = 5 * level;

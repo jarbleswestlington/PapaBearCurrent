@@ -354,13 +354,16 @@ renderer.draw["game"] = function () {
 		
 	}.bind(this));
 	
-    if(this.displayPoints) this.fillText("+" + user.log.wood, user.server.x - 10, user.server.y - 16);
+    if(this.displayPoints) {
+		ctx.fillStyle = "rgb(255,255,0)";
+		this.fillText(this.pointsToDisplay, user.server.x - 10, user.server.y - 16);		
+	}
 	
 	//show text for chopping
 	if(this.treeText && !user.log.has) this.UI['action prompt'].draw("Press space to cut wood!");
-
-	//show text for stealing
-	if(this.stealText && !user.log.has) this.UI['action prompt'].draw("Press space to steal wood!");
+	else if(this.stealText && !user.log.has) this.UI['action prompt'].draw("Press space to steal wood!");
+	else if(this.wallText) this.UI['action prompt'].draw("Press space to chop wall!");
+	
 		
 	//show respawn text
 	if(user.server.dead) this.UI['game screen'].draw("You will respawn soon!");

@@ -159,7 +159,7 @@ Game.prototype.collide = function(dummy){
 Game.prototype.colCheck = function(smaller, bigger, padding){
 	
 	if(!padding) padding = {x:0, y: 0, width:0, height: 0};
-	
+		
 	if( (smaller.x >= bigger.x + padding.x && smaller.x <= bigger.x + bigger.width - padding.x) || (smaller.x + smaller.width >= bigger.x + padding.x && smaller.x + smaller.width <= bigger.x + bigger.width - padding.x) ){
 
        if( (smaller.y >= bigger.y + padding.y && smaller.y <= bigger.y + bigger.height - padding.y) || (smaller.y + smaller.height >= bigger.y + padding.y && smaller.y + smaller.height <= bigger.y + bigger.height - padding.y) ){

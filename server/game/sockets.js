@@ -166,6 +166,17 @@ module.exports = function(server, game){
 
 		});
 		
+		socket.on('chop_wall', function(data){
+
+			game.objects[data.index].hp -= data.amount;
+
+			if(game.objects[data.index].hp <= 0){
+				game.objects[data.index].removed = true;
+				io.sockets.emit("remove_object", {index: data.index});
+			}
+		});
+		
+		
 		socket.on('play_everywhere', function(data){
 
 			socket.broadcast.emit('play_sound', {sound: data.name, coords: data.coords, level: data.level});
