@@ -24,15 +24,34 @@ builder.scrap = function(){
 	this.item = null;
 	this.on = false;
 	user.inPlace = false;
+	renderer.buildReject = false;
+	
 	
 };
 
-builder.place = function(){
+builder.request = function(){
 		
-	var xy = user.getHoldingCoords(this.refs[this.item]);
+	this.requestXY = user.getHoldingCoords(this.refs[this.item]);
 	
+	socket.emit("request_placement", {type: this.item, removed:false, x: this.requestXY.x, y: this.requestXY.y, width: this.refs[this.item].width, height: this.refs[this.item].height });
+		
+};
+
+builder.place = function(){
+	
+	renderer.buildReject = false;
 	this.on = false;	
 	user.inPlace = false;
+};
+
+builder.reject = function(){
+	
+	renderer.buildReject = true;
+	
+	setTimeout(function(){
 		
-	socket.emit("add_object", {type: this.item, removed:false, x: xy.x, y: xy.y, width: this.refs[this.item].width, height: this.refs[this.item].height });
+		renderer.buildReject = false;
+		
+	}, 1000)
+		
 };

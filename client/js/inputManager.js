@@ -35,7 +35,7 @@ inputManager.processInput = function(){
 	
 		if(inputManager.pressable.w){
 			inputManager.pressable.w = false;	
-			if(builder.on) builder.place();
+			if(builder.on) builder.request();
 			else if(user.server.log.has) builder.start("wall");
 		}
 		
@@ -89,26 +89,25 @@ inputManager.processInput = function(){
 	
 		if (38 in inputManager.keys) {
 			user.direction = "up";
-			if(!user.inPlace) user.moved = true;
+			user.moved = true;
 		}
 			
 		if (40 in inputManager.keys){
 			user.direction = "down";
-			if(!user.inPlace) user.moved = true;
+			user.moved = true;
 		}
 
 		if (37 in inputManager.keys){
 			user.direction = "left";
-			if(!user.inPlace) user.moved = true;
+			user.moved = true;
 		}
 
 		if (39 in inputManager.keys){
 			user.direction = "right";
-			if(!user.inPlace) user.moved = true;
+			user.moved = true;
 		}
 	
 	}
-		
 		
 	if(88 in inputManager.keys){
 		renderer.showNote = false;

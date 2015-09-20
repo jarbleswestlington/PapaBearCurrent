@@ -219,11 +219,16 @@ module.exports = function(server, game){
 
 		});
 		
-		socket.on("add_object", function(data){
+		socket.on("request_placement", function(data){			
 			
-			game.objects.push(data);
-			io.sockets.emit("add_object", data);
+			var illegal = game.collide(data);
 			
+			if(illegal)	socket.emit("placement_result", {success:false});
+			else{ 
+				game.objects.push(data);
+				io.sockets.emit("add_object", data);
+				socket.emit("placement_result", {success:true});
+			}
 		});
 		
 		socket.on("remove_object", function(data){

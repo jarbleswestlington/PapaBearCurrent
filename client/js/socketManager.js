@@ -74,3 +74,10 @@ socket.on('noteGot', function(data) {
 	game.client.notes[data.number].removed = true;
 		
 });
+
+socket.on('placement_result', function(data) {
+
+	if(data.success) builder.place();
+	else builder.reject();
+		
+});

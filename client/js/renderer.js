@@ -379,6 +379,7 @@ renderer.draw["game"] = function () {
 	} 
 	
 	//show note text
-	if(this.showNote) this.UI["big screen"].draw(this.currentNote.lines);
+	if(this.buildReject) this.UI["big screen"].draw("You cannot build there");
+	else if(this.showNote) this.UI["big screen"].draw(this.currentNote.lines);
 
 };

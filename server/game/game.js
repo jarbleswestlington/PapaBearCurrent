@@ -93,6 +93,69 @@ Game.prototype.start = function(io){
 
 }
 
+Game.prototype.collide = function(dummy){
+	var illegal = false;
+	
+	var check = function(){
+		
+		if(dummy.x > this.pixels.width || dummy.y > this.pixels.height || dummy.x < 0 || dummy.y < 0){
+			
+			illegal = true;
+			return true;
+		}
+		
+		this.forAllTeams(function(team){
+			
+			var boxes = team.baseColBoxes;
+			
+			boxes.forEach(function(box){
+				
+				if(this.colCheckRelative(dummy, {item: box, influencer: {x: team.baseX, y: team.baseY} } )) illegal = true;
+				
+			}.bind(this));
+		}.bind(this));
+		
+		this.forAllPlayers(function(oPlayer){
+			
+			if(!illegal && this.colCheck(dummy, oPlayer)) illegal = true;
+	
+		}.bind(this));
+		
+		for(i = 0; i < this.trees.length; i++){
+	
+			if(this.trees[i].removed == false){
+			
+				if(this.colCheck(dummy, this.trees[i])){
+
+					illegal = true;
+					return true;
+				}
+			}
+	
+		}
+		
+		for(i = 0; i < this.objects.length; i++){
+	
+			if(this.objects[i].removed == false){
+			
+				if(this.colCheck(this.objects[i], dummy)){
+
+					illegal = true;
+					return true;
+				}
+			}
+	
+		}
+		
+	
+	}.bind(this);
+	
+	check();
+
+	if(illegal) return true;
+	else return false;	
+}
+
 Game.prototype.colCheck = function(smaller, bigger, padding){
 	
 	if(!padding) padding = {x:0, y: 0, width:0, height: 0};
