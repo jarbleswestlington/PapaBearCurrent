@@ -104,11 +104,46 @@ audioArray.forEach(function(audio){
 	soundscape.upload(audio);
 });
 
+
+var happy = false;
+var sad = false;
+inputManager.registerKey("T", {
+	master: true, 
+	once: true, 
+	on: function(){ console.log("on") }, 
+	off: function(){ console.log("off") }, 
+	onCondition: function(){ return happy }, 
+	offCondition: function(){ return sad },
+	mode: "player",
+	}
+);
+
+inputManager.registerKey("M", {
+	master: true, 
+	once: true, 
+	mode: "all",
+	on: function(){ 
+			if(user.mode == "master" && user.server.name) user.mode = "player";
+			else if(user.mode == "player") user.mode = "master";
+		}, 
+	}
+);
+
+inputManager.registerKey("N", {
+	master: true, 
+	once: true, 
+	mode: "all",
+	on: function(){ 
+			socket.emit('confirm_name', { name: makeId() });
+		}, 
+	}
+);
+
+
 //soundscape.playWhen("swipe", function(){ return user.server.weapon.state == "attacking" });
 //soundscape.playFrom("bear", {x: 2000, y:2000});
 
-
-//soundscape.broadcast("bear", {})
+//soundscape.broadcast("bear", 20)
 //example of how to play a sound
 //soundscape.play("bear");
 

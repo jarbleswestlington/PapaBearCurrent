@@ -63,7 +63,7 @@ soundscape.playFrom = function(ref, coord, level){
 	//60 -- will cover that neighboring teams whole territory
 	//121 -- will make it corner to corner in a 60x60 map -- but very soft in corner
 	
-	if(user.name == "master"){
+	if(user.mode == "master"){
 		var deltaX = Math.abs(renderer.camera.x - coord.x);
 		var deltaY = Math.abs(renderer.camera.y - coord.y);
 	}else{

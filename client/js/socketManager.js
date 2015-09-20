@@ -1,5 +1,13 @@
 socket.on('name_confirmed', function(data) {
-	if(user.name !== "master") user.server = data.player;
+	
+	user.server = data.player;
+	user.name = data.player.name;
+	
+	if(user.master){
+		user.mPlayers.push(data.player.name)
+		if(user.mode = "master") user.mode = "player";
+	} 
+	
 	user.confirmed = true;
 });
 
@@ -25,7 +33,8 @@ socket.on('stealTotal', function(data) {
 socket.on('update_clients', function(data) {
 
 	game.server = data.game;
-	if(user.name !== "master") user.server = game.findUser();
+	if(user.mode == "player") user.server = game.findUser();
+
 	game.currentSec = data.time;
 		
 });

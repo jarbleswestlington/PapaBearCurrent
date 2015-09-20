@@ -3,16 +3,18 @@ var inputManager = {};
 
 inputManager.keys = [];
 
-addEventListener("keydown", function (e) {
+addEventListener("keydown", function (e) {	
+	inputManager.keys[String.fromCharCode(e.keyCode)] = true;
 	inputManager.keys[e.keyCode] = true;
 }, false);
 
 addEventListener("keyup", function (e) {
+	delete inputManager.keys[String.fromCharCode(e.keyCode)];
 	delete inputManager.keys[e.keyCode];
 }, false);
 
 inputManager.processInput = function(){
-	
+	this.check();
 	
 	if(13 in inputManager.keys){
 		
@@ -150,13 +152,64 @@ inputManager.processInput = function(){
 			} 
 			if (71 in inputManager.keys) {
 				socket.emit('change_team', {name: user.server.name, team: "green"});
-			} 
+			}
 		}
 	}	
 }
 
+inputManager.toCheck = [];
+
+inputManager.registerKey = function(char, opts){
+	
+	if(opts.once) inputManager.pressable[char] = true;
+	
+	
+	
+	var newKey = {char: char, conditions: {}};
+	if(opts.once) newKey.once = true;
+	else newKey.once = false;
+	
+	if(opts.mode) newKey.mode = opts.mode;
+	else newKey.mode = "player";
+			
+	if(opts.on) newKey.on = opts.on;
+	if(opts.off) newKey.off = opts.off;
+	
+	if(opts.onCondition) newKey.conditions.on = opts.onCondition;
+	else newKey.conditions.on = function(){return true};
+	
+	if(opts.offCondition) newKey.conditions.off = opts.offCondition;
+	else newKey.conditions.off = function(){return true};
+
+	if(opts.master) newKey.master = true;
+	
+	inputManager.toCheck.push(newKey);
+}
+
+inputManager.check = function(){
+	
+	this.toCheck.forEach(function(key){
+		if(key.master && !user.master) return;
+		if(key.mode != "all" && key.mode != user.mode) return;
+		
+		if( key.char in this.keys ){
+			
+			if( key.once && !this.pressable[key.char] ) return;
+			this.pressable[key.char] = false;
+			
+			if(key.conditions.on() && key.on) key.on();
+		}else{
+			if( key.off && key.conditions.off() ) key.off();
+			this.pressable[key.char] = true;	
+		}
+		
+	}.bind(this));
+}
 
 inputManager.masterKeys = function(modifier){	
+	
+	this.check();
+	
 	if(13 in this.keys){
 		if(this.pressable.enter){
 			this.pressable.enter = false;
@@ -179,7 +232,17 @@ inputManager.masterKeys = function(modifier){
 	if (39 in this.keys) { // user holding right
 		renderer.camera.x -= 700 * modifier;
 	}
+	
+
 };
+
+inputManager.changeKey = function(oldKey, newKey){
+	
+	this.toCheck.forEach(function(key){
+		
+		if(key.char == oldKey) key.char = newKey; 
+	})
+}
 
 inputManager.pressable = {
 	enter:true,

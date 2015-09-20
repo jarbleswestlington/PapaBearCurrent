@@ -27,7 +27,9 @@ module.exports = function(server, game){
 			game.elephant[data.name] = socket;
 
 			var player = game.findPlayerByName(data.name)
-
+			
+			if(!player) player = game.addPlayer(data.name);
+ 
 			game.elephant[data.name].emit("name_confirmed", {player: player});
 
 		});
@@ -57,14 +59,12 @@ module.exports = function(server, game){
 
 				team.score -= 250;
 	
-
 			}else{
 
 				woodTotal = team.score;
 
 				team.score = 0;
 
-	
 			}
 
 			var player = game.findPlayerByName(data.name);

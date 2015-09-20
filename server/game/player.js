@@ -215,7 +215,7 @@ module.exports = function(game, io){
 	
 			if(this.attacking){
 		
-				if(oPlayers.powers.papaBear && !this.powers.powerSword) return;
+				if(oPlayer.powers.papaBear && !this.powers.powerSword) return;
 	
 				if(game.colCheckRelative({item: this.spearColBoxes[this.direction], influencer: this}, oPlayer, {x:0, y:0})) hit = true;
 			}

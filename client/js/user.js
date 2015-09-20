@@ -4,45 +4,23 @@ var user = {
 	
 	name: URI[URI.length-1],
 	amount:0,
+	
+	master: URI[URI.length-1] == "master" ? true: false,
+	mode: URI[URI.length-1] == "master" ? "master" : "player",
 	dashing:false,
 	dashStart:0,
 	moved: false,
 	client:{},
 	frozen:false,
 	inPlace:false,
+	confirmed: false,
 	
-	spear:{},
-	
+	mPlayers : [],
 	
 	buildMode:true,
 	building: {},
+	server: {},
 };
-
-user.server = {
-	x:0,
-	y:0,
-	
-	attacking:false,
-
-	hasPapa:false,
-	hasSword:false,
-	
-	dead:false,
-	spear:{
-		has:false,
-		power:false,
-	},
-	weapon:{
-		state:"ready",
-	},
-	log:{
-		has: false,
-		stolen: false,
-		stolenFrom: "",
-		wood: 0,
-	},
-	powers:{}
-}
 
 user.log = {
 	has: false,
