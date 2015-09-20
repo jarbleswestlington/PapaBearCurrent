@@ -13,22 +13,6 @@ addEventListener("keyup", function (e) {
 
 inputManager.processInput = function(){
 	
-	if (16 in inputManager.keys) { // Player pressed shift
-		
-		if(inputManager.pressable.shift && user.server.weapon.state == "ready"){
-						
-			inputManager.pressable.shift = false;
-			
-			user.swipe();
-			
-		}
-
-	}else{
-		
-		inputManager.pressable.shift = true;
-		
-	}
-
 	
 	if(13 in inputManager.keys){
 		
@@ -43,6 +27,45 @@ inputManager.processInput = function(){
 		
 		inputManager.pressable.enter = true;
 		
+	}
+	
+	if(chatController.started) return;
+	
+	if (87 in inputManager.keys) { // w
+	
+		if(inputManager.pressable.w){
+			inputManager.pressable.w = false;	
+			if(builder.on) builder.request();
+			else if(user.server.log.has) builder.start("wall");
+		}
+		
+	}else{
+		inputManager.pressable.w = true;
+		
+	}
+	
+	if (88 in inputManager.keys) { // x
+		
+		if(inputManager.pressable.x){
+			inputManager.pressable.x = false;
+			if(builder.on) builder.scrap();
+		}
+	
+	}else{
+		inputManager.pressable.x = true;
+		
+	}
+	
+	if (16 in inputManager.keys) { // Player pressed shift
+		
+		if(inputManager.pressable.shift && user.server.weapon.state == "ready"){
+						
+			inputManager.pressable.shift = false;
+			user.swipe();
+		}
+
+	}else{
+		inputManager.pressable.shift = true;
 	}
 	
 	if (90 in inputManager.keys) { // user holding z
@@ -85,7 +108,6 @@ inputManager.processInput = function(){
 		}
 	
 	}
-		
 		
 	if(88 in inputManager.keys){
 		renderer.showNote = false;
@@ -156,4 +178,6 @@ inputManager.pressable = {
 	z:true,
 	k:true,
 	shift:true,
+	w:true,
+	x:true,
 };

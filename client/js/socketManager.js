@@ -8,6 +8,8 @@ socket.on('startgame_client', function(data) {
 	game.server = data.game;
 	game.client.trees = data.trees;
 	game.client.notes = data.notes;
+	game.client.objects = data.objects;
+	
 	game.started = true;
 
 	console.log("game started by server");
@@ -30,9 +32,19 @@ socket.on('update_clients', function(data) {
 
 socket.on('play_sound', function(data) {
 
-	console.log(data);
 	soundscape.playFrom(data.sound, data.coords, data.level);
 		
+});
+
+socket.on('add_object', function(data) {
+
+	game.client.objects.push(data)
+});
+
+socket.on('remove_object', function(data) {
+
+	game.client.objects[data.index].removed = true;
+	
 });
 
 socket.on("death", function(data){
@@ -60,5 +72,12 @@ socket.on('treeChopped', function(data) {
 socket.on('noteGot', function(data) {
 
 	game.client.notes[data.number].removed = true;
+		
+});
+
+socket.on('placement_result', function(data) {
+
+	if(data.success) builder.place();
+	else builder.reject();
 		
 });

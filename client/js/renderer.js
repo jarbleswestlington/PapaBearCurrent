@@ -273,6 +273,13 @@ renderer.draw["game"] = function () {
 			this.drawRect("rgb(0,0,180)", game.client.notes[i].x + 29, game.client.notes[i].y + 29, 20, 20);
 		}
 	}
+	
+		
+	for(var i = 0; i< game.client.objects.length; i++){
+		if(!game.client.objects[i].removed) {
+			this.drawRect("rgb(180,100,80)", game.client.objects[i].x, game.client.objects[i].y, game.client.objects[i].width, game.client.objects[i].height);
+		}
+	}
 		
 	game.forAllPlayers(function(player){
 		
@@ -364,7 +371,15 @@ renderer.draw["game"] = function () {
 
 	this.UI["timer"].draw((game.timeLimit - game.currentSec) + " seconds remaining");
 	
+	if(builder.on){
+		
+		var xy = user.getHoldingCoords(builder.refs[builder.item]);
+			 
+		this.drawRect("rgb(180,100,80)", xy.x, xy.y, builder.refs[builder.item].width, builder.refs[builder.item].height);
+	} 
+	
 	//show note text
-	if(this.showNote) this.UI["big screen"].draw(this.currentNote.lines);
+	if(this.buildReject) this.UI["big screen"].draw("You cannot build there");
+	else if(this.showNote) this.UI["big screen"].draw(this.currentNote.lines);
 
 };

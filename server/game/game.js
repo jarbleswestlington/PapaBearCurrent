@@ -48,15 +48,13 @@ function Game(width, height){
 	
 	this.bearX = 22;
 	this.bearY = 27;	
-	
-	this.grid = buildGrid(width, height)
-	this.size = {width: width, height: width};
-	
+		
 	Object.defineProperty(this, 'grid', {value: buildGrid(width, height), enumerable: false});
 	Object.defineProperty(this, 'elephant', {value: {}, enumerable: false});
 	Object.defineProperty(this, 'trees', {value: [], enumerable: false});
 	Object.defineProperty(this, 'notes', {value: [], enumerable: false});
-
+	Object.defineProperty(this, 'objects', {value: [], enumerable: false});
+	
 };
 
 Game.prototype.addNode = function(data){
@@ -91,8 +89,71 @@ Game.prototype.update = function(io) {
 
 Game.prototype.start = function(io){
 	
-	io.sockets.emit("startgame_client", {game: this, trees:this.trees, notes: this.notes});
+	io.sockets.emit("startgame_client", {game: this, trees:this.trees, notes: this.notes, objects: this.objects});
 
+}
+
+Game.prototype.collide = function(dummy){
+	var illegal = false;
+	
+	var check = function(){
+		
+		if(dummy.x > this.pixels.width || dummy.y > this.pixels.height || dummy.x < 0 || dummy.y < 0){
+			
+			illegal = true;
+			return true;
+		}
+		
+		this.forAllTeams(function(team){
+			
+			var boxes = team.baseColBoxes;
+			
+			boxes.forEach(function(box){
+				
+				if(this.colCheckRelative(dummy, {item: box, influencer: {x: team.baseX, y: team.baseY} } )) illegal = true;
+				
+			}.bind(this));
+		}.bind(this));
+		
+		this.forAllPlayers(function(oPlayer){
+			
+			if(!illegal && this.colCheck(dummy, oPlayer)) illegal = true;
+	
+		}.bind(this));
+		
+		for(i = 0; i < this.trees.length; i++){
+	
+			if(this.trees[i].removed == false){
+			
+				if(this.colCheck(dummy, this.trees[i])){
+
+					illegal = true;
+					return true;
+				}
+			}
+	
+		}
+		
+		for(i = 0; i < this.objects.length; i++){
+	
+			if(this.objects[i].removed == false){
+			
+				if(this.colCheck(this.objects[i], dummy)){
+
+					illegal = true;
+					return true;
+				}
+			}
+	
+		}
+		
+	
+	}.bind(this);
+	
+	check();
+
+	if(illegal) return true;
+	else return false;	
 }
 
 Game.prototype.colCheck = function(smaller, bigger, padding){
@@ -213,7 +274,7 @@ Game.prototype.spawnNotesAndTrees = function(){
 				var chance = Math.random() * 100;
 
 				if(chance <= 89){
-					this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
+					this.trees.push({x: x * 78, y: y * 78, removed: false, width:78, height:78, treeNum : getRandomInt(1,4)});
 				}
 				if(chance > 89 && chance <= 93){
 					this.notes.push({x: x * 78, y: y * 78, removed: false});
@@ -224,7 +285,7 @@ Game.prototype.spawnNotesAndTrees = function(){
 				var chance = Math.random() * 100;
 
 				if(chance <= 40){
-					this.trees.push({x: x * 78, y: y * 78, removed: false, treeNum : getRandomInt(1,4)});
+					this.trees.push({x: x * 78, y: y * 78, width:78, height:78, removed: false, treeNum : getRandomInt(1,4)});
 				}
 				if(chance > 89 && chance <= 91){
 					this.notes.push({x: x * 78, y: y * 78, removed: false});

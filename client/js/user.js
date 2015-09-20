@@ -9,8 +9,13 @@ var user = {
 	moved: false,
 	client:{},
 	frozen:false,
+	inPlace:false,
 	
-	spear:{}
+	spear:{},
+	
+	
+	buildMode:true,
+	building: {},
 };
 
 user.server = {
@@ -88,6 +93,36 @@ user.swipe = function(){
 	soundscape.broadcast("swipe", 121);
 	socket.emit("begin_swipe", {name: user.name,});
 
+}
+
+user.getHoldingCoords = function(obj){
+	
+	var info = {};
+	
+	if(this.direction == "up"){
+		info.y = user.server.y-obj.height-1;
+		info.x = user.server.x;
+	}
+	
+	if(this.direction == "left"){
+		
+		info.y = user.server.y;
+		info.x = user.server.x - obj.width-1;
+	} 
+	
+	if(this.direction == "right"){
+		
+		info.y = user.server.y;
+		info.x = user.server.x + user.server.width+1;
+	} 
+	
+	if(this.direction == "down"){
+		
+		info.y = user.server.y + user.server.height+1;
+		info.x = user.server.x;
+	}
+		
+	return info;
 }
 
 user.interactWBase = function(){
@@ -306,6 +341,8 @@ user.move = function(modifier){
 		if(this.server.powers.papaBear) this.amount = this.amount * 1.2;
 		
 		if(this.dashing) this.amount = this.amount * 5;
+		
+		if(this.inPlace) this.amount = 0;
 		
 		socket.emit('move_input', {direction: this.direction, name: this.name, amount: this.amount});
 	}

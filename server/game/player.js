@@ -4,8 +4,8 @@ module.exports = function(game){
 	
 		this.x = 0;
 		this.y = 0;
-		this.height = 41;
-		this.width = 36;
+		this.height = 36;
+		this.width = 41;
 		this.team = args.team;
 		this.renderteam = args.team;
 		this.name = args.name;
@@ -75,9 +75,9 @@ module.exports = function(game){
 
 			var spawnY = 0;
 		
-			spawnX = game.teams[this.team].baseX + (100 * Math.random() * 4);
+			spawnX = game.teams[this.team].baseX + ((100 * Math.random() * 8) - 400);
 
-			spawnY = game.teams[this.team].baseY + (100 * Math.random() * 4);
+			spawnY = game.teams[this.team].baseY + (100 * Math.random() * 3) + 100;
 
 			return {x: spawnX, y: spawnY};
 		
@@ -115,7 +115,7 @@ module.exports = function(game){
 				
 				illegal = true;
 				return true;
-			} 
+			}
 			
 			game.forAllTeams(function(team){
 				
@@ -132,11 +132,7 @@ module.exports = function(game){
 	
 				game.forAllOtherAlivePlayers(this, function(oPlayer){
 					
-					if(!illegal && !oPlayer.powers.papaBear && game.checkCollision(dummy, oPlayer, 41, 36, 41, 36, 0, 0)){
-			
-						illegal = true;
-					
-					}
+					if(!illegal && !oPlayer.powers.papaBear && game.colCheck(dummy, oPlayer)) illegal = true;
 			
 				});
 	
@@ -145,29 +141,29 @@ module.exports = function(game){
 			for(i = 0; i < game.trees.length; i++){
 		
 				if(game.trees[i].removed == false){
-		
-					if(this.powers.papaBear){
-			
-						if(game.checkCollision(dummy, game.trees[i], 63, 63, 78, 78, 0, 0)){
-		
-							illegal = true;
-							return true;
-			
-						}
-		
-					}else{
-			
-						if(game.checkCollision(dummy, game.trees[i], 41, 36, 78, 78, 0, 0)){
-		
-							illegal = true;
-							return true;
-			
-						}
+				
+					if(game.colCheck(dummy, game.trees[i])){
+	
+						illegal = true;
+						return true;
 					}
-		
 				}
 		
 			}
+			
+			for(i = 0; i < game.objects.length; i++){
+		
+				if(game.objects[i].removed == false){
+				
+					if(game.colCheck(game.objects[i], dummy)){
+	
+						illegal = true;
+						return true;
+					}
+				}
+		
+			}
+			
 		
 		}.bind(this);
 		
@@ -187,6 +183,8 @@ module.exports = function(game){
 			setTimeout(function() { 
 				this.x = spawn.x;
 				this.y = spawn.y;
+				this.width = 41;
+				this.height = 36;
 				this.dead = false;
 				this.powers.papaBear = false;
 		
