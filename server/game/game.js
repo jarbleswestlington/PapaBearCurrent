@@ -115,7 +115,7 @@ Game.prototype.collide = function(dummy){
 			}.bind(this));
 		}.bind(this));
 		
-		this.forAllPlayers(function(oPlayer){
+		this.forAllAlivePlayers(function(oPlayer){
 			
 			if(!illegal && this.colCheck(dummy, oPlayer)) illegal = true;
 	
@@ -217,6 +217,17 @@ Game.prototype.forAllPlayers = function(func){
 		for(var i = 0; i < this.teams[name].players.length; i++){
 
 			func(this.teams[name].players[i]);
+		}
+	}
+
+}
+
+Game.prototype.forAllAlivePlayers = function(func){
+	
+	for(var name in this.teams){
+		for(var i = 0; i < this.teams[name].players.length; i++){
+
+			if(!this.teams[name].players[i].dead) func(this.teams[name].players[i]);
 		}
 	}
 

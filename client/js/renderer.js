@@ -339,7 +339,7 @@ renderer.draw["game"] = function () {
 					"L":{x:-26, y:22},
 				}
 								
-				this.drawRect("rgb(200,200,200)", player.x + spearHelper[player.direction].x, player.y + spearHelper[player.direction].y, getWidth(player), getHeight(player));	
+				this.drawRect(player.spear.color, player.x + spearHelper[player.direction].x, player.y + spearHelper[player.direction].y, getWidth(player), getHeight(player));	
 			}	
 		
 		}	
@@ -364,7 +364,8 @@ renderer.draw["game"] = function () {
 		
 	//show respawn text
 	if(user.server.dead) this.UI['game screen'].draw("You will respawn soon!");
-	
+	else if(this.buildReject) this.UI["game screen"].draw("You cannot build there");
+
 	//time limit
 	if(game.currentSec > game.timeLimit - 100) ctx.fillStyle = "rgb(255,0,0)";
 	else ctx.fillStyle = "rgb(0,0,0)";
@@ -379,7 +380,6 @@ renderer.draw["game"] = function () {
 	} 
 	
 	//show note text
-	if(this.buildReject) this.UI["big screen"].draw("You cannot build there");
-	else if(this.showNote) this.UI["big screen"].draw(this.currentNote.lines);
+	if(this.showNote) this.UI["big screen"].draw(this.currentNote.lines);
 
 };
