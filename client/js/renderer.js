@@ -295,10 +295,7 @@ renderer.draw["game"] = function () {
 	}
 		
 	game.forAllPlayers(function(player){
-		
-		//shadows
-		this.drawImage("playershadow", player.x-1 , player.y+ 21);
-	
+			
 		//CHARACTER DRAWING
 		if(player.dead){
 			
@@ -315,7 +312,9 @@ renderer.draw["game"] = function () {
 			
 			this.drawSprite("bear", player.x,player.y, papaSpriteFinder[player.direction]);
 			
-		}else{
+		}else if(!player.powers.invisibility){
+			
+			this.drawImage("playershadow", player.x-1 , player.y+ 21);
 			
 			var playerSpriteFinder = {
 				"L":{x:2 + ((player.character-1) * 43), y:2, width:41, height:36},
@@ -325,7 +324,7 @@ renderer.draw["game"] = function () {
 			}
 			
 			this.drawSprite(game.server.teams[player.renderteam].name + "team", player.x,player.y, playerSpriteFinder[player.direction]);
-	
+
 		}
 		
 		if(!player.dead && !player.powers.papaBear){

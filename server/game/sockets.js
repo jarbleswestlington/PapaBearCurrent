@@ -264,6 +264,7 @@ module.exports = function(server, game){
 			player.powers[data.power] = true;
 			
 			if(data.power == "papaBear"){
+				player.powers = {papaBear: true};
 				player.x -= player.x%78;
 				player.x+=6;
 				player.y -= player.y%78;
