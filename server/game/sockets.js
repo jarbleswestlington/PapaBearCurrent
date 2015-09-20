@@ -245,8 +245,16 @@ module.exports = function(server, game){
 			player.powers[data.power] = true;
 			
 			if(data.power == "papaBear"){
-				player.width = 78;
-				player.height = 78;
+				player.x -= player.x%78;
+				player.x+=6;
+				player.y -= player.y%78;
+				player.y+=6;
+				player.width = 63;
+				player.height = 63;
+			}
+			if(data.power == "powerWeapon"){
+				player.powers.spear = true;
+				player.spear.color = "yellow";
 			}
 			
 			console.log(data.power + " given to Player:" + data.name);

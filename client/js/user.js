@@ -213,7 +213,7 @@ user.interactWNote = function(){
 					if(chance < 10){
 						probability = 1;	
 					}else{
-						probability = 1;
+						probability = 2;
 					}
 				
 					var notes = noteIndex[probability].filter(function(note){
@@ -350,16 +350,16 @@ user.move = function(modifier){
 
 var getWidth = function(player){
 	if (player.direction == "U" || player.direction == "D"){
-		return player.spear.vwidth;
+		return player.spear.height;
 	}else if (player.direction == "L" || player.direction == "R"){
-		return player.spear.hwidth;
+		return player.spear.width;
 	}
 };
 
 var getHeight = function(player){
 	if (player.direction == "U" || player.direction == "D"){
-		return player.spear.vheight;
+		return player.spear.width;
 	}else if (player.direction == "L" || player.direction == "R"){
-		return player.spear.hheight;
+		return player.spear.height;
 	}
 };

@@ -38,21 +38,21 @@ game.client.notes = [
 	new Note(["What sort of notes have your teammates read? Are they hiding something?"],
 	{prob: 1, condition: 0}), 
 
-	new Note(["Press 'k' to sheath and unsheathe a golden sword. This weapon can kill PAPA BEAR"], 
-	{prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&!game.getPowerStats("powerWeapon").has}, 
+	new Note(["Press 'k' to sheath and unsheathe a golden spear. This weapon can kill PAPA BEAR"], 
+	{prob:1, condition: function(){ return !game.getPowerStats("powerWeapon").has}, 
 	action:{func: user.givePower, args: ["powerWeapon"]} }), 
 
-	new Note(["Someone has a special sword that can kill PAPA BEAR"], 
+	new Note(["Someone has a special spear that can kill PAPA BEAR"], 
 	{prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
 
-	new Note(["Only the golden sword can defeat PAPA BEAR"], 
+	new Note(["Only the golden spear can defeat PAPA BEAR"], 
 	 {prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
 
 	new Note(["Some notes can give you immense power. This note does not."], 
 	{prob: 1, condition: function(){ return !game.getPowerStats("papaBear").has} }),
 
 	new Note(["You are now Papa Bear"], 
-	{prob: 1, condition: function(){ return !game.getPowerStats("papaBear").has}, 
+	{prob: 2, condition: function(){ return !game.getPowerStats("papaBear").has}, 
 	action:{func: user.givePower, args: ["papaBear"]} }), 
  
 ];

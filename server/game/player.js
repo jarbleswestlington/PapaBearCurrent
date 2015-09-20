@@ -26,27 +26,10 @@ module.exports = function(game){
 		this.illegal = false;
 	
 		this.spear = {
-			has:false,
-			attacking:false,
-			hwidth : 30,
-			hheight : 5,
-			vwidth : 5,
-			vheight : 30,
-
-			getWidth: function(){
-				if (this.direction == "U" || this.direction == "D"){
-					return this.spear.vwidth;
-				}else if (this.direction == "L" || this.direction == "R"){
-					return this.spear.hwidth;
-				}
-			},
-			getHeight: function(){
-				if (this.direction == "U" || this.direction == "D"){
-					return this.spear.vheight;
-				}else if (this.direction == "L" || this.direction == "R"){
-					return this.spear.hheight;
-				}
-			}
+		
+			width : 30,
+			height : 5,
+			color: "grey"
 
 		},
 		
@@ -63,6 +46,14 @@ module.exports = function(game){
 		}
 
 	};
+	
+	Player.prototype.spearColBoxes = {
+		U:{x: 36,y: -22, width:5, height:30},
+		D:{x:0,y:20, width: 5, height:30},
+		R:{x:36,y:22, width: 30, height:5},
+		L:{x:-26,y:+22, width: 30, height:5}
+	};
+		
 
 	Player.prototype.spawn = function(func){
 
@@ -207,14 +198,8 @@ module.exports = function(game){
 	
 			if(this.attacking){
 		
-				var directions = {
-					U:{x: 36,y: -22, width:5, height:30},
-					D:{x:0,y:20, width: 5, height:30},
-					R:{x:36,y:22, width: 30, height:5},
-					L:{x:-26,y:+22, width: 30, height:5}
-				}
-		
-				if(game.colCheckRelative({item: directions[this.direction], influencer: this}, oPlayer, {x:0, y:0})) hit = true;
+	
+				if(game.colCheckRelative({item: this.spearColBoxes[this.direction], influencer: this}, oPlayer, {x:0, y:0})) hit = true;
 			}		
 	
 			if(hit){
