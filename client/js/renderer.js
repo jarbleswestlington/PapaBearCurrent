@@ -447,6 +447,7 @@ renderer.draw["game"] = function () {
 	this.UI["notes"].grid("rgb(0,0,255)", user.notes, 8, 2);
 		
 	if(this.noteText) this.UI['space bar'].draw("Pick Up");
+	else if(this.objText) this.UI['space bar'].draw("Pick Up");
 	else if(this.treeText && !user.log.has) this.UI['space bar'].draw("Chop Tree");
 	else if(this.stealText && !user.log.has) this.UI['space bar'].draw("Steal Wood");
 	else if(this.wallText) this.UI['space bar'].draw("Chop Wall");

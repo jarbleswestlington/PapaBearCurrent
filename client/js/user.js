@@ -175,7 +175,7 @@ user.interactWObject = function(){
 	
 	renderer.wallText = false;
 		
-	renderer.noteText = false;	
+	renderer.objText = false;	
 		
 	for(var i = 0; i < game.client.objects.length; i++){	
 						
@@ -196,11 +196,13 @@ user.interactWObject = function(){
 		
 		}else if(game.client.objects[i].type == "power"){
 			
+			if(this.server.powers.invisiblity || this.server.powers.papaBear) continue;
+			
 			if(!game.colCheck(game.client.objects[i], this.server)) continue;
 			
-			renderer.noteText = true;	
+			renderer.objText = true;	
 			
-			if(!this.action || this.server.powers.papaBear) continue;	
+			if(!this.action) continue;	
 			
 			user.pickUp(game.client.objects[i], i);
 			
@@ -234,49 +236,53 @@ user.pickUp = function(item, index){
 
 user.interactWNote = function(){
 	
-	if(this.server.powers.papaBear || this.server.powers.invisibility) return;
+	renderer.noteText = false;	
 	
-	for (var z = 0; z < game.client.notes.length; z++){
-					
-		if(game.client.notes[z].removed == false){
-					
-			if (game.checkCollision({x: game.client.notes[z].x + 29, y: game.client.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)){
-				
-				var redo = true;
-				
-				do{
-					
-					var chance = Math.floor(Math.random() * 100);
-				
-					var probability = 1;
-				
-					//customize this
-					if(chance < 10){
-						probability = 1;	
-					}else{
-						probability = 2;
-					}
-				
-					var notes = noteIndex[probability].filter(function(note){
-						return note.condition();
-					});
-				
-					if(notes.length > 0) redo = false;
-					
-				}while(redo);
-							
-				var random = Math.floor(Math.random() * notes.length);
-
-				var note = notes[random];
-
-				this.readNote(note);
-
-				this.getNote(z, note);
-				
-			}
-
-		}
+	if(this.server.powers.papaBear || this.server.powers.invisibility) return;
 		
+	for (var z = 0; z < game.client.notes.length; z++){
+				
+		if(game.client.notes[z].removed) continue;		
+							
+		if (!game.checkCollision({x: game.client.notes[z].x + 29, y: game.client.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)) continue;		
+		
+		renderer.noteText = true;	
+				
+		if(!this.action) continue;
+					
+		var redo = true;
+		
+		do{
+			
+			var chance = Math.floor(Math.random() * 100);
+		
+			var probability = 1;
+		
+			//customize this
+			if(chance < 10){
+				probability = 1;	
+			}else{
+				probability = 2;
+			}
+		
+			var notes = noteIndex[probability].filter(function(note){
+				return note.condition();
+			});
+		
+			if(notes.length > 0) redo = false;
+			
+		}while(redo);
+			
+		var random = Math.floor(Math.random() * notes.length);
+
+		var note = notes[random];
+
+		this.readNote(note);
+
+		this.getNote(z, note);
+			
+		break;				
+
 	}
 	
 }
