@@ -1,12 +1,11 @@
 //collision objects
 //remove non socket logic from socket.js
-//allow master to enter as a player
-//allow spectator
-//collisions with bases
-//setup Server?
 //start with test config
-//fix papabear getting stuck
 //move all log stuff to server
+//move notes to server...move powers to server...
+//fix spawn
+//configurable random generation of trees and bases and stuff
+
 
 module.exports = function(game, io){
 	

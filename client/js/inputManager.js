@@ -2,6 +2,7 @@
 var inputManager = {};
 
 inputManager.keys = [];
+inputManager.mouse = {};
 
 addEventListener("keydown", function (e) {	
 	inputManager.keys[String.fromCharCode(e.keyCode)] = true;
@@ -12,6 +13,21 @@ addEventListener("keyup", function (e) {
 	delete inputManager.keys[String.fromCharCode(e.keyCode)];
 	delete inputManager.keys[e.keyCode];
 }, false);
+
+addEventListener("mousedown", function (e) {
+	inputManager.mouse.down = true;
+	inputManager.mouse.x = e.clientX;
+	inputManager.mouse.y = e.clientY;
+	inputManager.mouse.collider = {x: e.clientX, y: e.clientY, width: 1, height: 1};
+	
+}, false);
+
+addEventListener("mouseup", function (e) {	
+}, false);
+
+inputManager.clear = function(){
+	inputManager.mouse.down = false;
+}
 
 inputManager.processInput = function(){
 	this.check();
@@ -163,8 +179,6 @@ inputManager.registerKey = function(char, opts){
 	
 	if(opts.once) inputManager.pressable[char] = true;
 	
-	
-	
 	var newKey = {char: char, conditions: {}};
 	if(opts.once) newKey.once = true;
 	else newKey.once = false;
@@ -214,11 +228,13 @@ inputManager.masterKeys = function(modifier){
 		if(this.pressable.enter){
 			this.pressable.enter = false;
 			if(game.state == "game"){
-				//socket.emit()
+				socket.emit("startgame_server", {});
 			}else{
 				socket.emit("startgame_server", {});
 			}
 		} 
+	}else{
+		this.pressable.enter = true;
 	}
 	if (38 in this.keys) { // user holding up
 		renderer.camera.y += 700 * modifier;
@@ -233,7 +249,6 @@ inputManager.masterKeys = function(modifier){
 		renderer.camera.x -= 700 * modifier;
 	}
 	
-
 };
 
 inputManager.changeKey = function(oldKey, newKey){

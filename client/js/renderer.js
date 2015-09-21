@@ -32,9 +32,23 @@ renderer.upload = function(src){
 
 renderer.updateCamera = function(){
 	
-	this.camera.y = canvas.height/2 - user.server.y;
-	this.camera.x = canvas.width/2 - user.server.x;
+	this.camera.y = canvas.height/2 - (user.server.y + user.server.height/2);
+	this.camera.x = canvas.width/2 - (user.server.x + user.server.width/2);
 };
+
+renderer.drawUI = function(image, coordX, coordY, stretchX, stretchY){
+	
+	if(!this.refs[image]){
+		ctx.fillStyle = image;
+		
+		ctx.fillRect(coordX, coordY, stretchX, stretchY);
+	} 
+	else if(stretchX && stretchY){
+		ctx.drawImage(this.refs[image], coordX, coordY, stretchX, stretchY);
+		return;
+	}
+	
+}
 
 renderer.drawImage = function(image, coordX, coordY){
 	if(typeof image == "object") this.drawImage(image.image, image.x, image.y);
@@ -165,9 +179,19 @@ var Style = function(color, options){
 		ctx.font = this.fontSize + "px Helvetica";
 		
 	}
-	if(options.lineWidth) this.lineWidth = (canvas.width/(40/ options.lineWidth)) + this.fontSize;
-	else this.lineWidth = 0;
+	if(options.lineWidth) this.lineWidth = (canvas.width/( 40/ options.lineWidth) ) + this.fontSize;
+	else this.lineWidth = this.fontSize;
 	
+	if(options.gridWidth) this.gridWidth = (canvas.width/( 40/ options.gridWidth) ) + this.fontSize;
+	else this.gridWidth = this.fontSize;
+	
+	this.padding = {};
+	if(options.paddingX) this.padding.x = canvas.width/( 40 / options.paddingX );
+	else this.padding.x = 0;
+	
+	if(options.paddingY) this.padding.y = canvas.width/( 40 / options.paddingY );
+	else this.padding.y = 0;
+		
 	//if(!renderer.styles[name]) renderer.styles[name] = this;
 	
 }
@@ -194,6 +218,9 @@ var UI = function(style, box, options){
 		
 		
 	}
+	
+	this.box = box;
+	this.options = options;
 		
 	this.draw = function(array){
 		
@@ -203,14 +230,58 @@ var UI = function(style, box, options){
 		
 		var y = 0;	
 		
-		if(typeof array == "string" || typeof array == "number" ){
-			 ctx.fillText(array, box.x, box.y, box.width);
-			 return;
-		}
+		if(typeof array == "string" || typeof array == "number" ) array = [array];
 		
 		for(var i = 0; i < array.length; i++){
-
-			ctx.fillText(array[i], box.x, box.y + (styleInUse.lineWidth * i), box.width);
+			
+			paddingY = 0;
+			if(i == 0) paddingY = styleInUse.padding.y;
+			//else if(i == array.length -1) paddingY = -styleInUse.padding.y;
+				
+			if(renderer.refs[array[i]]) renderer.drawUI(array[i], box.x + styleInUse.padding.x, box.y + paddingY + (styleInUse.lineWidth * (i + 1)), box.width - styleInUse.padding.x, styleInUse.lineWidth);
+			else ctx.fillText(array[i], box.x + styleInUse.padding.x, box.y + paddingY + (styleInUse.lineWidth * (i + 1)), box.width - (styleInUse.padding.x * 2) );
+			
+		}
+	}
+	
+	this.background = function(image){
+		
+		if(renderer.refs[image]) renderer.drawUI(image, box.x, box.y, box.width, box.height);
+		
+	}
+	
+	this.grid = function(ref, array, cols, rows){
+		
+		var styleInUse = renderer.styles[style];
+		styleInUse.apply();
+		
+		var y = 0;	
+		var x = 0;
+		
+		if(typeof array == "string" || typeof array == "number" ) array = [array];
+		
+		for(var i = 0; i < array.length; i++){
+			
+			if(i != 0){
+				if(i%cols == 0){
+					x = 0;
+					y++;
+				}else{
+					x++;
+				}
+			}	
+			var drawX = box.x + (x * ( styleInUse.gridWidth + ( styleInUse.padding.x * 2 )) );
+			var drawY = box.y + (y * ( styleInUse.lineWidth + ( styleInUse.padding.y * 2 )) );
+			var cell = {x: drawX, y: drawY, width: styleInUse.gridWidth, height: styleInUse.lineWidth}
+			
+			renderer.drawUI(ref, drawX, drawY, cell.width, cell.height);
+						
+			if(inputManager.mouse.down){
+				if(game.colCheck(inputManager.mouse.collider, cell)){
+					user.readNote(array[i]);
+				}
+			}
+			
 			
 		}
 	}
@@ -364,21 +435,26 @@ renderer.draw["game"] = function () {
 		
 	}.bind(this));
 	
-	
-	if(this.treeText && !user.log.has) this.UI['action prompt'].draw("Press space to cut wood!");
-	else if(this.stealText && !user.log.has) this.UI['action prompt'].draw("Press space to steal wood!");
-	else if(this.wallText) this.UI['action prompt'].draw("Press space to chop wall!");
-	
-
-	if(user.server.dead) this.UI['game screen'].draw("You will respawn soon");
-	else if(this.pickedUp) this.UI['game screen'].draw("You just picked up a " + this.pickedUpItem);
-	else if(this.buildReject) this.UI["game screen"].draw("You cannot build there");
-
 	//time limit
 	if(game.currentSec > game.timeLimit - 100) ctx.fillStyle = "rgb(255,0,0)";
 	else ctx.fillStyle = "rgb(0,0,0)";
-
 	this.UI["timer"].draw((game.timeLimit - game.currentSec) + " seconds remaining");
+	
+	if(user.mode == "master") return;
+	
+	this.UI['space bar'].background("spacebar");	
+	
+	this.UI["notes"].grid("rgb(0,0,255)", user.notes, 8, 2);
+		
+	if(this.noteText) this.UI['space bar'].draw("Pick Up");
+	else if(this.objText) this.UI['space bar'].draw("Pick Up");
+	else if(this.treeText && !user.log.has) this.UI['space bar'].draw("Chop Tree");
+	else if(this.stealText && !user.log.has) this.UI['space bar'].draw("Steal Wood");
+	else if(this.wallText) this.UI['space bar'].draw("Chop Wall");
+	
+	if(user.server.dead) this.UI['game screen'].draw("You will respawn soon");
+	//else if(this.pickedUp) this.UI['game screen'].draw("You just picked up a " + this.pickedUpItem);
+	else if(this.buildReject) this.UI["game screen"].draw("You cannot build there");
 	
 	if(builder.on){
 		

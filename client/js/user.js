@@ -17,6 +17,8 @@ var user = {
 	
 	mPlayers : [],
 	
+	notes:[],
+	
 	buildMode:true,
 	building: {},
 	server: {},
@@ -107,7 +109,7 @@ user.interactWBase = function(){
 	
 	renderer.stealText = false;
 
-	if(!this.server.powers.papaBear){
+	if(!this.server.powers.papaBear && !this.server.powers.invisibility){
 			
 		game.forAllTeams(function(team){
 			
@@ -173,37 +175,38 @@ user.interactWObject = function(){
 	
 	renderer.wallText = false;
 		
-	for(var i = 0; i < game.client.objects.length; i++){		
-				
+	renderer.objText = false;	
+		
+	for(var i = 0; i < game.client.objects.length; i++){	
+						
 		if(game.client.objects[i].removed || this.server.dead) continue;	
 		
 		if(game.client.objects[i].type == "wall"){
-		
+					
 			if(!game.colCheck(this.server, game.client.objects[i], {x: -25, y:-25})) continue;
 		
 			renderer.wallText = true;	
 			
-			if(!this.action) continue;
-
+			if(!this.action) continue;	
+			
 			if(this.server.powers.papaBear) this.chopWall(i, .05);
 			else this.chopWall(i, 1);
+			
+			break;
 		
 		}else if(game.client.objects[i].type == "power"){
 			
+			if(this.server.powers.invisiblity || this.server.powers.papaBear) continue;
+			
 			if(!game.colCheck(game.client.objects[i], this.server)) continue;
 			
-			renderer.pickedUp = true;
-			renderer.pickedUpItem = game.client.objects[i].power;
-
-			setTimeout(function(){
-			  renderer.pickedUp = false;
-			}, 1000);
+			renderer.objText = true;	
 			
-			this.givePower(game.client.objects[i].power);
+			if(!this.action) continue;	
 			
-			game.client.objects[i].removed = true;
-					
-			socket.emit("remove_object", {index: i});
+			user.pickUp(game.client.objects[i], i);
+			
+			break;
 			
 		}
 				
@@ -211,53 +214,75 @@ user.interactWObject = function(){
 	
 }
 
+user.pickUp = function(item, index){
+	renderer.pickedUp = true;
+	renderer.pickedUpItem = item.power;
+
+	setTimeout(function(){
+	  renderer.pickedUp = false;
+	}, 1000);
+		
+	if(noteIndex[item.power]) {
+		user.notes.push(noteIndex[item.power]);
+		user.readNote(noteIndex[item.power]);
+	}
+	
+	user.givePower(item.power);
+	
+	item.removed = true;
+			
+	socket.emit("remove_object", {index: index});
+}
+
 user.interactWNote = function(){
 	
-	if(this.server.powers.papaBear) return;
+	renderer.noteText = false;	
 	
-	for (var z = 0; z < game.client.notes.length; z++){
-					
-		if(game.client.notes[z].removed == false){
-					
-			if (game.checkCollision({x: game.client.notes[z].x + 29, y: game.client.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)){
-				
-				var redo = true;
-				
-				do{
-					
-					var chance = Math.floor(Math.random() * 100);
-				
-					var probability = 1;
-				
-					//customize this
-					if(chance < 10){
-						probability = 1;	
-					}else{
-						probability = 2;
-					}
-				
-					var notes = noteIndex[probability].filter(function(note){
-						return note.condition();
-					});
-				
-					if(notes.length > 0) redo = false;
-					
-				}while(redo);
-							
-				var random = Math.floor(Math.random() * notes.length);
-
-				renderer.currentNote = notes[random];
-
-				renderer.showNote = true;
-				
-				if(renderer.currentNote.func) renderer.currentNote.func.apply(this, renderer.currentNote.args)
-
-				this.getNote(z);
-				
-			}
-
-		}
+	if(this.server.powers.papaBear || this.server.powers.invisibility) return;
 		
+	for (var z = 0; z < game.client.notes.length; z++){
+				
+		if(game.client.notes[z].removed) continue;		
+							
+		if (!game.checkCollision({x: game.client.notes[z].x + 29, y: game.client.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)) continue;		
+		
+		renderer.noteText = true;	
+				
+		if(!this.action) continue;
+					
+		var redo = true;
+		
+		do{
+			
+			var chance = Math.floor(Math.random() * 100);
+		
+			var probability = 1;
+		
+			//customize this
+			if(chance < 10){
+				probability = 1;	
+			}else{
+				probability = 2;
+			}
+		
+			var notes = noteIndex[probability].filter(function(note){
+				return note.condition();
+			});
+		
+			if(notes.length > 0) redo = false;
+			
+		}while(redo);
+			
+		var random = Math.floor(Math.random() * notes.length);
+
+		var note = notes[random];
+
+		this.readNote(note);
+
+		this.getNote(z, note);
+			
+		break;				
+
 	}
 	
 }
@@ -304,8 +329,14 @@ user.chopTree = function(treeId){
 		
 };
 
-user.getNote = function(noteId){
-			
+user.readNote = function(note){
+	renderer.currentNote = note;
+	renderer.showNote = true;
+};
+
+user.getNote = function(noteId, note){
+	if(note.func) note.func.apply(this, note.args);
+	user.notes.push(note);
 	game.client.notes[noteId].removed = true;
 	socket.emit('getNote', {id: noteId});
 		

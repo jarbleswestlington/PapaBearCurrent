@@ -58,6 +58,8 @@ socket.on('remove_object', function(data) {
 
 socket.on("death", function(data){
 	
+	user.notes = [];
+	
 	user.log.has = false;
 
 	if(user.log.stolen){
