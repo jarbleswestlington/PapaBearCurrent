@@ -1,7 +1,7 @@
 var noteIndex = {};
 
-var Note = function(lines, options){
-	
+var Note = function(name, lines, options){
+	this.name = name;
 	if(typeof options.condition == 'number'){
 		
 		this.condition = function(){
@@ -27,4 +27,5 @@ var Note = function(lines, options){
 	if(noteIndex[options.prob]) noteIndex[options.prob].push(this);
 	else noteIndex[options.prob] = [this];
 	
+	if(!noteIndex[name]) noteIndex[name] = this;
 }

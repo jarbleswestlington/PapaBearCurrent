@@ -146,6 +146,7 @@ game.update = function (modifier) {
 	
 	renderer.updateCamera();
 	
+	
 };
 
 game.stateManager = function () {
@@ -208,6 +209,8 @@ game.stateManager = function () {
 	this.then = now;
 	
 	soundscape.checkToPlay();
+	
+	inputManager.clear();
 
 	animate(game.stateManager);
 	     

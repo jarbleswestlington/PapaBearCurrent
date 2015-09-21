@@ -239,7 +239,7 @@ module.exports = function(server, game){
 
 		});
 		
-		socket.on("request_placement", function(data){			
+		socket.on("request_placement", function(data){
 			
 			var illegal = game.collide(data);
 			
@@ -275,6 +275,11 @@ module.exports = function(server, game){
 			if(data.power == "powerWeapon"){
 				player.powers.spear = true;
 				player.spear.color = "yellow";
+			}
+			
+			if(data.power == "invisiblity"){
+				player.powers = {invsibility: true};
+				
 			}
 			
 			console.log(data.power + " given to Player:" + data.name);

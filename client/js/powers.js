@@ -15,13 +15,12 @@ function Power(name, opts){
 	this.actions.lose = opts.onLoss || null;
 	
 	this.exclusive = opts.exclusive || false;
-	
 }
 
 new Power("spear");
 new Power("powerWeapon");
 new Power("disguise");
-new Power("invisibility");
+new Power("invisibility", {exclusive: true});
 new Power("telescope");
 new Power("spearHand");
 new Power("sword");
