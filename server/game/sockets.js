@@ -1,5 +1,7 @@
 module.exports = function(server, game){
 	
+	var powers = require('./powers.js');
+	
 	//setUp sockets
 	var io = require('socket.io').listen(server);
 	io.set('log level', 1);
@@ -263,26 +265,29 @@ module.exports = function(server, game){
 			var player = game.findPlayerByName(data.name);
 			player.powers[data.power] = true;
 			
-			if(data.power == "papaBear"){
-				player.powers = {papaBear: true};
-				player.x -= player.x%78;
-				player.x+=6;
-				player.y -= player.y%78;
-				player.y+=6;
-				player.width = 63;
-				player.height = 63;
-			}
-			if(data.power == "powerWeapon"){
-				player.powers.spear = true;
-				player.spear.color = "yellow";
-			}
-			
-			if(data.power == "invisiblity"){
-				player.powers = {invsibility: true};
+			var powerGive = powers.index[data.power];
+			if(powerGive){
+				if(powerGive.exclusive){
+					if(powerGive.group){
+						for(var powerPlayer in player.powers){
+							if(powers.index[powerPlayer].group == powerGive.group) player.powers[playerPower] = false;
+						}
+					}else player.powers = {};
+					
+				}
+				console.log(powerGive.name);
+				player.powers[powerGive.name] = true;
+				if(powerGive.onRecieve) powerGive.onRecieve(player);
+				if(powerGive.include && powerGive.include.length){
+					powerGive.include.forEach(function(power){
+						console.log("power");
+						player.powers[power] = true;
+					});
+				} 
+				console.log(data.power + " given to Player:" + powerGive.name);
 				
 			}
 			
-			console.log(data.power + " given to Player:" + data.name);
 
 		});
 

@@ -442,15 +442,11 @@ renderer.draw["game"] = function () {
 	
 	if(user.mode == "master") return;
 	
-	this.UI['space bar'].background("spacebar");	
 	
 	this.UI["notes"].grid("rgb(0,0,255)", user.notes, 8, 2);
 		
-	if(this.noteText) this.UI['space bar'].draw("Pick Up");
-	else if(this.objText) this.UI['space bar'].draw("Pick Up");
-	else if(this.treeText && !user.log.has) this.UI['space bar'].draw("Chop Tree");
-	else if(this.stealText && !user.log.has) this.UI['space bar'].draw("Steal Wood");
-	else if(this.wallText) this.UI['space bar'].draw("Chop Wall");
+	if(this.spacebar) this.UI['space bar'].background("spacebar"), this.UI['space bar'].draw(this.spacebarText);
+	this.spacebar = false;
 	
 	if(user.server.dead) this.UI['game screen'].draw("You will respawn soon");
 	//else if(this.pickedUp) this.UI['game screen'].draw("You just picked up a " + this.pickedUpItem);

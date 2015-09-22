@@ -14,47 +14,129 @@
 //organize things into one master array - objects//toRender//toCollide
 //allow ghostmovment in master if you hold shift
 
-new Note("steal1", ["If you manage to steal your opponent's wood, there is a considerable payoff."], {prob: 1, condition: 0}),
+new Note("steal1",
+ ["If you manage to steal your opponent's wood, there is a considerable payoff."], {
+	 prob: 1,
+	 condition: 0
+ }
+);
 
-new Note("dash1", ["Press Z to dash forward"], {prob: 1, condition: 0}),
+new Note("dash1",
+ ["Press Z to dash forward"], {
+	prob: 1,
+	condition: 0
+ }
+);
 
-new Note("chat1", ["Press ENTER to chat with nearby users"], {prob: 1, condition: 0}),
+new Note("chat1", 
+ ["Press ENTER to chat with nearby users"], {
+	prob: 1,
+	condition: 0
+ }
+);
 
-new Note("spear", ["You can now press 'k' to wield a deadly spear."], 
-{prob: 1, condition: 0, action:{func: user.givePower, args: ["spear"]}}),
+new Note("spear",
+ ["You can now press 'k' to wield a deadly spear."], {
+	 prob: 1,
+	 condition: 0,
+	 action:{
+		 func: user.givePower, args: ["spear"]
+	 }
+ }
+);
 
-new Note("spear2", ["You have picked up a spear. Press 'k' to use it, but be careful where you point it."],
-{prob: 1, condition: 0, action:{func: user.givePower, args: ["spear"]}}),
+new Note("spear2", ["You have picked up a spear. Press 'k' to use it, but be careful where you point it."], {
+	prob: 1, condition: 0,
+	action:{
+		func: user.givePower,
+		args: ["spear"]
+	}
+});
 
-new Note("spear3", ["Press 'k' to brandish your spear and then press 'k' again to hide it."],
-{prob: 1, condition: 0, action:{func: user.givePower, args: ["spear"]}}),
+new Note("spear3", 
+ ["Press 'k' to brandish your spear and then press 'k' again to hide it."], {
+	 prob: 1,
+	 condition: 0,
+	 action:{
+		 func: user.givePower,
+		 args: ["spear"]
+	 }
+ }
+);
 
-new Note("text1",["Appearances can be deceiving...stay on guard"], {prob: 1, condition: 0}),
+new Note("text1",["Appearances can be deceiving...stay on guard"], {
+	prob: 1,
+	condition: 0}
+);
 
-new Note("disguise",["You have picked up a disguise. Hold 'm' and then", 
-"press r,g or b to impersonate another team."],
-{prob: 1, condition: 0, action:{func: user.givePower, args: ["disguise"]}}), 
+new Note("disguise",
+ ["You have picked up a disguise. Hold 'm' and then", 
+  "press r,g or b to impersonate another team."], {
+	  prob: 1,
+	  condition: 0,
+	  action:{
+		   func: user.givePower,
+	  		args: ["disguise"]
+	  }
+  }
+); 
 
-new Note("notes1", ["What sort of notes have your teammates read? Are they hiding something?"],
-{prob: 1, condition: 0}), 
+new Note("notes1", ["What sort of notes have your teammates read? Are they hiding something?"],{
+	prob: 1,
+	condition: 0
+ }
+); 
 
-new Note("powerWeapon", ["Press 'k' to sheath and unsheathe a golden spear. This weapon can kill PAPA BEAR"], 
-{prob:1, condition: function(){ return !game.getPowerStats("powerWeapon").has}, 
-action:{func: user.givePower, args: ["powerWeapon"]} }), 
+new Note("powerWeapon",
+ ["Press 'k' to sheath and unsheathe a golden spear. This weapon can kill PAPA BEAR"], {
+	 prob:1, 
+	 condition: function(){
+		  return !game.getPowerStats("powerWeapon").has
+	 }, 
+	 action:{
+		 func: user.givePower, args: ["powerWeapon"]
+	 } 
+ }
+); 
 
-new Note("powerWeapon2", ["Someone has a special spear that can kill PAPA BEAR"], 
-{prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
+new Note("powerWeapon2", 
+ ["Someone has a special spear that can kill PAPA BEAR"], {
+	prob: 1,
+	condition: function(){
+		return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has
+	}
+ }
+); 
 
-new Note("powerWeapon3", ["Only the golden spear can defeat PAPA BEAR"], 
- {prob: 1, condition: function(){ return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has} }), 
+new Note("powerWeapon3",
+ ["Only the golden spear can defeat PAPA BEAR"], {
+	 prob: 1,
+	 condition: function(){
+		 return game.getPowerStats("papaBear").has&&game.getPowerStats("powerWeapon").has
+	 }
+  }
+); 
 
-new Note("text2", ["Some notes can give you immense power. This note does not."], 
-{prob: 1, condition: function(){ return !game.getPowerStats("papaBear").has} }),
+new Note("text2", ["Some notes can give you immense power. This note does not."], {
+	prob: 1,
+	condition: function(){
+		 return !game.getPowerStats("papaBear").has
+	}
+ }
+);
 
-new Note("papaBear1", ["You are now Papa Bear"], 
-{prob: 2, condition: function(){ return !game.getPowerStats("papaBear").has}, 
-action:{func: user.givePower, args: ["papaBear"]} }), 
- 
+new Note("papaBear1",
+ ["You are now Papa Bear"], {
+	 prob: 2,
+	 condition: function(){
+		  return !game.getPowerStats("papaBear").has
+	 }, 
+	 action:{
+		 func: user.givePower,
+		 args: ["papaBear"]
+	 }
+  }
+); 
 
 renderer.styles = {
 	"large": new Style("rgb(255,255,255)", {fontSize: 1.8, lineWidth: 1}),
