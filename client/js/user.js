@@ -124,8 +124,9 @@ user.interactWBase = function(){
 				
 					if(team.score != 0){
 				
-						renderer.stealText = true;
-				
+						renderer.spacebar = true;
+						renderer.spacebarText = "Steal Wood!";
+										
 						if(this.action){
 					
 							this.stealWood(team.name);
@@ -144,9 +145,7 @@ user.interactWBase = function(){
 }	
 
 user.interactWTree = function(){
-	
-	renderer.treeText = false;
-	
+		
 	if(!this.server.powers.papaBear){
 	
 		for(var i = 0; i < game.client.trees.length; i++){
@@ -155,8 +154,9 @@ user.interactWTree = function(){
 			
 				if(game.checkCollision(this.server, game.client.trees[i], 41, 36, 78, 78, -25, -25)){
 			
-					renderer.treeText = true;		
-		
+					renderer.spacebar = true;
+					renderer.spacebarText = "Chop Tree";
+							
 					if(this.action){
 			
 						this.chopTree(i);
@@ -172,11 +172,7 @@ user.interactWTree = function(){
 }
 
 user.interactWObject = function(){
-	
-	renderer.wallText = false;
-		
-	renderer.objText = false;	
-		
+			
 	for(var i = 0; i < game.client.objects.length; i++){	
 						
 		if(game.client.objects[i].removed || this.server.dead) continue;	
@@ -185,7 +181,8 @@ user.interactWObject = function(){
 					
 			if(!game.colCheck(this.server, game.client.objects[i], {x: -25, y:-25})) continue;
 		
-			renderer.wallText = true;	
+			renderer.spacebar = true;
+			renderer.spacebarText = "Chop Wall";	
 			
 			if(!this.action) continue;	
 			
@@ -200,7 +197,8 @@ user.interactWObject = function(){
 			
 			if(!game.colCheck(game.client.objects[i], this.server)) continue;
 			
-			renderer.objText = true;	
+			renderer.spacebar = true;
+			renderer.spacebarText = "Pick Up";
 			
 			if(!this.action) continue;	
 			
@@ -235,9 +233,7 @@ user.pickUp = function(item, index){
 }
 
 user.interactWNote = function(){
-	
-	renderer.noteText = false;	
-	
+		
 	if(this.server.powers.papaBear || this.server.powers.invisibility) return;
 		
 	for (var z = 0; z < game.client.notes.length; z++){
@@ -246,8 +242,9 @@ user.interactWNote = function(){
 							
 		if (!game.checkCollision({x: game.client.notes[z].x + 29, y: game.client.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)) continue;		
 		
-		renderer.noteText = true;	
-				
+		renderer.spacebar = true;
+		renderer.spacebarText = "Pick Up";
+						
 		if(!this.action) continue;
 					
 		var redo = true;
