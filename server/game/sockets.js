@@ -275,11 +275,12 @@ module.exports = function(server, game){
 					}else player.powers = {};
 					
 				}
-				
-				player.powers[powerGive.name] = true;;
+				console.log(powerGive.name);
+				player.powers[powerGive.name] = true;
 				if(powerGive.onRecieve) powerGive.onRecieve(player);
 				if(powerGive.include && powerGive.include.length){
 					powerGive.include.forEach(function(power){
+						console.log("power");
 						player.powers[power] = true;
 					});
 				} 

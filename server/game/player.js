@@ -1,5 +1,7 @@
 module.exports = function(game, io){
 	
+	var powers = require('./powers.js');
+	
 	var Player = function(args){
 	
 		this.x = 0;
@@ -77,20 +79,22 @@ module.exports = function(game, io){
 
 			illegal = false;
 
-			var spawnLoc = getXY();
+			var spawnPlayer = getXY();
+			spawnPlayer.width = this.width;
+			spawnPlayer.height = this.height;
 
-			illegal = this.checkCollisions(spawnLoc);
+			illegal = this.checkCollisions(spawnPlayer);
 		
 		}while(illegal);
 
 		if(!func){
 
-			this.x = spawnLoc.x;
-			this.y = spawnLoc.y;
+			this.x = spawnPlayer.x;
+			this.y = spawnPlayer.y;
 
 		}else{
 
-			func(spawnLoc);
+			func(spawnPlayer);
 		}
 
 	}
@@ -174,19 +178,8 @@ module.exports = function(game, io){
 		this.renderteam = this.team;
 		this.log.has = false;
 		
-		var droppable = ["powerWeapon", "spear", "sword", "disguise"];
-		var loseable = ["powerWeapon", "spear", "sword", "disguise", "papaBear"];
-		
 		for(var power in this.powers){
-			if(loseable.indexOf( power ) >= 0){
-				delete this.powers[power];
-			}
-			if(droppable.indexOf( power ) >= 0){
-				var obj = {power: power, type: "power", hard: false, removed:false, x: this.x, y: this.y, width: 20, height: 20 };
-				game.objects.push(obj);
-				io.sockets.emit("add_object", obj);
-			}
-		
+			powers.index[power].lose(this);
 		}
 
 		this.spawn(function(spawn){
