@@ -116,8 +116,7 @@ user.interactWBase = function(){
 			if(game.checkCollision(this.server, team.base, 41, 36, 140, 84, -25, -25)){
 		
 				if(this.server.team == team.name){
-				
-				
+
 					this.depLog();
 				
 				}else{
@@ -128,7 +127,7 @@ user.interactWBase = function(){
 						renderer.spacebarText = "Steal Wood!";
 										
 						if(this.action){
-					
+							this.action = false;							
 							this.stealWood(team.name);
 						}
 
@@ -158,7 +157,7 @@ user.interactWTree = function(){
 					renderer.spacebarText = "Chop Tree";
 							
 					if(this.action){
-			
+						this.action = false;
 						this.chopTree(i);
 			
 					}	
@@ -184,7 +183,10 @@ user.interactWObject = function(){
 			renderer.spacebar = true;
 			renderer.spacebarText = "Chop Wall";	
 			
-			if(!this.action) continue;	
+			if(!this.action){
+				this.action = false;
+				continue;	
+			} 
 			
 			if(this.server.powers.papaBear) this.chopWall(i, .05);
 			else this.chopWall(i, 1);
@@ -200,8 +202,10 @@ user.interactWObject = function(){
 			renderer.spacebar = true;
 			renderer.spacebarText = "Pick Up";
 			
-			if(!this.action) continue;	
-			
+			if(!this.action){
+				this.action = false;
+				continue;	
+			} 			
 			user.pickUp(game.client.objects[i], i);
 			
 			break;
@@ -245,8 +249,11 @@ user.interactWNote = function(){
 		renderer.spacebar = true;
 		renderer.spacebarText = "Pick Up";
 						
-		if(!this.action) continue;
-					
+		if(!this.action){
+			this.action = false;
+			continue;	
+		} 
+							
 		var redo = true;
 		
 		do{

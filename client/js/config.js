@@ -235,6 +235,7 @@ inputManager.registerKey(188, {
 		}, 
 	}
 );
+
 inputManager.registerKey(190, {
 	master: true, 
 	once: true, 
@@ -258,7 +259,6 @@ inputManager.registerKey(191, {
 		}, 
 	}
 );
-
 
 //soundscape.playWhen("swipe", function(){ return user.server.weapon.state == "attacking" });
 //soundscape.playFrom("bear", {x: 2000, y:2000});

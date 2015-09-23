@@ -12,6 +12,13 @@ module.exports = function(game, io){
 		this.renderteam = args.team;
 		this.name = args.name;
 		this.direction = "D";
+		
+		this.image = args.image || null;
+		
+		this.render = true;
+		this.draw = function(){
+			
+		}
 	
 		this.attacking = false;
 		
@@ -28,16 +35,13 @@ module.exports = function(game, io){
 		this.illegal = false;
 	
 		this.spear = {
-		
 			width : 30,
 			height : 5,
 			color: "grey"
-
 		},
 		
-		
 		this.weapon = {
-		    state: "ready"
+		   state: "ready"
 		}
 	
 		this.log = {
@@ -173,14 +177,10 @@ module.exports = function(game, io){
 		
 		this.dead = true;
 		this.attacking = false;		
-		this.width = 41;
-		this.height = 36;		
 		this.renderteam = this.team;
 		this.log.has = false;
 		
-		for(var power in this.powers){
-			powers.index[power].lose(this);
-		}
+		this.loseAllPowers();
 
 		this.spawn(function(spawn){
 
@@ -192,6 +192,12 @@ module.exports = function(game, io){
 			 }.bind(this), 8000);
 
 		}.bind(this));
+	}
+	
+	Player.prototype.loseAllPowers = function(){
+		for(var power in this.powers){
+			powers.index[power].lose(this);
+		}
 	}
 
 	Player.prototype.checkHits = function(){

@@ -98,6 +98,14 @@ renderer.playerText = function(player){
 
 renderer.draw = {};
 
+// renderer["loading"] = [];
+// renderer["intro"] = [];
+// renderer["server"] = [];
+// renderer["score"] = [];
+// renderer["end"] = [];
+// renderer['clear_frame'] = [];
+// renderer['game'] = [];
+
 renderer.draw["loading"] = function(){
 	this.UI["big screen"].draw([
 		"Loading..."
@@ -221,14 +229,37 @@ var UI = function(style, box, options){
 	
 	this.box = box;
 	this.options = options;
+	
+	if(options){
+		if(options.text) this.render = options.text;
+		else this.text = null;
+		if(options.render) this.render = options.render;
+		else this.render = true;
+		if(options.condition) this.render = options.condition;
+		else this.condition = null;
+	}else{
+		this.render = true;
+		this.condition = null;
+		this.text = null;
+		
+	}
+	
+	this.check = function(){
+		console.log(this.render);
+		if(this.condition && !this.condition()) return false;
+		if(!this.render) return false;
+		return true;
+	}
 		
 	this.draw = function(array){
+		if(!this.check()) return;
+		if(!array && this.text) array = this.text;
 		
 		var styleInUse = renderer.styles[style];
 		
 		styleInUse.apply();
 		
-		var y = 0;	
+		var y = 0;
 		
 		if(typeof array == "string" || typeof array == "number" ) array = [array];
 		
@@ -245,12 +276,14 @@ var UI = function(style, box, options){
 	}
 	
 	this.background = function(image){
+		if(!this.check()) return;
 		
 		if(renderer.refs[image]) renderer.drawUI(image, box.x, box.y, box.width, box.height);
 		
 	}
 	
 	this.grid = function(ref, array, cols, rows){
+		if(!this.check()) return;
 		
 		var styleInUse = renderer.styles[style];
 		styleInUse.apply();
@@ -263,31 +296,26 @@ var UI = function(style, box, options){
 		for(var i = 0; i < array.length; i++){
 			
 			if(i != 0){
-				if(i%cols == 0){
-					x = 0;
-					y++;
-				}else{
-					x++;
-				}
+				if(i%cols == 0) x = 0, y++;
+				else x++;
 			}	
 			var drawX = box.x + (x * ( styleInUse.gridWidth + ( styleInUse.padding.x * 2 )) );
 			var drawY = box.y + (y * ( styleInUse.lineWidth + ( styleInUse.padding.y * 2 )) );
 			var cell = {x: drawX, y: drawY, width: styleInUse.gridWidth, height: styleInUse.lineWidth}
 			
 			renderer.drawUI(ref, drawX, drawY, cell.width, cell.height);
-						
+					
+			//noteCode	
 			if(inputManager.mouse.down){
 				if(game.colCheck(inputManager.mouse.collider, cell)){
 					user.readNote(array[i]);
 				}
 			}
 			
-			
 		}
 	}
 	//if(!renderer.UI[name]) renderer.UI[name] = this;
 }
-
 
 renderer.draw["game"] = function () {
 	
@@ -441,7 +469,6 @@ renderer.draw["game"] = function () {
 	this.UI["timer"].draw((game.timeLimit - game.currentSec) + " seconds remaining");
 	
 	if(user.mode == "master") return;
-	
 	
 	this.UI["notes"].grid("rgb(0,0,255)", user.notes, 8, 2);
 		
