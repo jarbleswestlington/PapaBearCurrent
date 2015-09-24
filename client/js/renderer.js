@@ -1,4 +1,4 @@
-//get animation function (used for game loop)
+//get animation function (used in gameStateManager)
 var animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.mozRequestAnimationFrame;
 
 //setUp Renderer
@@ -22,6 +22,15 @@ var renderer = {
 
 	UI:{},
 };
+
+renderer.spriteData = {
+	"tree" : {
+		1:{x:0, y:0, width:111, height:131},
+		2:{x:114, y:0, width:111, height:131},
+		3:{x:0, y:131, width:111, height:131},
+		4:{x:115, y:132, width:111, height:131},
+	},
+}
 
 renderer.upload = function(src){
 	var newImg = new Image();
@@ -389,17 +398,8 @@ renderer.draw["game"] = function () {
 	}.bind(this));
 
 	//trees
-	var treeSpriteFinder = {
-		1:{x:0, y:0, width:111, height:131},
-		2:{x:114, y:0, width:111, height:131},
-		3:{x:0, y:131, width:111, height:131},
-		4:{x:115, y:132, width:111, height:131},
-	}
-	
-	//trees
 	for(var i = 0; i < game.client.trees.length; i++){
 		var tree = game.client.trees[i];
-		if(!tree.removed) this.drawSprite('pines', tree.x - 9, tree.y - 9, treeSpriteFinder[tree.treeNum]);
 	}
 	
 	//notes
