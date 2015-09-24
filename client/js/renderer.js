@@ -19,6 +19,8 @@ var renderer = {
 	showNote: false,
 	
 	toReset: [],
+
+	UI:{},
 };
 
 renderer.upload = function(src){
@@ -212,11 +214,11 @@ var Style = function(color, options){
 	
 }
 
-var UI = function(name, style, box, options){
+var UI = function(name, box, options){
 	
 	for(var prop in box){
 		
-		if(typeof box[prop] == "string"){
+		if(typeof box[prop] == "string" && prop !== "style"){
 			
 			var windowProp = "";
 			if(prop == "x" || prop == "width") windowProp = "innerWidth";
@@ -236,8 +238,7 @@ var UI = function(name, style, box, options){
 	}
 	
 	this.box = box;
-	this.options = options;
-	
+
 	if(options){
 		if(options.item) this.item = options.item;
 		else this.item = null;
@@ -256,6 +257,7 @@ var UI = function(name, style, box, options){
 		else this.rows = 10;
 		if(options.ref) this.ref = options.ref;
 		else this.ref = [];
+
 	}else{
 		this.render = true;
 		this.condition = null;
@@ -271,34 +273,35 @@ var UI = function(name, style, box, options){
 		return true;
 	}
 		
-	this.draw = function(item){
+	this.draw = function(itemIn){
 		if(!this.check()) return;
-		if(!item && !this.item) return;
-		
-		if(!item) item = this.item;
+		if(!itemIn && !this.item) return;
+		if(!itemIn) itemIn = this.item;
+
+		if(typeof itemIn == "function") itemIn = itemIn();
+		if(typeof itemIn == "string" || typeof itemIn == "number" ) itemIn = [itemIn];
 		if(this.background) this.bg();
 
-		if(typeof item == "function") item = item();
-		if(typeof item == "string" || typeof item == "number" ) item = [item];
-			
-		this[this.type]();
+		
+		var style = renderer.styles[this.box.style];
+		style.apply();
+
+		console.log(this.type);
+		this[this.type](itemIn, style);
 	}
 
-	this.block = function(item){
-
-		var styleInUse = renderer.styles[style];
-		styleInUse.apply();
-		
+	this.block = function(item, style){
+		console.log(item);
 		var y = 0;
 
 		for(var i = 0; i < item.length; i++){
 						
 			paddingY = 0;
-			if(i == 0) paddingY = styleInUse.padding.y;
-			//else if(i == item.length -1) paddingY = -styleInUse.padding.y;
-				
-			if(renderer.refs[item[i]]) renderer.drawUI(item[i], box.x + styleInUse.padding.x, box.y + paddingY + (styleInUse.lineWidth * (i + 1)), box.width - styleInUse.padding.x, styleInUse.lineWidth);
-			else ctx.fillText(item[i], box.x + styleInUse.padding.x, box.y + paddingY + (styleInUse.lineWidth * (i + 1)), box.width - (styleInUse.padding.x * 2) );
+			if(i == 0) paddingY = style.padding.y;
+			//else if(i == item.length -1) paddingY = -style.padding.y;
+			
+			if(renderer.refs[item[i]]) renderer.drawUI(item[i], box.x + style.padding.x, box.y + paddingY + (style.lineWidth * (i + 1)), box.width - style.padding.x, style.lineWidth);
+			else ctx.fillText(item[i], box.x + style.padding.x, box.y + paddingY + (style.lineWidth * (i + 1)), box.width - (style.padding.x * 2) );
 			
 		}
 	}
@@ -308,12 +311,9 @@ var UI = function(name, style, box, options){
 		
 	}
 	
-	this.grid = function(item){
+	this.grid = function(item, style){
 		if(!this.check()) return;
 		if(this.background) this.drawBackground(); 
-		
-		var styleInUse = renderer.styles[style];
-		styleInUse.apply();
 	
 		var y = 0;	
 		var x = 0;
@@ -321,12 +321,12 @@ var UI = function(name, style, box, options){
 		for(var i = 0; i < this.ref.length; i++){
 			
 			if(i != 0){
-				if(i%cols == 0) x = 0, y++;
+				if(i%this.cols == 0) x = 0, y++;
 				else x++;
 			}	
-			var drawX = box.x + (x * ( styleInUse.gridWidth + ( styleInUse.padding.x * 2 )) );
-			var drawY = box.y + (y * ( styleInUse.lineWidth + ( styleInUse.padding.y * 2 )) );
-			var cell = {x: drawX, y: drawY, width: styleInUse.gridWidth, height: styleInUse.lineWidth}
+			var drawX = box.x + (x * ( style.gridWidth + ( style.padding.x * 2 )) );
+			var drawY = box.y + (y * ( style.lineWidth + ( style.padding.y * 2 )) );
+			var cell = {x: drawX, y: drawY, width: style.gridWidth, height: style.lineWidth}
 			
 			renderer.drawUI(item, drawX, drawY, cell.width, cell.height);
 					
@@ -398,24 +398,18 @@ renderer.draw["game"] = function () {
 	
 	//trees
 	for(var i = 0; i < game.client.trees.length; i++){
-		
 		var tree = game.client.trees[i];
 		if(!tree.removed) this.drawSprite('pines', tree.x - 9, tree.y - 9, treeSpriteFinder[tree.treeNum]);
-
 	}
 	
 	//notes
 	for(var i =0; i< game.client.notes.length; i++){
-		if(!game.client.notes[i].removed) {
-			this.drawRect("rgb(0,0,180)", game.client.notes[i].x + 29, game.client.notes[i].y + 29, 20, 20);
-		}
+		if(!game.client.notes[i].removed) this.drawRect("rgb(0,0,180)", game.client.notes[i].x + 29, game.client.notes[i].y + 29, 20, 20);
 	}
 	
 	//walls/drops
 	for(var i = 0; i< game.client.objects.length; i++){
-		if(!game.client.objects[i].removed) {
-			this.drawRect("rgb(180,100,80)", game.client.objects[i].x, game.client.objects[i].y, game.client.objects[i].width, game.client.objects[i].height);
-		}
+		if(!game.client.objects[i].removed) this.drawRect("rgb(180,100,80)", game.client.objects[i].x, game.client.objects[i].y, game.client.objects[i].width, game.client.objects[i].height);
 	}
 		
 	game.forAllPlayers(function(player){

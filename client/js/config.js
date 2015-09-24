@@ -154,26 +154,28 @@ renderer.styles = {
 new UI("big screen", {style: "block text",x: "/10", y: 100, width: "/1.2", height: "-100"}, {reset:false, startRender: false, 
 	condition: function(){
 			if(user.server.dead){
-				this.text = "You will respawn soon";
+				this.item = "You will respawn soon";
 				return true;
 			}
 			if(builder.rejected){
-				this.text = "You cannot build here";
+				this.item = "You cannot build here";
 				return true;
 			}
 			return game.state !== "game";
 		}
 	}
 );
-new UI("game screen", {style: "block text",x: "/6", y: 200, width: "/1.3", height: "-200"}, {reset:false});
-new UI("action prompt", {style: "large", x: "/4", y: "-100", width: "/2", height: "/1"}, {reset:false}),
+new UI("game screen", {style: "block text", x: "/6", y: 200, width: "/1.3", height: "-200"}, {reset:false});
+new UI("action prompt", {style: "large", x: "/4", y: "-100", width: "/2", height: "/1"}, {type: "block", reset:false}),
 new UI("timer",  {style : "block text", x: "/30", y: "/15", width: "/5", height: "/8"}, {
 		reset:false,
-		text: function(){ return (game.timeLimit - game.currentSec) + " seconds remaining" },
+		item: function(){ return (game.timeLimit - game.currentSec) + " seconds remaining" },
 	}
 );
 new UI("space bar", {style: "on top", x: "/2.4", y: "/1.20", width: "/6", height: "/10"}, { background: "spacebar", startRender: false});
-new UI("notes", {style: "notes", x: "/1.65", y: "/1.20", width: "/6", height: "/10"}, { reset: false, type: "grid", rows: 8, cols:2, item: "rgb(0,0,255)", ref: user.notes ),	
+new UI("notes", {style: "notes", x: "/1.65", y: "/1.20", width: "/6", height: "/10"}, 
+	{ reset: false, type: "grid", rows: 8, cols:2, item: "rgb(0,0,255)", ref: user.notes });
+
 //upload all images
 var imageArray = ["bear",
 "playershadow",
