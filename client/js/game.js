@@ -206,12 +206,14 @@ game.stateManager = function () {
 	
 	if(renderer.draw[renderer.state]) renderer.draw[renderer.state].call(renderer);
 	
-	this.then = now;
+	renderer.reset();
 	
-	soundscape.checkToPlay();
+	soundscape.check();
 	
 	inputManager.clear();
-
+	
+	this.then = now;
+	
 	animate(game.stateManager);
 	     
 };

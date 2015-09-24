@@ -107,8 +107,6 @@ user.getHoldingCoords = function(obj){
 
 user.interactWBase = function(){
 	
-	renderer.stealText = false;
-
 	if(!this.server.powers.papaBear && !this.server.powers.invisibility){
 			
 		game.forAllTeams(function(team){
@@ -116,19 +114,18 @@ user.interactWBase = function(){
 			if(game.checkCollision(this.server, team.base, 41, 36, 140, 84, -25, -25)){
 		
 				if(this.server.team == team.name){
-				
-				
+
 					this.depLog();
 				
 				}else{
 				
 					if(team.score != 0){
 				
-						renderer.spacebar = true;
-						renderer.spacebarText = "Steal Wood!";
+						renderer.UI["space bar"].render = true;
+						renderer.UI["space bar"].item = "Steal Wood";
 										
 						if(this.action){
-					
+							this.action = false;							
 							this.stealWood(team.name);
 						}
 
@@ -154,11 +151,11 @@ user.interactWTree = function(){
 			
 				if(game.checkCollision(this.server, game.client.trees[i], 41, 36, 78, 78, -25, -25)){
 			
-					renderer.spacebar = true;
-					renderer.spacebarText = "Chop Tree";
+					renderer.UI["space bar"].render = true;
+					renderer.UI["space bar"].item = "Chop Tree";
 							
 					if(this.action){
-			
+						this.action = false;
 						this.chopTree(i);
 			
 					}	
@@ -181,10 +178,14 @@ user.interactWObject = function(){
 					
 			if(!game.colCheck(this.server, game.client.objects[i], {x: -25, y:-25})) continue;
 		
-			renderer.spacebar = true;
-			renderer.spacebarText = "Chop Wall";	
+			renderer.UI["space bar"].render = true;
+		
+			renderer.UI["space bar"].item = "Chop Wall";
 			
-			if(!this.action) continue;	
+			if(!this.action){
+				this.action = false;
+				continue;	
+			} 
 			
 			if(this.server.powers.papaBear) this.chopWall(i, .05);
 			else this.chopWall(i, 1);
@@ -200,8 +201,10 @@ user.interactWObject = function(){
 			renderer.spacebar = true;
 			renderer.spacebarText = "Pick Up";
 			
-			if(!this.action) continue;	
-			
+			if(!this.action){
+				this.action = false;
+				continue;	
+			} 			
 			user.pickUp(game.client.objects[i], i);
 			
 			break;
@@ -242,11 +245,14 @@ user.interactWNote = function(){
 							
 		if (!game.checkCollision({x: game.client.notes[z].x + 29, y: game.client.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)) continue;		
 		
-		renderer.spacebar = true;
-		renderer.spacebarText = "Pick Up";
-						
-		if(!this.action) continue;
-					
+		renderer.UI["space bar"].render = true;
+		renderer.UI["space bar"].item = "Pick Up";
+
+		if(!this.action){
+			this.action = false;
+			continue;	
+		} 
+							
 		var redo = true;
 		
 		do{
@@ -265,6 +271,7 @@ user.interactWNote = function(){
 			var notes = noteIndex[probability].filter(function(note){
 				return note.condition();
 			});
+			
 		
 			if(notes.length > 0) redo = false;
 			
@@ -287,7 +294,6 @@ user.interactWNote = function(){
 user.chopWall = function(index, amount){
 	
 	chatController.submit("Chop!", 60);
-
 	socket.emit("chop_wall", {index: index, amount:amount});
 	
 };
@@ -327,8 +333,8 @@ user.chopTree = function(treeId){
 };
 
 user.readNote = function(note){
-	renderer.currentNote = note;
-	renderer.showNote = true;
+	renderer.UI["game screen"].item = note.lines;
+	renderer.UI["game screen"].render = true;
 };
 
 user.getNote = function(noteId, note){

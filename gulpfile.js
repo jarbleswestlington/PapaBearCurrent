@@ -9,7 +9,6 @@ var runSeq = require('run-sequence');
 // Development tasks
 // --------------------------------------------------------------
 
-// Live reload business.
 gulp.task('reload', function () {
     livereload.reload();
 });

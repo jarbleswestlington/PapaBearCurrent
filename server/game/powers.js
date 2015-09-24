@@ -14,9 +14,9 @@ function Power(name, opts){
 	this.onRecieve = opts.onRecieve || null;
 	this.onUse = opts.onUse || null;
 	this.onLose = opts.onLoss || null;
-	this.onCollide = opts.onCollide || null;
+	this.onCollide = opts.onCollide || null; //if collded with player that used
 	
-	this.illegal = opts.illegal || null; //(no woodcutting, no notes, no stealing, etc, no collisions)
+	this.handicap = opts.handicap || null; //(no woodcutting, no notes, no stealing, etc, no collisions)
 	
 	this.include = opts.include || null;
 	this.exclusive = opts.exclusive || false;
@@ -49,10 +49,16 @@ new Power("papaBear", {
 		player.y+=6;
 		player.width = 63;
 		player.height = 63;
+	},
+	onLose: function(player){
+		player.width = 41;
+		player.height = 36;		
 	}
 });
 
 Power.prototype.lose = function(player){
+	player.powers[this.name] = false;
+	
 	if(this.onLose) this.onLose(player);
 	if(this.includes){
 		this.includes.forEach(function(power){
@@ -69,5 +75,30 @@ Power.prototype.lose = function(player){
 	}
 	
 };
+
+Power.prototype.giveTo = function(player){
+	
+	if(this.exclusive){
+		if(this.group){
+			for(var powerPlayer in player.powers){
+				if(powers.index[powerPlayer].group == this.group) powers.index[powerPlayer].lose(player);	 
+			}
+		}else {
+			player.loseAllPowers();
+		}
+		
+	}
+	player.powers[this.name] = true;
+	if(this.include && this.include.length){
+		this.include.forEach(function(power){
+			var morePower = powers.index[power];	
+			morePower.giveTo(player);
+		});
+	}
+	
+	if(this.onRecieve) this.onRecieve(player);
+	console.log(this.name + " given to Player:" + player.name);
+	
+}
 
 module.exports = powers;

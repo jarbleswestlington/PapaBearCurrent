@@ -3,8 +3,14 @@
 //start with test config
 //move all log stuff to server
 //move notes to server...move powers to server...
-//fix spawn
 //configurable random generation of trees and bases and stuff
+//actually have users powers point at a power
+//have notes on back-end
+//organize things into one master array - objects//toRender//toCollide
+//interface = object, object {distance: onBreach: condition: }
+//collide = object, object, {padding: , onCollide}
+//onUse swordPower -- renderer.add(sword)
+//make collisions function automatically tell whos bigger and smaller;//
 
 
 module.exports = function(game, io){

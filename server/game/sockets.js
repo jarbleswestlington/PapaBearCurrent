@@ -3,11 +3,11 @@ module.exports = function(server, game){
 	var powers = require('./powers.js');
 	
 	//setUp sockets
-	var io = require('socket.io').listen(server);
+	var io = require('../../sockets').listen(server);
 	io.set('log level', 1);
 
 	io.sockets.on('connection', function(socket) {
-
+		
 		if(game.state == "started"){
 
 			console.log("started game on " + socket.id)
@@ -266,28 +266,7 @@ module.exports = function(server, game){
 			player.powers[data.power] = true;
 			
 			var powerGive = powers.index[data.power];
-			if(powerGive){
-				if(powerGive.exclusive){
-					if(powerGive.group){
-						for(var powerPlayer in player.powers){
-							if(powers.index[powerPlayer].group == powerGive.group) player.powers[playerPower] = false;
-						}
-					}else player.powers = {};
-					
-				}
-				console.log(powerGive.name);
-				player.powers[powerGive.name] = true;
-				if(powerGive.onRecieve) powerGive.onRecieve(player);
-				if(powerGive.include && powerGive.include.length){
-					powerGive.include.forEach(function(power){
-						console.log("power");
-						player.powers[power] = true;
-					});
-				} 
-				console.log(data.power + " given to Player:" + powerGive.name);
-				
-			}
-			
+			if(powerGive) powerGive.giveTo(player);
 
 		});
 
