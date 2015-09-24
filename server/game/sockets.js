@@ -4,7 +4,7 @@ module.exports = function(server, game){
 	
 	//setUp sockets
 	var io = require('../../sockets').listen(server);
-	//io.set('log level', 1);
+	io.set('log level', 1);
 
 	io.sockets.on('connection', function(socket) {
 		

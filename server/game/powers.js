@@ -91,13 +91,13 @@ Power.prototype.giveTo = function(player){
 	player.powers[this.name] = true;
 	if(this.include && this.include.length){
 		this.include.forEach(function(power){
-			var morePower = powers.index[data.power];	
+			var morePower = powers.index[power];	
 			morePower.giveTo(player);
 		});
 	}
 	
 	if(this.onRecieve) this.onRecieve(player);
-	console.log(data.power + " given to Player:" + powerGive.name);
+	console.log(this.name + " given to Player:" + player.name);
 	
 }
 

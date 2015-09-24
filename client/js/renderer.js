@@ -17,6 +17,8 @@ var renderer = {
 	currentNote : {},
 	
 	showNote: false,
+	
+	toReset: [],
 };
 
 renderer.upload = function(src){
@@ -98,13 +100,13 @@ renderer.playerText = function(player){
 
 renderer.draw = {};
 
-// renderer["loading"] = [];
-// renderer["intro"] = [];
-// renderer["server"] = [];
-// renderer["score"] = [];
-// renderer["end"] = [];
-// renderer['clear_frame'] = [];
-// renderer['game'] = [];
+renderer["loading"] = [];
+renderer["intro"] = [];
+renderer["server"] = [];
+renderer["score"] = [];
+renderer["end"] = [];
+renderer['clear_frame'] = [];
+renderer['game'] = [];
 
 renderer.draw["loading"] = function(){
 	this.UI["big screen"].draw([
@@ -174,6 +176,12 @@ renderer.hasLoaded = function(){
 	return true;
 }
 
+renderer.reset = function(){
+	this.toReset.forEach(function(item){
+		item.render = false;
+	});
+}
+
 var Style = function(color, options){
 
 	if(!color) color = "white";
@@ -204,7 +212,7 @@ var Style = function(color, options){
 	
 }
 
-var UI = function(style, box, options){
+var UI = function(name, style, box, options){
 	
 	for(var prop in box){
 		
@@ -231,69 +239,86 @@ var UI = function(style, box, options){
 	this.options = options;
 	
 	if(options){
-		if(options.text) this.render = options.text;
-		else this.text = null;
-		if(options.render) this.render = options.render;
+		if(options.item) this.item = options.item;
+		else this.item = null;
+		if(options.background) this.background = options.background;
+		else this.background = null;
+		if(options.startRender) this.render = options.startRender;
 		else this.render = true;
-		if(options.condition) this.render = options.condition;
+		if(options.condition) this.condition = options.condition;
 		else this.condition = null;
+		if(options.reset !== false) renderer.toReset.push(this);	
+		if(options.type) this.type = options.type;
+		else this.type = "block";
+		if(options.cols) this.cols = options.cols;
+		else this.cols = 10;
+		if(options.rows) this.rows = options.rows;
+		else this.rows = 10;
+		if(options.ref) this.ref = options.ref;
+		else this.ref = [];
 	}else{
 		this.render = true;
 		this.condition = null;
-		this.text = null;
-		
+		this.background = null;
+		renderer.toReset.push(this);
+		this.mode = "player";	
+		this.type = "block";
 	}
 	
 	this.check = function(){
-		console.log(this.render);
 		if(this.condition && !this.condition()) return false;
 		if(!this.render) return false;
 		return true;
 	}
 		
-	this.draw = function(array){
+	this.draw = function(item){
 		if(!this.check()) return;
-		if(!array && this.text) array = this.text;
+		if(!item && !this.item) return;
 		
+		if(!item) item = this.item;
+		if(this.background) this.bg();
+
+		if(typeof item == "function") item = item();
+		if(typeof item == "string" || typeof item == "number" ) item = [item];
+			
+		this[this.type]();
+	}
+
+	this.block = function(item){
+
 		var styleInUse = renderer.styles[style];
-		
 		styleInUse.apply();
 		
 		var y = 0;
-		
-		if(typeof array == "string" || typeof array == "number" ) array = [array];
-		
-		for(var i = 0; i < array.length; i++){
-			
+
+		for(var i = 0; i < item.length; i++){
+						
 			paddingY = 0;
 			if(i == 0) paddingY = styleInUse.padding.y;
-			//else if(i == array.length -1) paddingY = -styleInUse.padding.y;
+			//else if(i == item.length -1) paddingY = -styleInUse.padding.y;
 				
-			if(renderer.refs[array[i]]) renderer.drawUI(array[i], box.x + styleInUse.padding.x, box.y + paddingY + (styleInUse.lineWidth * (i + 1)), box.width - styleInUse.padding.x, styleInUse.lineWidth);
-			else ctx.fillText(array[i], box.x + styleInUse.padding.x, box.y + paddingY + (styleInUse.lineWidth * (i + 1)), box.width - (styleInUse.padding.x * 2) );
+			if(renderer.refs[item[i]]) renderer.drawUI(item[i], box.x + styleInUse.padding.x, box.y + paddingY + (styleInUse.lineWidth * (i + 1)), box.width - styleInUse.padding.x, styleInUse.lineWidth);
+			else ctx.fillText(item[i], box.x + styleInUse.padding.x, box.y + paddingY + (styleInUse.lineWidth * (i + 1)), box.width - (styleInUse.padding.x * 2) );
 			
 		}
 	}
 	
-	this.background = function(image){
-		if(!this.check()) return;
-		
-		if(renderer.refs[image]) renderer.drawUI(image, box.x, box.y, box.width, box.height);
+	this.bg = function(){
+		if(renderer.refs[this.background]) renderer.drawUI(this.background, box.x, box.y, box.width, box.height);
 		
 	}
 	
-	this.grid = function(ref, array, cols, rows){
+	this.grid = function(item){
 		if(!this.check()) return;
+		if(this.background) this.drawBackground(); 
 		
 		var styleInUse = renderer.styles[style];
 		styleInUse.apply();
-		
+	
 		var y = 0;	
 		var x = 0;
 		
-		if(typeof array == "string" || typeof array == "number" ) array = [array];
-		
-		for(var i = 0; i < array.length; i++){
+		for(var i = 0; i < this.ref.length; i++){
 			
 			if(i != 0){
 				if(i%cols == 0) x = 0, y++;
@@ -303,18 +328,18 @@ var UI = function(style, box, options){
 			var drawY = box.y + (y * ( styleInUse.lineWidth + ( styleInUse.padding.y * 2 )) );
 			var cell = {x: drawX, y: drawY, width: styleInUse.gridWidth, height: styleInUse.lineWidth}
 			
-			renderer.drawUI(ref, drawX, drawY, cell.width, cell.height);
+			renderer.drawUI(item, drawX, drawY, cell.width, cell.height);
 					
 			//noteCode	
 			if(inputManager.mouse.down){
 				if(game.colCheck(inputManager.mouse.collider, cell)){
-					user.readNote(array[i]);
+					user.readNote(this.ref[i]);
 				}
 			}
 			
 		}
 	}
-	//if(!renderer.UI[name]) renderer.UI[name] = this;
+	if(!renderer.UI[name]) renderer.UI[name] = this;
 }
 
 renderer.draw["game"] = function () {
@@ -386,7 +411,7 @@ renderer.draw["game"] = function () {
 		}
 	}
 	
-		
+	//walls/drops
 	for(var i = 0; i< game.client.objects.length; i++){
 		if(!game.client.objects[i].removed) {
 			this.drawRect("rgb(180,100,80)", game.client.objects[i].x, game.client.objects[i].y, game.client.objects[i].width, game.client.objects[i].height);
@@ -394,99 +419,18 @@ renderer.draw["game"] = function () {
 	}
 		
 	game.forAllPlayers(function(player){
-			
-		//CHARACTER DRAWING
-		if(player.dead){
-			
-			this.drawImage(game.server.teams[player.team].name + "corpse", player.x- 4, player.y);
-		
-		}else if(player.powers.papaBear){
-			
-			var papaSpriteFinder= {
-				"R":{x:0, y:0, width:63, height:63},
-				"D":{x:0, y:66, width:63, height:63},
-				"L":{x:66, y:0, width:63, height:63},
-				"U":{x:66, y:66, width:63, height:63},
-			}
-			
-			this.drawSprite("bear", player.x,player.y, papaSpriteFinder[player.direction]);
-			
-		}else if(!player.powers.invisibility){
-			
-			this.drawImage("playershadow", player.x-1 , player.y+ 21);
-			
-			var playerSpriteFinder = {
-				"L":{x:2 + ((player.character-1) * 43), y:2, width:41, height:36},
-				"R":{x:2 + ((player.character-1) * 43), y:40, width:41, height:33},
-				"D":{x:2 + ((player.character-1) * 43), y:75, width:41, height:35},
-				"U":{x:2 + ((player.character-1) * 43), y:113, width:41, height:36},
-			}
-			
-			this.drawSprite(game.server.teams[player.renderteam].name + "team", player.x,player.y, playerSpriteFinder[player.direction]);
-
-		}
-		
-		if(!player.dead && !player.powers.papaBear){
-			
-			if(player.log.has){
-
-				var backpackSpriteFinder = {
-					"R":{x:0, y:0, width:60, height:40, playerDelta:{x: -14, y:-3}},
-					"D":{x:0, y:40, width:60, height:43, playerDelta:{x: -20, y:-10}},
-					"U":{x:0, y:83, width:60, height:39, playerDelta:{x: -20, y:-5}},
-					"L":{x:0, y:126, width:60, height:40, playerDelta:{x: 0, y:-3}},	
-				}
-				
-				this.drawSprite("backpacks", player.x + backpackSpriteFinder[player.direction].playerDelta.x, player.y + backpackSpriteFinder[player.direction].playerDelta.y, backpackSpriteFinder[player.direction]);
-			}
-		
-			if (player.attacking){
-				//spear DRAWING		
-				
-				var spearHelper = {
-					"U":{x: 36, y: -22},
-					"D":{x:0, y: 20},
-					"R":{x:36, y:22},
-					"L":{x:-26, y:22},
-				}
-								
-				this.drawRect(player.spear.color, player.x + spearHelper[player.direction].x, player.y + spearHelper[player.direction].y, getWidth(player), getHeight(player));	
-			}	
-		
-		}	
-		
-	    var weapon = user.client.weapon;
-		if(player.weapon.state == "attacking") weapon.renderData.drawBlur(player, weapon.renderData.blur[player.direction]);
-	    if(weapon.renderData[player.weapon.state]) this.drawImageRelative(weapon.renderData[player.weapon.state][player.direction], player);
-		//chat drawing
-		if(player.chatting) this.playerText(player);
-		
-	}.bind(this));
+		player.draw();
+	});
 	
-	//time limit
-	if(game.currentSec > game.timeLimit - 100) ctx.fillStyle = "rgb(255,0,0)";
-	else ctx.fillStyle = "rgb(0,0,0)";
-	this.UI["timer"].draw((game.timeLimit - game.currentSec) + " seconds remaining");
+	this.UI["timer"].draw();
 	
 	if(user.mode == "master") return;
 	
-	this.UI["notes"].grid("rgb(0,0,255)", user.notes, 8, 2);
-		
-	if(this.spacebar) this.UI['space bar'].background("spacebar"), this.UI['space bar'].draw(this.spacebarText);
-	this.spacebar = false;
+	this.UI["notes"].draw();
+	this.UI['space bar'].draw();
+	this.UI['game screen'].draw();
+	this.UI["big screen"].draw();
+	builder.draw();
 	
-	if(user.server.dead) this.UI['game screen'].draw("You will respawn soon");
-	//else if(this.pickedUp) this.UI['game screen'].draw("You just picked up a " + this.pickedUpItem);
-	else if(this.buildReject) this.UI["game screen"].draw("You cannot build there");
-	
-	if(builder.on){
-		
-		var xy = user.getHoldingCoords(builder.refs[builder.item]);
-			 
-		this.drawRect("rgb(180,100,80)", xy.x, xy.y, builder.refs[builder.item].width, builder.refs[builder.item].height);
-	} 
-	
-	//show note text
-	if(this.showNote) this.UI["big screen"].draw(this.currentNote.lines);
 
 };

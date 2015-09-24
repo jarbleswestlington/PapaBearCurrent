@@ -14,6 +14,10 @@
 //organize things into one master array - objects//toRender//toCollide
 //allow ghostmovment in master if you hold shift
 
+//how do I prevent a player from doing more than one thing with the action button pressed down
+//right now it will do the action that is called first, when so happens to be the action that is rendered first (and then overlapped)
+//therefor the player will not be doing the action that they see being rendered because it is overlapped by later actions
+
 new Note("steal1",
  ["If you manage to steal your opponent's wood, there is a considerable payoff."], {
 	 prob: 1,
@@ -147,15 +151,29 @@ renderer.styles = {
 	
 }
 
-renderer.UI = {
-	"big screen" : new UI("block text", {x: "/10", y: 100, width: "/1.2", height: "-100"}),
-	"game screen" : new UI("block text", {x: "/6", y: 200, width: "/1.3", height: "-200"}),
-	"action prompt" : new UI("large", {x: "/4", y: "-100", width: "/2", height: "/1"}),
-	"timer" : new UI("block text", {x: "/30", y: "/15", width: "/5", height: "/8"}),
-	"space bar" : new UI("on top", {x: "/2.4", y: "/1.20", width: "/6", height: "/10"}),	
-	"notes" : new UI("notes", {x: "/1.65", y: "/1.20", width: "/6", height: "/10"}),	
-}
-
+new UI("big screen", {style: "block text",x: "/10", y: 100, width: "/1.2", height: "-100"}, {reset:false, startRender: false, 
+	condition: function(){
+			if(user.server.dead){
+				this.text = "You will respawn soon";
+				return true;
+			}
+			if(builder.rejected){
+				this.text = "You cannot build here";
+				return true;
+			}
+			return game.state !== "game";
+		}
+	}
+);
+new UI("game screen", {style: "block text",x: "/6", y: 200, width: "/1.3", height: "-200"}, {reset:false});
+new UI("action prompt", {style: "large", x: "/4", y: "-100", width: "/2", height: "/1"}, {reset:false}),
+new UI("timer",  {style : "block text", x: "/30", y: "/15", width: "/5", height: "/8"}, {
+		reset:false,
+		text: function(){ return (game.timeLimit - game.currentSec) + " seconds remaining" },
+	}
+);
+new UI("space bar", {style: "on top", x: "/2.4", y: "/1.20", width: "/6", height: "/10"}, { background: "spacebar", startRender: false});
+new UI("notes", {style: "notes", x: "/1.65", y: "/1.20", width: "/6", height: "/10"}, { reset: false, type: "grid", rows: 8, cols:2, item: "rgb(0,0,255)", ref: user.notes ),	
 //upload all images
 var imageArray = ["bear",
 "playershadow",

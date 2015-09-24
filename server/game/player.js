@@ -17,7 +17,52 @@ module.exports = function(game, io){
 		
 		this.render = true;
 		this.draw = function(){
+			if(this.dead) renderer.drawImage(game.server.teams[this.team].name + "corpse", this.x- 4, this.y);
+			else if(this.powers.papaBear){
+				var papaSpriteFinder= {
+					"R":{x:0, y:0, width:63, height:63},
+					"D":{x:0, y:66, width:63, height:63},
+					"L":{x:66, y:0, width:63, height:63},
+					"U":{x:66, y:66, width:63, height:63},
+				}
+				renderer.drawSprite("bear", this.x,this.y, papaSpriteFinder[this.direction]);
+			}else if(!this.powers.invisibility){
+				renderer.drawImage("playershadow", this.x-1 , this.y+ 21);
+				var playerSpriteFinder = {
+					"L":{x:2 + ((this.character-1) * 43), y:2, width:41, height:36},
+					"R":{x:2 + ((this.character-1) * 43), y:40, width:41, height:33},
+					"D":{x:2 + ((this.character-1) * 43), y:75, width:41, height:35},
+					"U":{x:2 + ((this.character-1) * 43), y:113, width:41, height:36},
+				}
+				renderer.drawSprite(game.server.teams[this.renderteam].name + "team", this.x,this.y, playerSpriteFinder[this.direction]);
+			}
+			if(!this.dead && !this.powers.papaBear){
+				if(this.log.has){
+					var backpackSpriteFinder = {
+						"R":{x:0, y:0, width:60, height:40, thisDelta:{x: -14, y:-3}},
+						"D":{x:0, y:40, width:60, height:43, thisDelta:{x: -20, y:-10}},
+						"U":{x:0, y:83, width:60, height:39, thisDelta:{x: -20, y:-5}},
+						"L":{x:0, y:126, width:60, height:40, thisDelta:{x: 0, y:-3}},	
+					}
+					renderer.drawSprite("backpacks", this.x + backpackSpriteFinder[this.direction].thisDelta.x, this.y + backpackSpriteFinder[this.direction].thisDelta.y, backpackSpriteFinder[this.direction]);
+				}
+				if (this.attacking){
+					var spearHelper = {
+						"U":{x: 36, y: -22},
+						"D":{x:0, y: 20},
+						"R":{x:36, y:22},
+						"L":{x:-26, y:22},
+					}			
+					renderer.drawRect(this.spear.color, this.x + spearHelper[this.direction].x, this.y + spearHelper[this.direction].y, getWidth(this), getHeight(this));	
+				}	
 			
+			}	
+		
+		    var weapon = user.client.weapon;
+			if(this.weapon.state == "attacking") weapon.renderData.drawBlur(this, weapon.renderData.blur[this.direction]);
+		    if(weapon.renderData[this.weapon.state]) renderer.drawImageRelative(weapon.renderData[this.weapon.state][this.direction], this);
+			//chat drawing
+			if(this.chatting) renderer.playerText(this);
 		}
 	
 		this.attacking = false;

@@ -88,8 +88,6 @@ socket.on('noteGot', function(data) {
 });
 
 socket.on('placement_result', function(data) {
-
 	if(data.success) builder.place();
 	else builder.reject();
-		
 });

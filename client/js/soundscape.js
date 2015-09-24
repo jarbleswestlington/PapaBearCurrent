@@ -28,7 +28,7 @@ soundscape.upload = function(src){
 
 };
 
-soundscape.checkToPlay = function(){
+soundscape.check = function(){
 
 	this.conditionals.forEach(function(item, i){
 		if(item.cond()){

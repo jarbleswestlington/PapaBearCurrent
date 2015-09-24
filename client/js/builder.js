@@ -3,6 +3,7 @@ var walls = [{x:1000, y: 1000}];
 var builder = {
 	on:false,
 	item:null,
+	rejected: false,
 };
 
 builder.refs = {}
@@ -24,8 +25,7 @@ builder.scrap = function(){
 	this.item = null;
 	this.on = false;
 	user.inPlace = false;
-	renderer.buildReject = false;
-	
+	this.rejected = false;
 	
 };
 
@@ -39,19 +39,26 @@ builder.request = function(){
 
 builder.place = function(){
 	
-	renderer.buildReject = false;
+	this.rejected = false;
 	this.on = false;	
 	user.inPlace = false;
 };
 
 builder.reject = function(){
 	
-	renderer.buildReject = true;
+	this.rejected = true;
 	
 	setTimeout(function(){
 		
-		renderer.buildReject = false;
+		this.rejected = false;
 		
-	}, 1000)
+	}.bind(this), 1000);
 		
 };
+
+builder.draw = function(){
+	if(!this.on) return;
+	
+	var xy = user.getHoldingCoords(builder.refs[builder.item]);
+	renderer.drawRect("rgb(180,100,80)", xy.x, xy.y, builder.refs[builder.item].width, builder.refs[builder.item].height);
+}
