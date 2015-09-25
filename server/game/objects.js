@@ -10,12 +10,12 @@ function Tree(x, y, opts){
 	this.height = 78;
 	this.treeNum = getRandomInt(1,4);
 
-	this.ref = "tree";
+	this.ref = "pines";
 	this.hard = true;
 
-	draw = function(){
+	this.draw = function(){
 		if(this.removed) return;
-		renderer.drawSprite(this.ref, this.x - 9, this.y - 9, renderer.spriteData["tree"][treeNum]);
+		renderer.drawSprite(this.ref, this.x - 9, this.y - 9, renderer.spriteData["tree"][this.treeNum]);
 	}
 
 }
