@@ -1,7 +1,7 @@
+var powers = require('./powers.js');
+var Obj = require('./objects.js').Obj;
+
 module.exports = function(server, game){
-	
-	var powers = require('./powers.js');
-	
 	//setUp sockets
 	var io = require('pedig.io').listen(server);
 	io.set('log level', 1);
@@ -49,7 +49,6 @@ module.exports = function(server, game){
 			console.log("started game on " + socket.id)
 			
 			setTimeout( game.update.bind(game, io) , 0);
-			//process.nextTick(function(){ game.update(io) } );
 
 		});
 
@@ -173,21 +172,13 @@ module.exports = function(server, game){
 		});
 		
 		socket.on('chop_wall', function(data){
-
+			console.log(game.objects)
 			game.objects[data.index].hp -= data.amount;
 
 			if(game.objects[data.index].hp <= 0){
 				game.objects[data.index].removed = true;
 				io.sockets.emit("remove_object", {index: data.index});
 			}
-		});
-		
-		socket.on('remove_object', function(data){
-			
-			game.objects[data.index].removed = true;
-
-			io.sockets.emit("remove_object", {index: data.index});
-
 		});
 		
 		socket.on('play_everywhere', function(data){
@@ -249,8 +240,9 @@ module.exports = function(server, game){
 			
 			if(illegal)	socket.emit("placement_result", {success:false});
 			else{ 
-				game.objects.push(data);
-				io.sockets.emit("add_object", data);
+				var newObj = new Obj(data);
+				game.objects.push(newObj)
+				io.sockets.emit("add_object", newObj);
 				socket.emit("placement_result", {success:true});
 			}
 		});

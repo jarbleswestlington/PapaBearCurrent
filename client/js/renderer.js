@@ -79,8 +79,7 @@ renderer.drawImageRelative = function(item , influence){
 
 renderer.drawSprite = function(image, coordX, coordY, sprite){
 	
-	ctx.drawImage(this.refs[image], sprite.x, sprite.y, sprite.width, sprite.height, coordX + this.camera.x, coordY + this.camera.y, sprite.width, sprite.height
-	);
+	ctx.drawImage(this.refs[image], sprite.x, sprite.y, sprite.width, sprite.height, coordX + this.camera.x, coordY + this.camera.y, sprite.width, sprite.height);
 
 };
 
@@ -108,69 +107,6 @@ renderer.playerText = function(player){
 	}.bind(this));
 	
 };
-
-renderer.draw = {};
-
-renderer["loading"] = [];
-renderer["intro"] = [];
-renderer["server"] = [];
-renderer["score"] = [];
-renderer["end"] = [];
-renderer['clear_frame'] = [];
-renderer['game'] = [];
-
-renderer.draw["loading"] = function(){
-	this.UI["big screen"].draw([
-		"Loading..."
-	]);
-}	
-
-renderer.draw["intro"] = function(style){
-	
-	this.UI["big screen"].draw([
-		"There are three villages. You are " + user.name + " of the " + user.server.team + " village.",
-		"Only one village will survive this harsh winter, so you must stockpile as much wood as you can.",
-		"Learn how better to survive by searching the woods for notes.",
-		"",
-		"Good luck.",
-		"Waiting for game to start...."
-	]);
-	
-}
-
-renderer.draw["server"] = function(){
-
-	this.UI["big screen"].draw([
-		"Connecting to server..."
-	]);
-	
-}
-
-renderer.draw["score"] = function(){
-	
-
-	var textArr = []
-	
-	game.forAllTeams(function(team){
-			
-		textArr.push(team.name + " : " + team.score);
-			
-	});
-	
-	this.UI["big screen"].draw(textArr);
-	
-
-}
-
-renderer.draw["end"] = function(){
-	
-
-}
-
-renderer.draw['clear_frame'] = function(){
-	ctx.fillStyle = "rgb(0,0,0)";
-	ctx.fillRect(0,0, canvas.width, canvas.height);
-}
 
 renderer.hasLoaded = function(){
 	
@@ -349,81 +285,12 @@ var UI = function(name, box, options){
 	if(!renderer.UI[name]) renderer.UI[name] = this;
 }
 
-renderer.draw["game"] = function () {
-	
+renderer.drawAll = function(arr){
 	ctx.fillStyle = "rgb(255,255,255)";
-		
-	//tiled background
-	for(var x = 0; x < ((game.server.size.width/12.1)); x++){
-	
-		for(var y = 0; y < ((game.server.size.height/10.34)); y++){
-			this.drawImage("background", x * 944, y * 807);
-
-		}
+	for(var i = 0; i < arr.length; i++){
+		if(!arr[i]) continue;
+		if(arr[i].constructor == Array) renderer.drawAll(arr[i]);
+		else if(typeof arr[i] == "function") arr[i](function(item){ item.draw() });
+		else arr[i].draw();
 	}
-	
-	//teams and their scores and stuff
-	game.forAllTeams(function(team){
-		
-		//wood piles
-		var row = 1;
-		var col = 1;
-		var x = 0;
-		var y = 0;
-
-		for(var i = 1; i < team.score; i+= 150){
-			
-			col += .5;
-			if(row < 2) row += 1;
-			else row = 1;
-			
-			x = -Math.floor(col) * 24;
-			
-			y = -Math.floor(row) * 26;
-			
-			this.drawImage("pile", (team.baseX - 53) + x, (team.baseY + 61) + y);
-		}
-		
-		//actual base
-		this.drawImage('house' + team.name, team.baseX, team.baseY);
-		
-		//baseScore
-		ctx.fillStyle = "white";
-		ctx.font="11px Georgia";
-		
-		this.fillText(team.score, team.baseX - 3, team.baseY + 65);
-		
-	}.bind(this));
-
-	//trees
-	for(var i = 0; i < game.client.trees.length; i++){
-		var tree = game.client.trees[i];
-		tree.draw();
-	}
-	
-	//notes
-	for(var i =0; i< game.client.notes.length; i++){
-		if(!game.client.notes[i].removed) this.drawRect("rgb(0,0,180)", game.client.notes[i].x + 29, game.client.notes[i].y + 29, 20, 20);
-	}
-	
-	//walls/drops
-	for(var i = 0; i< game.client.objects.length; i++){
-		if(!game.client.objects[i].removed) this.drawRect("rgb(180,100,80)", game.client.objects[i].x, game.client.objects[i].y, game.client.objects[i].width, game.client.objects[i].height);
-	}
-		
-	game.forAllPlayers(function(player){
-		player.draw();
-	});
-	
-	this.UI["timer"].draw();
-	
-	if(user.mode == "master") return;
-	
-	this.UI["notes"].draw();
-	this.UI['space bar'].draw();
-	this.UI['game screen'].draw();
-	this.UI["big screen"].draw();
-	builder.draw();
-	
-
-};
+}

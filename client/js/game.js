@@ -39,18 +39,18 @@ game.getCurrentSec = function(){
 
 game.forAllTrees = function(func){
 
-	for(var i = 0; this.client.trees.length; i++){
-		func(this.client.trees[i].length);
+	for(var i = 0; game.client.trees.length; i++){
+		func(game.client.trees[i].length);
 	}
 }
 
 game.forAllPlayers = function(func){
 	
-	for(var name in this.server.teams){
+	for(var name in game.server.teams){
 
-		for(var i = 0; i < this.server.teams[name].players.length; i++){
+		for(var i = 0; i < game.server.teams[name].players.length; i++){
 			
-			func(this.server.teams[name].players[i]);
+			func(game.server.teams[name].players[i]);
 		}
 
 	}
@@ -59,9 +59,9 @@ game.forAllPlayers = function(func){
 
 game.forAllTeams = function(func){
 
-	for(var name in this.server.teams){
+	for(var name in game.server.teams){
 
-		func(this.server.teams[name]);
+		func(game.server.teams[name]);
 
 	}
 
@@ -154,7 +154,7 @@ game.stateManager = function () {
     var now = Date.now();
     var delta = now - this.then;
 	
-	renderer.draw['clear_frame']();
+	renderer['clear_frame']();
 	
 	if(user.mode == "master") inputManager.masterKeys(delta/1000);
       
@@ -204,7 +204,7 @@ game.stateManager = function () {
 
 	}
 	
-	if(renderer.draw[renderer.state]) renderer.draw[renderer.state].call(renderer);
+	if(renderer[renderer.state]) renderer[renderer.state].call(renderer);
 	
 	renderer.reset();
 	

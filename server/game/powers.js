@@ -1,3 +1,5 @@
+var Obj = require('./objects.js').Obj;
+
 var powers = {}
 powers.index = {};
 
@@ -70,8 +72,10 @@ Power.prototype.lose = function(player){
 	}
 	if(this.droppable){
 		var obj = {power: this.name, type: "power", hard: false, removed:false, x: player.x, y: player.y, width: 20, height: 20 };
-		game.objects.push(obj);
-		io.sockets.emit("add_object", obj);
+		var newObj = new Obj(obj)
+		game.objects.push(newObj);
+		
+		io.sockets.emit("add_object", newObj);
 	}
 	
 };

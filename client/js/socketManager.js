@@ -46,7 +46,6 @@ socket.on('play_sound', function(data) {
 });
 
 socket.on('add_object', function(data) {
-
 	game.client.objects.push(data)
 });
 
