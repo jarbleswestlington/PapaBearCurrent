@@ -154,7 +154,7 @@ game.stateManager = function () {
     var now = Date.now();
     var delta = now - this.then;
 	
-	renderer.draw['clear_frame']();
+	renderer['clear_frame']();
 	
 	if(user.mode == "master") inputManager.masterKeys(delta/1000);
       
@@ -204,7 +204,7 @@ game.stateManager = function () {
 
 	}
 	
-	if(renderer.draw[renderer.state]) renderer.draw[renderer.state].call(renderer);
+	if(renderer[renderer.state]) renderer[renderer.state].call(renderer);
 	
 	renderer.reset();
 	

@@ -288,3 +288,61 @@ inputManager.registerKey(191, {
 //soundscape.play("bear");
 
 
+//drawing things
+renderer['game'] = function(){
+	//you can pass an array, a single object with a draw function, or a function that grabs certain objects with draw functions
+	renderer.drawAll([
+		game.server,
+	 	game.forAllTeams,
+	 	game.client.trees,
+	 	game.client.notes,
+	 	game.client.objects,
+	 	game.forAllPlayers,
+		renderer.UI["timer"],
+		renderer.UI["notes"],
+		renderer.UI['space bar'],
+		renderer.UI['game screen'],
+		renderer.UI["big screen"],
+		builder.draw
+	]);
+};
+
+//or you can explicitly state what to draw (good for small little screens)
+renderer["loading"] = function(){
+	renderer.UI["big screen"].draw([
+		"Loading..."
+	]);
+}
+
+renderer["intro"] = function(style){
+	renderer.UI["big screen"].draw([
+		"There are three villages. You are " + user.name + " of the " + user.server.team + " village.",
+		"Only one village will survive this harsh winter, so you must stockpile as much wood as you can.",
+		"Learn how better to survive by searching the woods for notes.",
+		"",
+		"Good luck.",
+		"Waiting for game to start...."
+	]);
+}
+renderer["server"] = function(){
+	renderer.UI["big screen"].draw([
+		"Connecting to server..."
+	]);
+}
+
+renderer["score"] = function(){
+	var textArr = []
+	game.forAllTeams(function(team){
+			
+		textArr.push(team.name + " : " + team.score);
+			
+	});
+	this.UI["big screen"].draw(textArr);
+}
+
+renderer['clear_frame'] = function(){
+	ctx.fillStyle = "rgb(0,0,0)";
+	ctx.fillRect(0,0, canvas.width, canvas.height);
+}
+
+

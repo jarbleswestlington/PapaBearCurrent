@@ -108,69 +108,6 @@ renderer.playerText = function(player){
 	
 };
 
-renderer.draw = {};
-
-renderer["loading"] = [];
-renderer["intro"] = [];
-renderer["server"] = [];
-renderer["score"] = [];
-renderer["end"] = [];
-renderer['clear_frame'] = [];
-renderer['game'] = [];
-
-renderer.draw["loading"] = function(){
-	this.UI["big screen"].draw([
-		"Loading..."
-	]);
-}	
-
-renderer.draw["intro"] = function(style){
-	
-	this.UI["big screen"].draw([
-		"There are three villages. You are " + user.name + " of the " + user.server.team + " village.",
-		"Only one village will survive this harsh winter, so you must stockpile as much wood as you can.",
-		"Learn how better to survive by searching the woods for notes.",
-		"",
-		"Good luck.",
-		"Waiting for game to start...."
-	]);
-	
-}
-
-renderer.draw["server"] = function(){
-
-	this.UI["big screen"].draw([
-		"Connecting to server..."
-	]);
-	
-}
-
-renderer.draw["score"] = function(){
-	
-
-	var textArr = []
-	
-	game.forAllTeams(function(team){
-			
-		textArr.push(team.name + " : " + team.score);
-			
-	});
-	
-	this.UI["big screen"].draw(textArr);
-	
-
-}
-
-renderer.draw["end"] = function(){
-	
-
-}
-
-renderer.draw['clear_frame'] = function(){
-	ctx.fillStyle = "rgb(0,0,0)";
-	ctx.fillRect(0,0, canvas.width, canvas.height);
-}
-
 renderer.hasLoaded = function(){
 	
 	//scroll through all images
@@ -348,84 +285,12 @@ var UI = function(name, box, options){
 	if(!renderer.UI[name]) renderer.UI[name] = this;
 }
 
-
-
-renderer['game'] = function(){
-	renderer.drawState([
-		game.server,
-	 	game.forAllTeams,
-	 	game.client.trees,
-	 	game.client.notes,
-	 	game.client.objects,
-	 	game.forAllPlayers,
-		renderer.UI["timer"],
-		renderer.UI["notes"],
-		renderer.UI['space bar'],
-		renderer.UI['game screen'],
-		renderer.UI["big screen"],
-		builder.draw
-	]);
-};
-
-
-renderer.drawState = function(arr){
-
+renderer.drawAll = function(arr){
 	ctx.fillStyle = "rgb(255,255,255)";
 	for(var i = 0; i < arr.length; i++){
 		if(!arr[i]) continue;
-		if(arr[i].constructor == Array) this.drawState(arr[i]);
+		if(arr[i].constructor == Array) renderer.drawAll(arr[i]);
 		else if(typeof arr[i] == "function") arr[i](function(item){ item.draw() });
 		else arr[i].draw();
 	}
 }
-
-// renderer.draw["game"] = function () {
-	
-// 	this.drawState(this.game);
-	
-
-// };
-renderer.draw["game"] = function () {
-
-	renderer["game"]();
-
-	// ctx.fillStyle = "rgb(255,255,255)";
-	
-	// game.server.draw()
-	
-	// //teams and their scores and stuff
-	// game.forAllTeams(function(team){	
-	// 	team.draw();		
-	// });
-
-	// //trees
-	// for(var i = 0; i < game.client.trees.length; i++){
-	// 	game.client.trees[i].draw();
-	// }
-	
-	// //notes
-	// for(var i =0; i< game.client.notes.length; i++){
-	// 	game.client.notes[i].draw();
-	// }
-	
-	// //walls/drops
-	// for(var i = 0; i< game.client.objects.length; i++){
-	// 	game.client.objects[i].draw();
-	// }
-		
-	// game.forAllPlayers(function(player){
-	// 	player.draw();
-	// });
-	
-	// this.UI["timer"].draw();
-	
-	// if(user.mode == "master") return;
-	
-	// this.UI["notes"].draw();
-	// this.UI['space bar'].draw();
-	// this.UI['game screen'].draw();
-	// this.UI["big screen"].draw();
-	// builder.draw();
-	
-
-};
