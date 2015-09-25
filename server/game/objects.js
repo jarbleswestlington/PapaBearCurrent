@@ -1,3 +1,7 @@
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
 function Tree(x, y, opts){
 	this.x = x * 78;
 	this.y = y * 78;
@@ -9,7 +13,7 @@ function Tree(x, y, opts){
 	this.ref = "tree";
 	this.hard = true;
 
-	draw: function(){
+	draw = function(){
 		if(this.removed) return;
 		renderer.drawSprite(this.ref, this.x - 9, this.y - 9, renderer.spriteData["tree"][treeNum]);
 	}

@@ -3,11 +3,13 @@ module.exports = function(server, game){
 	var powers = require('./powers.js');
 	
 	//setUp sockets
-	var io = require('../../sockets').listen(server);
+	var io = require('pedig.io').listen(server);
 	io.set('log level', 1);
 
 	io.sockets.on('connection', function(socket) {
 		
+		console.log("connection has opened");
+
 		if(game.state == "started"){
 
 			console.log("started game on " + socket.id)
