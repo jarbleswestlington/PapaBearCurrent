@@ -298,7 +298,7 @@ Game.prototype.spawnNotesAndTrees = function(){
 				var chance = Math.random() * 100;
 
 				if(chance <= 40){
-					this.trees.push({x: x * 78, y: y * 78, width:78, height:78, removed: false, treeNum : getRandomInt(1,4)});
+					this.trees.push(new Tree (x, y));
 				}
 				if(chance > 89 && chance <= 91){
 					this.notes.push({x: x * 78, y: y * 78, removed: false});

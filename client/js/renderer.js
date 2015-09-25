@@ -295,12 +295,10 @@ var UI = function(name, box, options){
 		var style = renderer.styles[this.box.style];
 		style.apply();
 
-		console.log(this.type);
 		this[this.type](itemIn, style);
 	}
 
 	this.block = function(item, style){
-		console.log(item);
 		var y = 0;
 
 		for(var i = 0; i < item.length; i++){
@@ -400,6 +398,7 @@ renderer.draw["game"] = function () {
 	//trees
 	for(var i = 0; i < game.client.trees.length; i++){
 		var tree = game.client.trees[i];
+		tree.draw();
 	}
 	
 	//notes
