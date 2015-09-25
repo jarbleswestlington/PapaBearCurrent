@@ -280,7 +280,9 @@ inputManager.registerKey(191, {
 	}
 );
 
-//soundscape.playWhen("swipe", function(){ return user.server.weapon.state == "attacking" });
+
+//view the soundscape.playWhen function to see a guide to what level you should pass into the third arguments
+//soundscape.playWhen("swipe", function(){ return user.server.weapon.state == "attacking" }, 11);
 //soundscape.playFrom("bear", {x: 2000, y:2000});
 
 //soundscape.broadcast("bear", 20)
@@ -290,7 +292,9 @@ inputManager.registerKey(191, {
 
 //drawing things
 renderer['game'] = function(){
-	//you can pass an array, a single object with a draw function, or a function that grabs certain objects with draw functions
+	//you can pass an array that contains items that have draw functions
+	//you can pass a single object with a draw function, 
+	//or you can pass a function that grabs certain objects with draw functions
 	renderer.drawAll([
 		game.server,
 	 	game.forAllTeams,
@@ -305,6 +309,7 @@ renderer['game'] = function(){
 		renderer.UI["big screen"],
 		builder.draw
 	]);
+	//
 };
 
 //or you can explicitly state what to draw (good for small little screens)
