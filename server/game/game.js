@@ -1,5 +1,9 @@
 var Tree = require('./objects.js').Tree;
 
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
 function buildGrid(width, height){
 	
 	var grid = [];
