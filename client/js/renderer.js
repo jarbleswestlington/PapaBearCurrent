@@ -79,8 +79,7 @@ renderer.drawImageRelative = function(item , influence){
 
 renderer.drawSprite = function(image, coordX, coordY, sprite){
 	
-	ctx.drawImage(this.refs[image], sprite.x, sprite.y, sprite.width, sprite.height, coordX + this.camera.x, coordY + this.camera.y, sprite.width, sprite.height
-	);
+	ctx.drawImage(this.refs[image], sprite.x, sprite.y, sprite.width, sprite.height, coordX + this.camera.x, coordY + this.camera.y, sprite.width, sprite.height);
 
 };
 
@@ -349,81 +348,84 @@ var UI = function(name, box, options){
 	if(!renderer.UI[name]) renderer.UI[name] = this;
 }
 
-renderer.draw["game"] = function () {
-	
+
+
+renderer['game'] = function(){
+	renderer.drawState([
+		game.server,
+	 	game.forAllTeams,
+	 	game.client.trees,
+	 	game.client.notes,
+	 	game.client.objects,
+	 	game.forAllPlayers,
+		renderer.UI["timer"],
+		renderer.UI["notes"],
+		renderer.UI['space bar'],
+		renderer.UI['game screen'],
+		renderer.UI["big screen"],
+		builder.draw
+	]);
+};
+
+
+renderer.drawState = function(arr){
+
 	ctx.fillStyle = "rgb(255,255,255)";
-		
-	//tiled background
-	for(var x = 0; x < ((game.server.size.width/12.1)); x++){
-	
-		for(var y = 0; y < ((game.server.size.height/10.34)); y++){
-			this.drawImage("background", x * 944, y * 807);
+	for(var i = 0; i < arr.length; i++){
+		if(!arr[i]) continue;
+		if(arr[i].constructor == Array) this.drawState(arr[i]);
+		else if(typeof arr[i] == "function") arr[i](function(item){ item.draw() });
+		else arr[i].draw();
+	}
+}
 
-		}
-	}
+// renderer.draw["game"] = function () {
 	
-	//teams and their scores and stuff
-	game.forAllTeams(function(team){
-		
-		//wood piles
-		var row = 1;
-		var col = 1;
-		var x = 0;
-		var y = 0;
+// 	this.drawState(this.game);
+	
 
-		for(var i = 1; i < team.score; i+= 150){
-			
-			col += .5;
-			if(row < 2) row += 1;
-			else row = 1;
-			
-			x = -Math.floor(col) * 24;
-			
-			y = -Math.floor(row) * 26;
-			
-			this.drawImage("pile", (team.baseX - 53) + x, (team.baseY + 61) + y);
-		}
-		
-		//actual base
-		this.drawImage('house' + team.name, team.baseX, team.baseY);
-		
-		//baseScore
-		ctx.fillStyle = "white";
-		ctx.font="11px Georgia";
-		
-		this.fillText(team.score, team.baseX - 3, team.baseY + 65);
-		
-	}.bind(this));
+// };
+renderer.draw["game"] = function () {
 
-	//trees
-	for(var i = 0; i < game.client.trees.length; i++){
-		var tree = game.client.trees[i];
-		tree.draw();
-	}
+	renderer["game"]();
+
+	// ctx.fillStyle = "rgb(255,255,255)";
 	
-	//notes
-	for(var i =0; i< game.client.notes.length; i++){
-		if(!game.client.notes[i].removed) this.drawRect("rgb(0,0,180)", game.client.notes[i].x + 29, game.client.notes[i].y + 29, 20, 20);
-	}
+	// game.server.draw()
 	
-	//walls/drops
-	for(var i = 0; i< game.client.objects.length; i++){
-		if(!game.client.objects[i].removed) this.drawRect("rgb(180,100,80)", game.client.objects[i].x, game.client.objects[i].y, game.client.objects[i].width, game.client.objects[i].height);
-	}
+	// //teams and their scores and stuff
+	// game.forAllTeams(function(team){	
+	// 	team.draw();		
+	// });
+
+	// //trees
+	// for(var i = 0; i < game.client.trees.length; i++){
+	// 	game.client.trees[i].draw();
+	// }
+	
+	// //notes
+	// for(var i =0; i< game.client.notes.length; i++){
+	// 	game.client.notes[i].draw();
+	// }
+	
+	// //walls/drops
+	// for(var i = 0; i< game.client.objects.length; i++){
+	// 	game.client.objects[i].draw();
+	// }
 		
-	game.forAllPlayers(function(player){
-		player.draw();
-	});
+	// game.forAllPlayers(function(player){
+	// 	player.draw();
+	// });
 	
-	this.UI["timer"].draw();
+	// this.UI["timer"].draw();
 	
-	if(user.mode == "master") return;
+	// if(user.mode == "master") return;
 	
-	this.UI["notes"].draw();
-	this.UI['space bar'].draw();
-	this.UI['game screen'].draw();
-	this.UI["big screen"].draw();
-	builder.draw();
+	// this.UI["notes"].draw();
+	// this.UI['space bar'].draw();
+	// this.UI['game screen'].draw();
+	// this.UI["big screen"].draw();
+	// builder.draw();
 	
 
 };

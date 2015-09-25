@@ -30,8 +30,6 @@ module.exports = function(app, game){
 		player.renderteam = "green";
 		player.x += 50;
 
-	   res.write(index);
-
 	   res.end();
 
 	});

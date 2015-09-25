@@ -39,18 +39,18 @@ game.getCurrentSec = function(){
 
 game.forAllTrees = function(func){
 
-	for(var i = 0; this.client.trees.length; i++){
-		func(this.client.trees[i].length);
+	for(var i = 0; game.client.trees.length; i++){
+		func(game.client.trees[i].length);
 	}
 }
 
 game.forAllPlayers = function(func){
 	
-	for(var name in this.server.teams){
+	for(var name in game.server.teams){
 
-		for(var i = 0; i < this.server.teams[name].players.length; i++){
+		for(var i = 0; i < game.server.teams[name].players.length; i++){
 			
-			func(this.server.teams[name].players[i]);
+			func(game.server.teams[name].players[i]);
 		}
 
 	}
@@ -59,9 +59,9 @@ game.forAllPlayers = function(func){
 
 game.forAllTeams = function(func){
 
-	for(var name in this.server.teams){
+	for(var name in game.server.teams){
 
-		func(this.server.teams[name]);
+		func(game.server.teams[name]);
 
 	}
 

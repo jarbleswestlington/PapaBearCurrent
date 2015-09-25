@@ -1,4 +1,5 @@
 var Tree = require('./objects.js').Tree;
+var Note = require('./objects.js').Note;
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -50,6 +51,17 @@ function Game(width, height){
 	
 	this.bearX = 22;
 	this.bearY = 27;	
+
+	this.draw = function(){
+		//tiled background
+		for(var x = 0; x < ((this.size.width/12.1)); x++){
+		
+			for(var y = 0; y < ((this.size.height/10.34)); y++){
+				renderer.drawImage("background", x * 944, y * 807);
+
+			}
+		}
+	}
 		
 	Object.defineProperty(this, 'grid', {value: buildGrid(width, height), enumerable: false});
 	Object.defineProperty(this, 'elephant', {value: {}, enumerable: false});
@@ -290,7 +302,7 @@ Game.prototype.spawnNotesAndTrees = function(){
 					this.trees.push(new Tree (x, y));
 				}
 				if(chance > 89 && chance <= 93){
-					this.notes.push({x: x * 78, y: y * 78, removed: false});
+					this.notes.push(new Note (x, y));
 				}
 				
 			}else{
@@ -301,7 +313,7 @@ Game.prototype.spawnNotesAndTrees = function(){
 					this.trees.push(new Tree (x, y));
 				}
 				if(chance > 89 && chance <= 91){
-					this.notes.push({x: x * 78, y: y * 78, removed: false});
+					this.notes.push(new Note (x, y));
 				}
 				
 				

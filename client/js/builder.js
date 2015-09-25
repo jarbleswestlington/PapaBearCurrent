@@ -57,7 +57,7 @@ builder.reject = function(){
 };
 
 builder.draw = function(){
-	if(!this.on) return;
+	if(!builder.on) return;
 	
 	var xy = user.getHoldingCoords(builder.refs[builder.item]);
 	renderer.drawRect("rgb(180,100,80)", xy.x, xy.y, builder.refs[builder.item].width, builder.refs[builder.item].height);
