@@ -111,7 +111,7 @@ user.interactWBase = function(){
 			
 		game.forAllTeams(function(team){
 			
-			if(game.checkCollision(this.server, team.base, 41, 36, 140, 84, -25, -25)){
+			if(tools.checkCollision(this.server, team.base, 41, 36, 140, 84, -25, -25)){
 		
 				if(this.server.team == team.name){
 
@@ -149,7 +149,7 @@ user.interactWTree = function(){
 			
 			if(game.client.trees[i].removed == false && !this.server.dead){
 			
-				if(game.checkCollision(this.server, game.client.trees[i], 41, 36, 78, 78, -25, -25)){
+				if(tools.checkCollision(this.server, game.client.trees[i], 41, 36, 78, 78, -25, -25)){
 			
 					renderer.UI["space bar"].render = true;
 					renderer.UI["space bar"].item = "Chop Tree";
@@ -176,7 +176,7 @@ user.interactWObject = function(){
 		
 		if(game.client.objects[i].type == "wall"){
 					
-			if(!game.colCheck(this.server, game.client.objects[i], {x: -25, y:-25})) continue;
+			if(!tools.colCheck(this.server, game.client.objects[i], {x: -25, y:-25})) continue;
 		
 			renderer.UI["space bar"].render = true;
 		
@@ -196,7 +196,7 @@ user.interactWObject = function(){
 			
 			if(this.server.powers.invisiblity || this.server.powers.papaBear) continue;
 			
-			if(!game.colCheck(game.client.objects[i], this.server)) continue;
+			if(!tools.colCheck(game.client.objects[i], this.server)) continue;
 			
 			renderer.spacebar = true;
 			renderer.spacebarText = "Pick Up";
@@ -243,7 +243,7 @@ user.interactWNote = function(){
 				
 		if(game.client.notes[z].removed) continue;		
 							
-		if (!game.checkCollision({x: game.client.notes[z].x + 29, y: game.client.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)) continue;		
+		if (!tools.checkCollision({x: game.client.notes[z].x + 29, y: game.client.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)) continue;		
 		
 		renderer.UI["space bar"].render = true;
 		renderer.UI["space bar"].item = "Pick Up";

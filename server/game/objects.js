@@ -1,8 +1,11 @@
+var tools = require('./tools.js');
+
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
 function Tree(x, y, opts){
+	this.tag = "tree";
 	this.x = x * 78;
 	this.y = y * 78;
 	this.removed = false;
@@ -19,8 +22,14 @@ function Tree(x, y, opts){
 	}
 }
 
+Tree.prototype.collide = function(agent){
+	if(this.removed) return;
+	if(tools.colCheck(agent, this)) return true;
+}
+
 
 function Note(x, y, opts){
+	this.tag = "note";
 	this.x = x * 78;
 	this.y = y * 78;
 	this.removed = false;
@@ -38,6 +47,7 @@ function Note(x, y, opts){
 }
 
 function Obj(data){
+	this.tag = "obj";
 	for(var prop in data){
 		this[prop] = data[prop];
 	}
@@ -51,6 +61,11 @@ function Obj(data){
 	}
 
 }
+
+Obj.prototype.collide = function(agent){
+	if(!this.hard || this.removed) return;
+	return tools.colCheck(agent, this);
+};
 
 module.exports = {
 	Tree: Tree,

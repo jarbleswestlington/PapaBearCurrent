@@ -1,3 +1,5 @@
+var tools = require('./tools.js');
+
 module.exports = function(game, io){
 	var Player = require('./player.js')(game, io);
 		
@@ -16,6 +18,7 @@ module.exports = function(game, io){
 		game.defineTerritory("team", coord);
 		game.teams[name] = this;
 
+		this.tag = "base";
 		this.draw = function(){
 			//actual base
 			renderer.drawImage('house' + this.name, this.baseX, this.baseY);
@@ -61,6 +64,17 @@ module.exports = function(game, io){
 		
 		return newPlayer;
 	};
+
+	Team.prototype.collide = function(agent){
+		var boxes = this.baseColBoxes;
+
+		for(var i = 0;i < boxes.length; i++){
+			if(tools.colCheckRelative(agent, {item: boxes[i], influencer: {x: this.baseX, y: this.baseY} } )){
+				return true;
+			} 
+		}
+		return false;
+	}
 
 	return Team;
 };

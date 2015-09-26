@@ -1,9 +1,10 @@
+var tools = require('./tools.js');
+var powers = require('./powers.js').powers;
+
 module.exports = function(game, io){
 	
-	var powers = require('./powers.js');
-	
 	var Player = function(args){
-	
+		this.tag = "player";
 		this.x = 0;
 		this.y = 0;
 		this.height = 36;
@@ -97,6 +98,46 @@ module.exports = function(game, io){
 		}
 
 	};
+
+	Player.prototype.collide = function(agent){
+		//agent == thing moving
+		//this == thing being hit
+
+		//passive
+		//for AGENT colliding with THIS
+		if(agent.tag == "player" || agent.tag == "papaBear"){
+			if(this.attacking){
+				if(agent.tag == "papaBear" && !this.powers.powerWeapon) return;
+				if(tools.colCheckRelative({item: this.spearColBoxes[this.direction], influencer: this}, agent)){
+					agent.die();
+					return;
+				} 
+			}
+			if(this.powers.papaBear && tools.colCheck(agent, this)){
+				agent.die();
+				return;
+			}	
+		}
+
+
+		//active
+		//for the AGENT running into THIS -- return true if it collided plz
+		if(tools.colCheck(agent, this)){
+			if(this.powers.papaBear){
+				if(agent.tag == "powerWeapon"){
+					this.die();
+					return;
+				} 
+				else return false;
+			}
+			if(agent.tag == "sword" || agent.tag == "spear" || agent.tag == "powerWeapon" || agent.tag == "papaBear"){
+				this.die();
+				return;
+			}
+			//returns true to prevent movement of the agent
+			else return true;
+		}
+	}
 	
 	Player.prototype.spearColBoxes = {
 		U:{x: 36,y: -22, width:5, height:30},
@@ -126,15 +167,15 @@ module.exports = function(game, io){
 
 		do{
 
-			illegal = false;
+			legal = false;
 
 			var spawnPlayer = getXY();
 			spawnPlayer.width = this.width;
 			spawnPlayer.height = this.height;
 
-			illegal = this.checkCollisions(spawnPlayer);
+			legal = this.legalMove(spawnPlayer);
 		
-		}while(illegal);
+		}while(!legal);
 
 		if(!func){
 
@@ -148,72 +189,44 @@ module.exports = function(game, io){
 
 	}
 
-	Player.prototype.checkCollisions = function(dummy){
+	Player.prototype.legalMove = function(dummy){
 
-		var illegal = false;
+		var playerCollisions = [
+			game,
+			game.forAllTeams.bind(game),
+			game.trees,
+			game.objects,
+			game.forAllOtherAlivePlayers.bind(game, this)
+		];
+
+		return tools.checkAll(dummy, playerCollisions);
+
+	}
+
+	Player.prototype.defense = function(){
+		//collide with everyone elses spear/papabear
+		//this is the passive death
+		//you will recognize how this behaves by the top portion of the collisions statements
+		var playerCollisions = [
+			game.forAllOtherAlivePlayers.bind(game, this)
+		];
+
+		return tools.checkAll(this, playerCollisions);
+
+	}
+
+	Player.prototype.offense = function(){
+
+		if(!this.attacking || !this.powers.spear) return;
+
+		var box = JSON.parse(JSON.stringify(this.spearColBoxes[this.direction]));
+
+		box.x += this.x;
+		box.y += this.y;
+		if(this.powers.powerWeapon) box.tag = "powerWeapon";
+		else box.tag = "spear";
 		
-		var check = function(){
-			
-			if(dummy.x > game.pixels.width || dummy.y > game.pixels.height || dummy.x < 0 || dummy.y < 0){
-				
-				illegal = true;
-				return true;
-			}
-			
-			game.forAllTeams(function(team){
-				
-				var boxes = team.baseColBoxes;
-				
-				boxes.forEach(function(box){
-					
-					if(game.colCheckRelative(dummy, {item: box, influencer: {x: team.baseX, y: team.baseY} } )) illegal = true;
-					
-				}.bind(this));
-			}.bind(this));
-			
-			if(!this.powers.papaBear){
-	
-				game.forAllOtherAlivePlayers(this, function(oPlayer){
-					
-					if(!illegal && !oPlayer.powers.papaBear && game.colCheck(dummy, oPlayer)) illegal = true;
-			
-				});
-	
-			}
-					
-			for(i = 0; i < game.trees.length; i++){
-		
-				if(game.trees[i].removed == false){
-				
-					if(game.colCheck(dummy, game.trees[i])){
-	
-						illegal = true;
-						return true;
-					}
-				}
-		
-			}
-			
-			for(i = 0; i < game.objects.length; i++){
-		
-				if(!game.objects[i].removed && game.objects[i].hard){
-				
-					if(game.colCheck(game.objects[i], dummy)){
-	
-						illegal = true;
-						return true;
-					}
-				}
-		
-			}
-			
-		
-		}.bind(this);
-		
-		check();
-	
-		if(illegal) return true;
-		else return false;	
+		tools.checkAll(box, game.forAllOtherAlivePlayers.bind(game, this));
 	}
 	
 	Player.prototype.die = function(){
@@ -244,57 +257,22 @@ module.exports = function(game, io){
 			powers.index[power].lose(this);
 		}
 	}
-
-	Player.prototype.checkHits = function(){
-	
-		game.forAllOtherAlivePlayers(this, function(oPlayer){
-	
-			var hit = false;
-
-			if(this.powers.papaBear){
-					
-				if(game.checkCollision(oPlayer, this, 41, 36, 63, 63, 0, 0)) hit = true;
-
-			}
-	
-			if(this.attacking){
-		
-				if(oPlayer.powers.papaBear && !this.powers.powerSword) return;
-	
-				if(game.colCheckRelative({item: this.spearColBoxes[this.direction], influencer: this}, oPlayer, {x:0, y:0})) hit = true;
-			}
-	
-			if(hit){
-        		
-				console.log(this.name + "killed" + oPlayer.name);
-
-				oPlayer.die();
-	
-			}
-	
-		}.bind(this));
-	
-	}
 	
 	Player.prototype.swipe = function(){
+
+		var boxes = JSON.parse(JSON.stringify(this.weaponColBoxes[this.direction]));
+
+		boxes = boxes.map(function(box){
+			box.x += this.x;
+			box.y += this.y;
+			box.width = box.width;
+			box.height = box.height;
+			box.tag = "sword";
+			return box;
+		}.bind(this));
 		
-		game.forAllOtherAlivePlayers(this, function(oPlayer){
-					
-			if(oPlayer.powers.papaBear) return;
-			
-		    var boxes = this.weaponColBoxes[this.direction];
-
-		    boxes.forEach(function(box){
-				
-		        if(game.colCheckRelative({item: box, influencer: this}, oPlayer, {x:0, y:0})){
-            		console.log(this.name + "killed" + oPlayer.name);
-					
-					oPlayer.die();
-		        }
-
-			}.bind(this));
-
-		}.bind(this));	
+		tools.checkAll(boxes, game.forAllOtherAlivePlayers.bind(game, this));
+	
 	};
 		
 	Player.prototype.weaponColBoxes = {

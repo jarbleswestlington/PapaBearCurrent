@@ -1,22 +1,3 @@
-
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min)) + min;
-}
-
-function getRandomArbitrary( numone,  numtwo) {
-	return Math.floor(Math.random() * (numtwo - numone) + 1);
-}
-
-function makeId(){
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for( var i=0; i < 5; i++ )
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-    return text;
-}
-
 //setUp Game object;
 var game = {
 	
@@ -65,44 +46,6 @@ game.forAllTeams = function(func){
 
 	}
 
-}
-
-game.colCheck = function(smaller, bigger, padding){
-	if(!padding) padding = {x:0, y: 0, width:0, height: 0};
-	
-	if( (smaller.x >= bigger.x + padding.x && smaller.x <= bigger.x + bigger.width - padding.x) || (smaller.x + smaller.width >= bigger.x + padding.x && smaller.x + smaller.width <= bigger.x + bigger.width - padding.x) ){
-
-       if( (smaller.y >= bigger.y + padding.y && smaller.y <= bigger.y + bigger.height - padding.y) || (smaller.y + smaller.height >= bigger.y + padding.y && smaller.y + smaller.height <= bigger.y + bigger.height - padding.y) ){
-
-           return true;
-       }
-
-   }
-	
-}
-
-game.colCheckRelative = function(smallerGroup, biggerGroup, padding){
-	if(!padding) padding = {x:0, y: 0, width:0, height: 0};
-	
-	if(biggerGroup.item) biggerGroup = {x: biggerGroup.item.x + biggerGroup.influencer.x, y: biggerGroup.item.y + biggerGroup.influencer.y, width: biggerGroup.item.width, height: biggerGroup.item.height};
-
-	if(smallerGroup.item) smallerGroup = {x: smallerGroup.item.x + smallerGroup.influencer.x, y: smallerGroup.item.y + smallerGroup.influencer.y, width: smallerGroup.item.width, height: smallerGroup.item.height};
-
-	return this.colCheck(smallerGroup, biggerGroup, padding);
-}
-
-game.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
-
-   if( (item.x >= shark.x + paddingX && item.x <= shark.x + sharkWidth - paddingX) || (item.x + itemWidth >= shark.x + paddingX && item.x + itemWidth <= shark.x + sharkWidth - paddingX) ){
-
-       if( (item.y >= shark.y + paddingY && item.y <= shark.y + sharkHeight - paddingY) || (item.y + itemHeight >= shark.y + paddingY && item.y + itemHeight <= shark.y + sharkHeight - paddingY) ){
-
-           return true;
-       }
-
-   }
-   
-   return false;
 }
 
 game.getPowerStats = function(power){

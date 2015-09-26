@@ -48,19 +48,7 @@ inputManager.processInput = function(){
 	}
 	
 	if(chatController.started) return;
-	
-	if (87 in inputManager.keys) { // w
-	
-		if(inputManager.pressable.w){
-			inputManager.pressable.w = false;	
-			if(user.server.log.has) builder.start("wall");
-		}
-		
-	}else{
-		if(builder.on) builder.request();
-		inputManager.pressable.w = true;
-		
-	}
+
 	
 	if (88 in inputManager.keys) { // x
 		
@@ -207,14 +195,15 @@ inputManager.check = function(){
 		if(key.mode != "all" && key.mode != user.mode) return;
 		
 		if( key.char in this.keys ){
-			
+			if( key.on && !key.conditions.on() ) return;
 			if( key.once && !this.pressable[key.char] ) return;
 			this.pressable[key.char] = false;
-			
-			if(key.conditions.on() && key.on) key.on();
+			if(key.on) key.on();
 		}else{
-			if( key.off && key.conditions.off() ) key.off();
-			this.pressable[key.char] = true;	
+			if( key.off && !key.conditions.off() ) return;
+			if( key.once && this.pressable[key.char] ) return;
+			this.pressable[key.char] = true;
+			if( key.off ) key.off();	
 		}
 		
 	}.bind(this));
