@@ -1,4 +1,4 @@
-var powers = require('./powers.js');
+var powers = require('./powers.js').powers;
 var Obj = require('./objects.js').Obj;
 
 module.exports = function(server, game){
@@ -18,7 +18,6 @@ module.exports = function(server, game){
 		
 		socket.on("drop_log", function(data){
 			var player = game.findPlayerByName(data.name)
-		
 			player.log.has = false;
 			player.log.stolen = false;
 		
@@ -172,7 +171,6 @@ module.exports = function(server, game){
 		});
 		
 		socket.on('chop_wall', function(data){
-			console.log(game.objects)
 			game.objects[data.index].hp -= data.amount;
 
 			if(game.objects[data.index].hp <= 0){
@@ -193,6 +191,7 @@ module.exports = function(server, game){
 			var player = game.findPlayerByName(data.name);
 
 			if(!player || player.dead) return;
+			
 			dummy.x = player.x;
 			dummy.y = player.y;
 			dummy.width = player.width;
@@ -224,19 +223,19 @@ module.exports = function(server, game){
 
 			}
 			
-			if(!player.checkCollisions(dummy)){
+			if(player.legalMove(dummy)){
 				
 				player.x = dummy.x;
 				player.y = dummy.y;
 			}
-			
-			player.checkHits();
 
+			player.defense();
+			player.offense();
 		});
 		
 		socket.on("request_placement", function(data){
 			
-			var illegal = game.collide(data);
+			var illegal = game.collideCheck(data);
 			
 			if(illegal)	socket.emit("placement_result", {success:false});
 			else{ 
@@ -257,7 +256,6 @@ module.exports = function(server, game){
 		socket.on("give_power", function(data){
 
 			var player = game.findPlayerByName(data.name);
-			player.powers[data.power] = true;
 			
 			var powerGive = powers.index[data.power];
 			if(powerGive) powerGive.giveTo(player);

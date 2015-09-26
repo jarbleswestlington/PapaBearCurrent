@@ -1,5 +1,7 @@
 var Tree = require('./objects.js').Tree;
 var Note = require('./objects.js').Note;
+var tools = require('./tools.js');
+
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -52,6 +54,8 @@ function Game(width, height){
 	this.bearX = 22;
 	this.bearY = 27;	
 
+	this.tag = "game";
+
 	this.draw = function(){
 		//tiled background
 		for(var x = 0; x < ((this.size.width/12.1)); x++){
@@ -99,175 +103,105 @@ Game.prototype.update = function(io) {
 	
 	setTimeout( this.update.bind(this, io) , 50);
 	
-}
+};
 
 Game.prototype.start = function(io){
-	
 	io.sockets.emit("startgame_client", {game: this, trees:this.trees, notes: this.notes, objects: this.objects});
+};
 
+
+Game.prototype.collide = function(agent){
+	if(agent.x > this.pixels.width || agent.y > this.pixels.height || agent.x < 0 || agent.y < 0) return true;
+	return false;
 }
 
-Game.prototype.collide = function(dummy){
-	var illegal = false;
-	
-	var check = function(){
-		
-		if(dummy.x > this.pixels.width || dummy.y > this.pixels.height || dummy.x < 0 || dummy.y < 0){
-			
-			illegal = true;
-			return true;
-		}
-		
-		this.forAllTeams(function(team){
-			
-			var boxes = team.baseColBoxes;
-			
-			boxes.forEach(function(box){
-				
-				if(this.colCheckRelative(dummy, {item: box, influencer: {x: team.baseX, y: team.baseY} } )) illegal = true;
-				
-			}.bind(this));
-		}.bind(this));
-		
-		this.forAllAlivePlayers(function(oPlayer){
-			
-			if(!illegal && this.colCheck(dummy, oPlayer)) illegal = true;
-	
-		}.bind(this));
-		
-		for(i = 0; i < this.trees.length; i++){
-	
-			if(this.trees[i].removed == false){
-			
-				if(this.colCheck(dummy, this.trees[i])){
-
-					illegal = true;
-					return true;
-				}
-			}
-	
-		}
-		
-		for(i = 0; i < this.objects.length; i++){
-	
-			if(!this.objects[i].removed && this.objects[i].hard){
-			
-				if(this.colCheck(this.objects[i], dummy)){
-
-					illegal = true;
-					return true;
-				}
-			}
-	
-		}
-		
-	
-	}.bind(this);
-	
-	check();
-
-	if(illegal) return true;
-	else return false;	
-}
-
-Game.prototype.colCheck = function(smaller, bigger, padding){
-	
-	if(!padding) padding = {x:0, y: 0, width:0, height: 0};
-		
-	if( (smaller.x >= bigger.x + padding.x && smaller.x <= bigger.x + bigger.width - padding.x) || (smaller.x + smaller.width >= bigger.x + padding.x && smaller.x + smaller.width <= bigger.x + bigger.width - padding.x) ){
-
-       if( (smaller.y >= bigger.y + padding.y && smaller.y <= bigger.y + bigger.height - padding.y) || (smaller.y + smaller.height >= bigger.y + padding.y && smaller.y + smaller.height <= bigger.y + bigger.height - padding.y) ){
-
-           return true;
-       }
-
-   }
-	
-}
-
-Game.prototype.colCheckRelative = function(smallerGroup, biggerGroup, padding){
-	if(!padding) padding = {x:0, y: 0, width:0, height: 0};
-	
-	if(biggerGroup.item) biggerGroup = {x: biggerGroup.item.x + biggerGroup.influencer.x, y: biggerGroup.item.y + biggerGroup.influencer.y, width: biggerGroup.item.width, height: biggerGroup.item.height};
-
-	if(smallerGroup.item) smallerGroup = {x: smallerGroup.item.x + smallerGroup.influencer.x, y: smallerGroup.item.y + smallerGroup.influencer.y, width: smallerGroup.item.width, height: smallerGroup.item.height};
-
-	return this.colCheck(smallerGroup, biggerGroup, padding);
-}
-
-Game.prototype.checkCollision = function(item, shark, itemWidth, itemHeight, sharkWidth, sharkHeight, paddingX, paddingY){
-
-   if( (item.x >= shark.x + paddingX && item.x <= shark.x + sharkWidth - paddingX) || (item.x + itemWidth >= shark.x + paddingX && item.x + itemWidth <= shark.x + sharkWidth - paddingX) ){
-
-       if( (item.y >= shark.y + paddingY && item.y <= shark.y + sharkHeight - paddingY) || (item.y + itemHeight >= shark.y + paddingY && item.y + itemHeight <= shark.y + sharkHeight - paddingY) ){
-
-           return true;
-
-       }
-
-   }
+Game.prototype.collideCheck = function(dummy){
+	return !tools.checkAll(dummy, [
+		this,
+		this.forAllTeams.bind(this),
+		this.forAllAlivePlayers.bind(this),
+		this.trees,
+		this.objects,
+	]);
 }
 
 Game.prototype.forAllTeams = function(func){
+	var result = false;
 
 	for(var name in this.teams){
-
-		func(this.teams[name]);
-
+		if(func(this.teams[name])) result = true;
 	}
-
+	return result;
 }
 
 Game.prototype.forAllTrees = function(func){
-	
-	this.trees.forEach(function(tree){
-		if(tree.removed == false) func(tree);
-	})
+	var result = false;
+
+	for(var i = 0; i < game.trees.length; i++){
+		if(game.trees[i].removed) continue;
+		if(func(game.trees[i])) result = true;
+	}
+	return result;
+
 }
 
 Game.prototype.forAllPlayers = function(func){
-	
+	var result = false;
 	for(var name in this.teams){
 		for(var i = 0; i < this.teams[name].players.length; i++){
-
-			func(this.teams[name].players[i]);
+			if(func(this.teams[name].players[i])) result = true;
 		}
 	}
-
+	return result;
 }
 
 Game.prototype.forAllAlivePlayers = function(func){
-	
+	var result = false;
+
 	for(var name in this.teams){
 		for(var i = 0; i < this.teams[name].players.length; i++){
-
-			if(!this.teams[name].players[i].dead) func(this.teams[name].players[i]);
+			if(this.teams[name].players[i].dead) return;
+			if(func(this.teams[name].players[i])){
+				result = true;
+			} 
+			
 		}
 	}
+
+	return result;
 
 }
 
 Game.prototype.forAllOtherPlayers = function(player, func){
+	var result = false;
 
 	for(var name in this.teams){
 
 		for(var i = 0; i < this.teams[name].players.length; i++){
 
-			if(player !== this.teams[name].players[i]) func(this.teams[name].players[i]);
+			if(player !== this.teams[name].players[i]){
+				if(func(this.teams[name].players[i])) return true;
+			} 
 		}
 	}
+
+	return result;
+
 
 }
 
 Game.prototype.forAllOtherAlivePlayers = function(player, func){
+	var result = false;
 
 	for(var name in this.teams){
 
 		for(var i = 0; i < this.teams[name].players.length; i++){
-
-			if(player !== this.teams[name].players[i] && !this.teams[name].players[i].dead) func(this.teams[name].players[i]);
+			if(player !== this.teams[name].players[i] && !this.teams[name].players[i].dead){
+				if(func(this.teams[name].players[i])) result = true;
+			}
 		}
 	}
+	return result;
 
 }
 

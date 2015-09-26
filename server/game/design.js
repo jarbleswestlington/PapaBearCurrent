@@ -12,11 +12,11 @@
 //onUse swordPower -- renderer.add(sword)
 //make collisions function automatically tell whos bigger and smaller;//
 
-
 module.exports = function(game, io){
 	
 	var Team = require('./team.js')(game, io);
 	var Player = require('./player.js')(game, io);
+	var Power = require('./powers.js').Power;
 
 	new Team('blue', {x: 10, y: 10, width: 10, height: 10});
 
@@ -28,5 +28,44 @@ module.exports = function(game, io){
 	game.defineTerritory("forest", {x: 0, y: 0, height: 5, width: game.size.width});
 	
 	game.spawnNotesAndTrees();
+
+	new Power("spear", {
+		group: "weapon",
+		exclusive: true,
+		onRecieve: function(player){
+			player.spear.color = "grey";
+		},
+	});
+	new Power("powerWeapon", {
+		onRecieve: function(player){
+			player.spear.color = "yellow";
+		},
+		onLose: function(player){
+			player.spear.color = "grey";
+		},
+		include: ["spear"],
+	});
+	new Power("disguise");
+	new Power("invisibility", {exclusive: true});
+	new Power("telescope");
+	new Power("sword", {group: "weapon", exclusive: true});
+	new Power("papaBear", {
+		exclusive: true,
+		onRecieve: function(player){
+			player.x -= player.x%78;
+			player.x+=6;
+			player.y -= player.y%78;
+			player.y+=6;
+			player.width = 63;
+			player.height = 63;
+			player.tag = "papaBear";
+		},
+		onLose: function(player){
+			player.width = 41;
+			player.height = 36;	
+			player.tag = "player";	
+		}
+	});
+
 	
 }

@@ -9,59 +9,30 @@ function Power(name, opts){
 	powers.index[name] = this;
 	
 	this.name = name;
-	this.loseable = opts.loseable || false;
+	this.loseable = opts.loseable || true;
 	this.droppable = opts.droppable || false;
 	
 	this.actions = {};	
 	this.onRecieve = opts.onRecieve || null;
 	this.onUse = opts.onUse || null;
-	this.onLose = opts.onLoss || null;
+	this.onLose = opts.onLose || null;
 	this.onCollide = opts.onCollide || null; //if collded with player that used
-	
+
 	this.handicap = opts.handicap || null; //(no woodcutting, no notes, no stealing, etc, no collisions)
-	
+	this.default = opts.default || false;
+
 	this.include = opts.include || null;
 	this.exclusive = opts.exclusive || false;
+	this.group = opts.group || false;
+
 }
 
-new Power("spear", {
-	group: "weapon",
-	exclusive: true,
-	onRecieve: function(player){
-		player.spear.color = "grey";
-	},
- }
-);
-new Power("powerWeapon", {
-	onRecieve: function(player){
-		player.spear.color = "yellow";
-	},
-	include: ["spear"],
-});
-new Power("disguise");
-new Power("invisibility", {exclusive: true});
-new Power("telescope");
-new Power("sword", {group: "weapon", exclusive: true});
-new Power("papaBear", {
-	exclusive: true,
-	onRecieve: function(player){
-		player.x -= player.x%78;
-		player.x+=6;
-		player.y -= player.y%78;
-		player.y+=6;
-		player.width = 63;
-		player.height = 63;
-	},
-	onLose: function(player){
-		player.width = 41;
-		player.height = 36;		
-	}
-});
-
 Power.prototype.lose = function(player){
-	player.powers[this.name] = false;
-	
-	if(this.onLose) this.onLose(player);
+	console.log(player.name + " lost the power:" + this.name);
+
+	if(this.onLose) {
+		this.onLose(player);
+	}
 	if(this.includes){
 		this.includes.forEach(function(power){
 			player.powers[power] = false;
@@ -90,7 +61,6 @@ Power.prototype.giveTo = function(player){
 		}else {
 			player.loseAllPowers();
 		}
-		
 	}
 	player.powers[this.name] = true;
 	if(this.include && this.include.length){
@@ -105,4 +75,7 @@ Power.prototype.giveTo = function(player){
 	
 }
 
-module.exports = powers;
+module.exports = {
+	Power: Power,
+	powers: powers,
+};

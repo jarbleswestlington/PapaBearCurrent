@@ -148,7 +148,6 @@ renderer.styles = {
 	"note": new Style("rgb(255,255,255)", {fontSize: 1.5, lineWidth: .2}),
 	"on top": new Style("rgb(0,0,0)", {fontSize: 1, lineWidth: .2, paddingX: .85, paddingY: .1}),	
 	"notes": new Style("rgb(0,0,0)", {fontSize: 1, paddingX: .2, paddingY: .2}),	
-	
 }
 
 new UI("big screen", {style: "block text",x: "/10", y: 100, width: "/1.2", height: "-100"}, {reset:false, startRender: false, 
@@ -240,10 +239,9 @@ inputManager.registerKey("N", {
 	once: true, 
 	mode: "all",
 	on: function(){ 
-			socket.emit('confirm_name', { name: makeId() });
-		}, 
-	}
-);
+			socket.emit('confirm_name', { name: tools.makeId() });
+	},
+});
 
 inputManager.registerKey(188, {
 	master: true, 
@@ -252,9 +250,8 @@ inputManager.registerKey(188, {
 	on: function(){ 
 			var cur = user.mPlayers.indexOf(user.name);
 			if(user.mPlayers[cur-1]) user.name = user.mPlayers[cur-1];
-		}, 
-	}
-);
+	} 
+});
 
 inputManager.registerKey(190, {
 	master: true, 
@@ -263,22 +260,38 @@ inputManager.registerKey(190, {
 	on: function(){ 
 			var cur = user.mPlayers.indexOf(user.name);
 			if(user.mPlayers[cur+1]) user.name = user.mPlayers[cur+1];
-		}, 
 	}
-);
+});
 
 inputManager.registerKey(191, {
 	master: true, 
 	once: true, 
 	mode: "player",
 	on: function(){ 
-		for(var power in powers.index)
+		for(var power in powers.index){
 			if(powers.index.hasOwnProperty(power) && !powers.index[power].exclusive){
 				user.givePower(power);
 			}
-		}, 
+		} 
 	}
-);
+});
+
+inputManager.registerKey(87, {
+	once: true, 
+	mode: "player",
+	on: function(){ 
+		builder.start("wall");
+	},
+	onCondition: function(){
+		return user.server.log.has;
+	},
+	off: function(){
+		builder.request();
+	},
+	offCondition: function(){
+		return builder.on;
+	},
+});
 
 
 //view the soundscape.playWhen function to see a guide to what level you should pass into the third arguments
@@ -307,9 +320,10 @@ renderer['game'] = function(){
 		renderer.UI['space bar'],
 		renderer.UI['game screen'],
 		renderer.UI["big screen"],
-		builder.draw
+		builder
 	]);
-	//
+	//to edit whats happening
+	//find the draw funtions either on the server instance or the client instance of these objects
 };
 
 //or you can explicitly state what to draw (good for small little screens)
@@ -338,9 +352,7 @@ renderer["server"] = function(){
 renderer["score"] = function(){
 	var textArr = []
 	game.forAllTeams(function(team){
-			
 		textArr.push(team.name + " : " + team.score);
-			
 	});
 	this.UI["big screen"].draw(textArr);
 }

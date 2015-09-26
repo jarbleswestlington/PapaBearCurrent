@@ -17,7 +17,6 @@ builder.start = function(type){
 	user.inPlace = true;
 	user.log.has = false;
 	user.log.stolen = false;
-	socket.emit("drop_log", {name: user.name});		
 };
 
 builder.scrap = function(){
@@ -42,12 +41,15 @@ builder.place = function(){
 	this.rejected = false;
 	this.on = false;	
 	user.inPlace = false;
+	socket.emit("drop_log", {name: user.name});		
+
 };
 
 builder.reject = function(){
 	
 	this.rejected = true;
-	
+	this.on = false;	
+	user.inPlace = false;
 	setTimeout(function(){
 		
 		this.rejected = false;

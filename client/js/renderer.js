@@ -275,7 +275,7 @@ var UI = function(name, box, options){
 					
 			//noteCode	
 			if(inputManager.mouse.down){
-				if(game.colCheck(inputManager.mouse.collider, cell)){
+				if(tools.colCheck(inputManager.mouse.collider, cell)){
 					user.readNote(this.ref[i]);
 				}
 			}
