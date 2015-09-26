@@ -2,7 +2,6 @@ var Tree = require('./objects.js').Tree;
 var Note = require('./objects.js').Note;
 var tools = require('./tools.js');
 
-
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -313,4 +312,6 @@ Game.prototype.hasPlayer = function(name){
 	else return true;
 }
 
-module.exports = new Game(60, 60);
+var oneGame = new Game(60, 60);
+
+module.exports = oneGame;

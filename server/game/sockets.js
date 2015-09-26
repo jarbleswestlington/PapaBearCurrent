@@ -1,7 +1,14 @@
 var powers = require('./powers.js').powers;
 var Obj = require('./objects.js').Obj;
 
-module.exports = function(server, game){
+
+var localio;
+var access = {};
+access.emit = function(name, data){
+	localio.sockets.emit(name, data);
+}
+
+function setUp(game, server){
 	//setUp sockets
 	var io = require('pedig.io').listen(server);
 	io.set('log level', 1);
@@ -191,7 +198,7 @@ module.exports = function(server, game){
 			var player = game.findPlayerByName(data.name);
 
 			if(!player || player.dead) return;
-			
+
 			dummy.x = player.x;
 			dummy.y = player.y;
 			dummy.width = player.width;
@@ -264,7 +271,12 @@ module.exports = function(server, game){
 
 	});
 	
-	return {io: io};
+	localio = io;
+	return io;
 }
 
+module.exports = {
+	access: access,
+	setUp: setUp,
+}
 

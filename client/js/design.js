@@ -209,20 +209,6 @@ audioArray.forEach(function(audio){
 	soundscape.upload(audio);
 });
 
-
-var happy = false;
-var sad = false;
-inputManager.registerKey("T", {
-	master: true, 
-	once: true, 
-	on: function(){ console.log("on") }, 
-	off: function(){ console.log("off") }, 
-	onCondition: function(){ return happy }, 
-	offCondition: function(){ return sad },
-	mode: "player",
-	}
-);
-
 inputManager.registerKey("M", {
 	master: true, 
 	once: true, 

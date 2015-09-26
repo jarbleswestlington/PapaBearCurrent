@@ -198,8 +198,8 @@ user.interactWObject = function(){
 			
 			if(!tools.colCheck(game.client.objects[i], this.server)) continue;
 			
-			renderer.spacebar = true;
-			renderer.spacebarText = "Pick Up";
+			renderer.UI["space bar"].render = true;
+			renderer.UI["space bar"].item = "Pick Up";
 			
 			if(!this.action){
 				this.action = false;

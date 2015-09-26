@@ -217,6 +217,7 @@ module.exports = function(game, io){
 
 	Player.prototype.offense = function(){
 
+		//if the spear is out, consistently attack with it
 		if(!this.attacking || !this.powers.spear) return;
 
 		var box = JSON.parse(JSON.stringify(this.spearColBoxes[this.direction]));
@@ -254,7 +255,7 @@ module.exports = function(game, io){
 	
 	Player.prototype.loseAllPowers = function(){
 		for(var power in this.powers){
-			powers.index[power].lose(this);
+			if(this.powers[power] == true) powers.index[power].lose(this);
 		}
 	}
 	
