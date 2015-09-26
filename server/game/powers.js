@@ -1,4 +1,5 @@
 var Obj = require('./objects.js').Obj;
+var game = require('./game.js');
 
 var powers = {}
 powers.index = {};
@@ -28,13 +29,15 @@ function Power(name, opts){
 }
 
 Power.prototype.lose = function(player){
+	var sockets = require("./sockets.js").access;
+
 	console.log(player.name + " lost the power:" + this.name);
 
 	if(this.onLose) {
 		this.onLose(player);
 	}
-	if(this.includes){
-		this.includes.forEach(function(power){
+	if(this.include){
+		this.include.forEach(function(power){
 			player.powers[power] = false;
 		});
 	}
@@ -42,17 +45,18 @@ Power.prototype.lose = function(player){
 		player.powers[this.name] = false;
 	}
 	if(this.droppable){
+		console.log(this.name + " was dropped by: " + player.name);
 		var obj = {power: this.name, type: "power", hard: false, removed:false, x: player.x, y: player.y, width: 20, height: 20 };
 		var newObj = new Obj(obj)
 		game.objects.push(newObj);
 		
-		io.sockets.emit("add_object", newObj);
+		sockets.emit("add_object", newObj);
 	}
 	
 };
 
 Power.prototype.giveTo = function(player){
-	
+
 	if(this.exclusive){
 		if(this.group){
 			for(var powerPlayer in player.powers){

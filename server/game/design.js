@@ -9,8 +9,8 @@
 //organize things into one master array - objects//toRender//toCollide
 //interface = object, object {distance: onBreach: condition: }
 //collide = object, object, {padding: , onCollide}
-//onUse swordPower -- renderer.add(sword)
-//make collisions function automatically tell whos bigger and smaller;//
+//onUse swordPower -- renderer.add(sword), renderer.remove(sword)
+//
 
 module.exports = function(game, io){
 	
@@ -35,6 +35,7 @@ module.exports = function(game, io){
 		onRecieve: function(player){
 			player.spear.color = "grey";
 		},
+		droppable:true,
 	});
 	new Power("powerWeapon", {
 		onRecieve: function(player){
@@ -44,11 +45,12 @@ module.exports = function(game, io){
 			player.spear.color = "grey";
 		},
 		include: ["spear"],
+		droppable:true,
 	});
 	new Power("disguise");
 	new Power("invisibility", {exclusive: true});
 	new Power("telescope");
-	new Power("sword", {group: "weapon", exclusive: true});
+	new Power("sword", {group: "weapon", droppable: true, exclusive: true});
 	new Power("papaBear", {
 		exclusive: true,
 		onRecieve: function(player){
