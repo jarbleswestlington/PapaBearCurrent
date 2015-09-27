@@ -38,10 +38,12 @@ Power.prototype.lose = function(player){
 	}
 	if(this.include){
 		this.include.forEach(function(power){
+			console.log("falsing", power);
 			player.powers[power] = false;
 		});
 	}
 	if(this.loseable){
+		console.log("falsing", this.name);
 		player.powers[this.name] = false;
 	}
 	if(this.droppable){
@@ -55,11 +57,12 @@ Power.prototype.lose = function(player){
 	
 };
 
-Power.prototype.giveTo = function(player){
+Power.prototype.giveTo = function(player, includes){
 
-	if(this.exclusive){
+	if(this.exclusive && !includes){
 		if(this.group){
 			for(var powerPlayer in player.powers){
+				console.log("loseing", powerPlayer);
 				if(powers.index[powerPlayer].group == this.group) powers.index[powerPlayer].lose(player);	 
 			}
 		}else {
@@ -70,7 +73,7 @@ Power.prototype.giveTo = function(player){
 	if(this.include && this.include.length){
 		this.include.forEach(function(power){
 			var morePower = powers.index[power];	
-			morePower.giveTo(player);
+			morePower.giveTo(player, true);
 		});
 	}
 	
