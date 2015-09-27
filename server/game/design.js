@@ -10,7 +10,7 @@
 //interface = object, object {distance: onBreach: condition: }
 //collide = object, object, {padding: , onCollide}
 //onUse swordPower -- renderer.add(sword), renderer.remove(sword)
-//
+//generally fix the requiring of things
 
 module.exports = function(game, io){
 	

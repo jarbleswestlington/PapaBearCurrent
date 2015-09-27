@@ -119,7 +119,6 @@ module.exports = function(game, io){
 			}	
 		}
 
-
 		//active
 		//for the AGENT running into THIS -- return true if it collided plz
 		if(tools.colCheck(agent, this)){
@@ -191,6 +190,7 @@ module.exports = function(game, io){
 
 	Player.prototype.legalMove = function(dummy){
 
+		dummy.tag = this.tag;
 		var playerCollisions = [
 			game,
 			game.forAllTeams.bind(game),
@@ -254,6 +254,11 @@ module.exports = function(game, io){
 	}
 	
 	Player.prototype.loseAllPowers = function(){
+		for(var power in this.power){
+			if(this.powers[power] == true && this.powers[power].includes.length){
+				powers.index[power].lose(this);
+			}
+		}
 		for(var power in this.powers){
 			if(this.powers[power] == true) powers.index[power].lose(this);
 		}
