@@ -263,9 +263,17 @@ function setUp(game, server){
 		socket.on("give_power", function(data){
 
 			var player = game.findPlayerByName(data.name);
-			
-			var powerGive = powers.index[data.power];
-			if(powerGive) powerGive.giveTo(player);
+
+			if(data.power == "all"){
+				for(var power in powers.index){
+					if(!powers.index[power].exclusive) powers.index[power].giveTo(player);
+				}
+			}else{
+				var powerGive = powers.index[data.power];
+				if(powerGive) powerGive.giveTo(player);
+			}
+
+
 
 		});
 

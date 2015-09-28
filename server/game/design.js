@@ -19,9 +19,7 @@ module.exports = function(game, io){
 	var Power = require('./powers.js').Power;
 
 	new Team('blue', {x: 10, y: 10, width: 10, height: 10});
-
 	new Team("red", {x: 30, y: 30, width: 10, height: 10});
-
 	new Team("green", {x: 50, y: 50, width: 10, height: 10});
 	
 	game.defineTerritory("forest", {x: 0, y: 0, height: game.size.height, width: 5});
@@ -45,6 +43,8 @@ module.exports = function(game, io){
 			player.spear.color = "grey";
 		},
 		include: ["spear"],
+		group:"weapon",
+		exclusive: true,
 		droppable:true,
 	});
 	new Power("disguise");

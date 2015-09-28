@@ -1,4 +1,4 @@
-var Obj = require('./objects.js').Obj;
+ var Obj = require('./objects.js').Obj;
 var game = require('./game.js');
 
 var powers = {}
@@ -28,25 +28,23 @@ function Power(name, opts){
 
 }
 
-Power.prototype.lose = function(player){
+Power.prototype.lose = function(player, fromIncludes){
 	var sockets = require("./sockets.js").access;
 
-	console.log(player.name + " lost the power:" + this.name);
+	console.log(player.name + " lost the power:" + this.name, fromIncludes);
 
 	if(this.onLose) {
 		this.onLose(player);
 	}
 	if(this.include){
 		this.include.forEach(function(power){
-			console.log("falsing", power);
-			player.powers[power] = false;
+			powers.index[power].lose(player, true);
 		});
 	}
 	if(this.loseable){
-		console.log("falsing", this.name);
 		player.powers[this.name] = false;
 	}
-	if(this.droppable){
+	if(this.droppable && !fromIncludes){
 		console.log(this.name + " was dropped by: " + player.name);
 		var obj = {power: this.name, type: "power", hard: false, removed:false, x: player.x, y: player.y, width: 20, height: 20 };
 		var newObj = new Obj(obj)
@@ -57,19 +55,17 @@ Power.prototype.lose = function(player){
 	
 };
 
-Power.prototype.giveTo = function(player, includes){
+Power.prototype.giveTo = function(player, fromIncludes){
 
-	if(this.exclusive && !includes){
+	if(this.exclusive && !fromIncludes){
 		if(this.group){
-			for(var powerPlayer in player.powers){
-				console.log("loseing", powerPlayer);
-				if(powers.index[powerPlayer].group == this.group) powers.index[powerPlayer].lose(player);	 
+			for(var name in player.powers){
+				if(player.powers[name] && powers.index[name].group == this.group) powers.index[name].lose(player, player.powers[name].included);	 
 			}
 		}else {
 			player.loseAllPowers();
 		}
 	}
-	player.powers[this.name] = true;
 	if(this.include && this.include.length){
 		this.include.forEach(function(power){
 			var morePower = powers.index[power];	
@@ -77,6 +73,7 @@ Power.prototype.giveTo = function(player, includes){
 		});
 	}
 	
+	player.powers[this.name] = {has: true, included: fromIncludes};
 	if(this.onRecieve) this.onRecieve(player);
 	console.log(this.name + " given to Player:" + player.name);
 	

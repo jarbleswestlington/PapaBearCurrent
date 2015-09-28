@@ -13,9 +13,7 @@ module.exports = function(game, io){
 		this.renderteam = args.team;
 		this.name = args.name;
 		this.direction = "D";
-		
 		this.image = args.image || null;
-		
 		this.render = true;
 		this.draw = function(){
 			if(this.dead) renderer.drawImage(game.server.teams[this.team].name + "corpse", this.x- 4, this.y);
@@ -65,31 +63,22 @@ module.exports = function(game, io){
 			//chat drawing
 			if(this.chatting) renderer.playerText(this);
 		}
-	
 		this.attacking = false;
-		
 		this.character = Math.floor((Math.random() * 3) + 1);
-	
 		this.powers = {};
-
 		this.frozen = false;
-	
 		this.dead = false;
-	
 		this.chatting = false;
 		this.chatText =  "";
 		this.illegal = false;
-	
 		this.spear = {
 			width : 30,
 			height : 5,
 			color: "grey"
 		},
-		
 		this.weapon = {
 		   state: "ready"
 		}
-	
 		this.log = {
 			has: false,
 			stolen: false,
@@ -97,6 +86,9 @@ module.exports = function(game, io){
 			wood: 0,
 		}
 
+		this.exports = {
+
+		}
 	};
 
 	Player.prototype.collide = function(agent){
@@ -109,12 +101,12 @@ module.exports = function(game, io){
 			if(this.attacking){
 				if(agent.tag == "papaBear" && !this.powers.powerWeapon) return;
 				if(tools.colCheckRelative({item: this.spearColBoxes[this.direction], influencer: this}, agent)){
-					agent.die();
+					if(agent instanceof Player) agent.die();
 					return;
 				} 
 			}
 			if(this.powers.papaBear && tools.colCheck(agent, this)){
-				agent.die();
+				if(agent instanceof Player) agent.die();
 				return;
 			}	
 		}
@@ -124,13 +116,13 @@ module.exports = function(game, io){
 		if(tools.colCheck(agent, this)){
 			if(this.powers.papaBear){
 				if(agent.tag == "powerWeapon"){
-					this.die();
+					if(this instanceof Player) this.die();
 					return;
 				} 
 				else return false;
 			}
 			if(agent.tag == "sword" || agent.tag == "spear" || agent.tag == "powerWeapon" || agent.tag == "papaBear"){
-				this.die();
+				if(this instanceof Player) this.die();
 				return;
 			}
 			//returns true to prevent movement of the agent
@@ -254,13 +246,15 @@ module.exports = function(game, io){
 	}
 	
 	Player.prototype.loseAllPowers = function(){
-		for(var power in this.power){
-			if(this.powers[power] == true && this.powers[power].includes.length){
-				powers.index[power].lose(this);
+		for(var name in this.powers){
+			if(this.powers[name] && powers.index[name].include && powers.index[name].include.length){
+				powers.index[name].lose(this, false);
 			}
 		}
-		for(var power in this.powers){
-			if(this.powers[power] == true) powers.index[power].lose(this);
+		for(var name in this.powers){
+			if(this.powers[name]) {
+				powers.index[name].lose(this, false);
+			}
 		}
 	}
 	

@@ -110,7 +110,7 @@ Game.prototype.start = function(io){
 
 
 Game.prototype.collide = function(agent){
-	if(agent.x > this.pixels.width || agent.y > this.pixels.height || agent.x < 0 || agent.y < 0) return true;
+	if(agent.x + agent.width > this.pixels.width || agent.y + agent.height > this.pixels.height || agent.x < 0 || agent.y < 0) return true;
 	return false;
 }
 

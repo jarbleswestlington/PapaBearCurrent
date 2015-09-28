@@ -131,7 +131,7 @@ inputManager.processInput = function(){
 	}
 	//equip sword
 	if (75 in inputManager.keys) {				
-		if(inputManager.pressable.k && user.server.powers.spear == true){
+		if(inputManager.pressable.k && user.server.powers.spear){
 			inputManager.pressable.k = false;
 			user.arm();
 		}
@@ -146,7 +146,7 @@ inputManager.processInput = function(){
 	
 	//special ability: change color
 	if (77 in inputManager.keys) { // change color of character
-		if (user.server.powers.disguise == true){// has ability
+		if (user.server.powers.disguise){// has ability
 			//pick team
 			if (66 in inputManager.keys) {
 				socket.emit('change_team', {name: user.server.name, team: "blue"});

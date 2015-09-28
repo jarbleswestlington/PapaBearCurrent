@@ -187,7 +187,7 @@ user.interactWObject = function(){
 				continue;	
 			} 
 			
-			if(this.server.powers.papaBear) this.chopWall(i, .05);
+			if(!!this.server.powers.papaBear) this.chopWall(i, .2);
 			else this.chopWall(i, 1);
 			
 			break;

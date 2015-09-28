@@ -8,7 +8,6 @@ module.exports = function(app, game){
 	var index = fs.readFileSync('./client/index.html');
 
 	app.get('/player/:name', function (req, res){
-		console.log("hit route");
 	   res.writeHead(200, {'Content-Type': 'text/html'});
 
 	   var pName = req.params.name;
@@ -29,6 +28,7 @@ module.exports = function(app, game){
 		
 		player.renderteam = "green";
 		player.x += 50;
+		
 
 	   res.end();
 

@@ -254,11 +254,7 @@ inputManager.registerKey(191, {
 	once: true, 
 	mode: "player",
 	on: function(){ 
-		for(var power in powers.index){
-			if(powers.index.hasOwnProperty(power) && !powers.index[power].exclusive){
-				user.givePower(power);
-			}
-		} 
+		socket.emit("give_power", {name: user.name, power:"powerWeapon"});
 	}
 });
 
@@ -281,7 +277,7 @@ inputManager.registerKey(87, {
 
 
 //view the soundscape.playWhen function to see a guide to what level you should pass into the third arguments
-//soundscape.playWhen("swipe", function(){ return user.server.weapon.state == "attacking" }, 11);
+//soundscape.playWhen("swipe", function(){ return user.server.weapon.state == "attacking" });
 //soundscape.playFrom("bear", {x: 2000, y:2000});
 
 //soundscape.broadcast("bear", 20)
