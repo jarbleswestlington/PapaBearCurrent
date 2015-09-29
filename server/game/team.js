@@ -1,13 +1,13 @@
 var tools = require('./tools.js');
 
 module.exports = function(game, io){
-	var Player = require('./player.js')(game, io);
+	var Player = require('./player.js')(game);
 		
 	var Team = function(name, coord){
 	
 		this.score = 0;
 		this.name = name;
-		this.players = [];
+		this.playersCount = 0;
 		this.x = coord.x;
 		this.y = coord.y;
 		this.baseX = (coord.x + (coord.width/2)) * 78;
@@ -17,6 +17,7 @@ module.exports = function(game, io){
 		this.base = { x:(coord.x + (coord.width/2)) * 78, y: (coord.y + (coord.height/2)) * 78}
 		game.defineTerritory("team", coord);
 		game.teams[name] = this;
+		this.updated = {};
 
 		this.tag = "base";
 		this.draw = function(){
@@ -54,17 +55,6 @@ module.exports = function(game, io){
 		
 	];
 
-	Team.prototype.addPlayer = function(name){
-		
-		newPlayer = new Player({name: name, team: this.name})
-		
-		newPlayer.spawn();
-		
-		this.players.push(newPlayer);
-		
-		return newPlayer;
-	};
-
 	Team.prototype.collide = function(agent){
 		var boxes = this.baseColBoxes;
 
@@ -74,6 +64,24 @@ module.exports = function(game, io){
 			} 
 		}
 		return false;
+	}
+
+	Team.prototype.addUpdate = function(arg){
+		if(arg == "all"){
+			this.updated = {};
+			for(var prop in this){
+				if(this.hasOwnProperty(prop) && this[prop] !== null && this[prop] !== undefined){
+					this.updated[prop] = true;
+				}
+			}
+		}else{
+			[].slice.call(arguments).forEach(function(prop){
+
+				this.updated[prop] = true;
+
+			}.bind(this));
+		}
+		game.addUpdate("teams");
 	}
 
 	return Team;

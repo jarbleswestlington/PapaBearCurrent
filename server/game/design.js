@@ -32,15 +32,18 @@ module.exports = function(game, io){
 		exclusive: true,
 		onRecieve: function(player){
 			player.spear.color = "grey";
+			player.addUpdate("spear");
 		},
 		droppable:true,
 	});
 	new Power("powerWeapon", {
 		onRecieve: function(player){
 			player.spear.color = "yellow";
+			player.addUpdate("spear");
 		},
 		onLose: function(player){
 			player.spear.color = "grey";
+			player.addUpdate("spear");
 		},
 		include: ["spear"],
 		group:"weapon",
@@ -48,7 +51,16 @@ module.exports = function(game, io){
 		droppable:true,
 	});
 	new Power("disguise");
-	new Power("invisibility", {exclusive: true});
+	new Power("invisibility", {exclusive: true,	
+		onRecieve: function(player){
+			player.render = false;
+			player.addUpdate("render");
+		},
+		onLose: function(player){
+			player.render = true;
+			player.addUpdate("render");
+		}
+	});
 	new Power("telescope");
 	new Power("sword", {group: "weapon", droppable: true, exclusive: true});
 	new Power("papaBear", {
@@ -61,11 +73,13 @@ module.exports = function(game, io){
 			player.width = 63;
 			player.height = 63;
 			player.tag = "papaBear";
+			player.addUpdate("x","y","width","height","tag");
 		},
 		onLose: function(player){
 			player.width = 41;
 			player.height = 36;	
 			player.tag = "player";	
+			player.addUpdate("width","height","tag");
 		}
 	});
 

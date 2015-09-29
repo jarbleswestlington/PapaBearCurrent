@@ -1,23 +1,54 @@
 var tools = require('./tools.js');
 var powers = require('./powers.js').powers;
 
-module.exports = function(game, io){
+module.exports = function(game){
 	
 	var Player = function(args){
-		this.tag = "player";
+		this.updated = {};
+
+		this.team = args.team;
+		this.name = args.name;
+
 		this.x = 0;
 		this.y = 0;
 		this.height = 36;
 		this.width = 41;
-		this.team = args.team;
-		this.renderteam = args.team;
-		this.name = args.name;
 		this.direction = "D";
-		this.image = args.image || null;
+
+		this.renderteam = args.team;
+
+		this.log = {
+			has: false,
+			stolen: false,
+			stolenFrom: "",
+			wood: 0,
+		}
+		this.frozen = false;
+		this.dead = false;
+
+		this.chatting = false;
+		this.chatText =  "";
+
 		this.render = true;
+		this.attacking = false;
+		this.powers = {};
+		this.tag = "player";
+
+		this.spear = {
+			width : 30,
+			height : 5,
+			color: "grey"
+		},
+		this.weapon = {
+		   state: "ready"
+		}
+
+		//this.image = args.image || null;
+		this.character = Math.floor((Math.random() * 3) + 1);
 		this.draw = function(){
 			if(this.dead) renderer.drawImage(game.server.teams[this.team].name + "corpse", this.x- 4, this.y);
 			else if(this.powers.papaBear){
+				renderer.drawImage("playershadow", this.x-1 , this.y+ 21);
 				var papaSpriteFinder= {
 					"R":{x:0, y:0, width:63, height:63},
 					"D":{x:0, y:66, width:63, height:63},
@@ -25,7 +56,7 @@ module.exports = function(game, io){
 					"U":{x:66, y:66, width:63, height:63},
 				}
 				renderer.drawSprite("bear", this.x,this.y, papaSpriteFinder[this.direction]);
-			}else if(!this.powers.invisibility){
+			}else if(this.render){
 				renderer.drawImage("playershadow", this.x-1 , this.y+ 21);
 				var playerSpriteFinder = {
 					"L":{x:2 + ((this.character-1) * 43), y:2, width:41, height:36},
@@ -63,32 +94,7 @@ module.exports = function(game, io){
 			//chat drawing
 			if(this.chatting) renderer.playerText(this);
 		}
-		this.attacking = false;
-		this.character = Math.floor((Math.random() * 3) + 1);
-		this.powers = {};
-		this.frozen = false;
-		this.dead = false;
-		this.chatting = false;
-		this.chatText =  "";
-		this.illegal = false;
-		this.spear = {
-			width : 30,
-			height : 5,
-			color: "grey"
-		},
-		this.weapon = {
-		   state: "ready"
-		}
-		this.log = {
-			has: false,
-			stolen: false,
-			stolenFrom: "",
-			wood: 0,
-		}
 
-		this.exports = {
-
-		}
 	};
 
 	Player.prototype.collide = function(agent){
@@ -172,12 +178,31 @@ module.exports = function(game, io){
 
 			this.x = spawnPlayer.x;
 			this.y = spawnPlayer.y;
+			this.addUpdate("x", "y");
 
 		}else{
 
 			func(spawnPlayer);
 		}
 
+	}
+
+	Player.prototype.addUpdate = function(arg){
+		if(arg == "all"){
+			this.updated = {};
+			for(var prop in this){
+				if(this.hasOwnProperty(prop) && this[prop] !== null && this[prop] !== undefined){
+					this.updated[prop] = true;
+				}
+			}
+		}else{
+			[].slice.call(arguments).forEach(function(prop){
+
+				this.updated[prop] = true;
+
+			}.bind(this));
+		}
+		game.addUpdate("players");
 	}
 
 	Player.prototype.legalMove = function(dummy){
@@ -233,13 +258,15 @@ module.exports = function(game, io){
 		
 		this.loseAllPowers();
 
+		this.addUpdate("dead", "attacking", "renderteam", "log");
+
 		this.spawn(function(spawn){
 
 			setTimeout(function() { 
 				this.x = spawn.x;
 				this.y = spawn.y;
 				this.dead = false;
-		
+				this.addUpdate("x", "y", "dead");
 			 }.bind(this), 8000);
 
 		}.bind(this));

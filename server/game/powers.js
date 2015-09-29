@@ -43,13 +43,13 @@ Power.prototype.lose = function(player, fromIncludes){
 	}
 	if(this.loseable){
 		player.powers[this.name] = false;
+		player.addUpdate("powers");
 	}
 	if(this.droppable && !fromIncludes){
 		console.log(this.name + " was dropped by: " + player.name);
 		var obj = {power: this.name, type: "power", hard: false, removed:false, x: player.x, y: player.y, width: 20, height: 20 };
 		var newObj = new Obj(obj)
 		game.objects.push(newObj);
-		
 		sockets.emit("add_object", newObj);
 	}
 	
@@ -74,6 +74,7 @@ Power.prototype.giveTo = function(player, fromIncludes){
 	}
 	
 	player.powers[this.name] = {has: true, included: fromIncludes};
+	player.addUpdate("powers");
 	if(this.onRecieve) this.onRecieve(player);
 	console.log(this.name + " given to Player:" + player.name);
 	

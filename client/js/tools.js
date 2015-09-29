@@ -1,6 +1,25 @@
 var tools = {};
 console.log(tools);
 
+function findInArray(arr, addTo){
+	for(var i = 0; i < arr.length; i++){
+		var current = arr[i];
+		if(current.updated && current.updated.length){
+			addTo[i] = {};
+			findAndAdd(current, addTo);
+		}
+	}
+}
+function findInObject(obj, addTo){
+	for(var prop in obj){
+		var current = obj[prop];
+		if(current.updated && current.updated.length){
+			addTo[prop] = {};
+			findAndAdd(current, addTo[prop]);
+		}
+	}
+}
+
 tools.checkAll = function(agent, obstacles){
 	if(agent.constructor != Array) agent = [agent];
 	if(obstacles.constructor != Array) obstacles = [obstacles];
