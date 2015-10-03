@@ -179,16 +179,14 @@ user.interactWObject = function(){
 			if(!tools.colCheck(this.server, game.client.objects[i], {x: -25, y:-25})) continue;
 		
 			renderer.UI["space bar"].render = true;
-		
 			renderer.UI["space bar"].item = "Chop Wall";
 			
-			if(!this.action){
-				this.action = false;
-				continue;	
+			if(this.action){
+				this.action = false;				
+				if(!!this.server.powers.papaBear) this.chopWall(i, .2);
+				else this.chopWall(i, 1);
 			} 
-			
-			if(this.server.powers.papaBear) this.chopWall(i, .05);
-			else this.chopWall(i, 1);
+	
 			
 			break;
 		
@@ -251,7 +249,7 @@ user.interactWNote = function(){
 		if(!this.action){
 			this.action = false;
 			continue;	
-		} 
+		}
 							
 		var redo = true;
 		
@@ -269,7 +267,7 @@ user.interactWNote = function(){
 			}
 		
 			var notes = noteIndex[probability].filter(function(note){
-				return note.condition();
+				return note.condition() && user.once ? user.notes.indexOf(note.id) == -1 : true;
 			});
 			
 		
@@ -281,7 +279,7 @@ user.interactWNote = function(){
 
 		var note = notes[random];
 
-		this.readNote(note);
+		this.readNote(note.id);
 
 		this.getNote(z, note);
 			
@@ -332,17 +330,19 @@ user.chopTree = function(treeId){
 		
 };
 
-user.readNote = function(note){
+user.readNote = function(id){
+
+	console.log(id);
+	note = noteIndex[id];
 	renderer.UI["game screen"].item = note.lines;
 	renderer.UI["game screen"].render = true;
 };
 
 user.getNote = function(noteId, note){
 	if(note.func) note.func.apply(this, note.args);
-	user.notes.push(note);
+	user.notes.push(note.id);
 	game.client.notes[noteId].removed = true;
-	socket.emit('getNote', {id: noteId});
-		
+	socket.emit('getNote', {id: noteId});	
 };
 
 user.depLog = function(){

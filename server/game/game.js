@@ -1,6 +1,8 @@
 var Tree = require('./objects.js').Tree;
 var Note = require('./objects.js').Note;
 var tools = require('./tools.js');
+var oneGame = new Game(60, 60);
+var Player = require('./player.js')(oneGame);
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -37,6 +39,7 @@ function GridNode(data){
 }
 
 function Game(width, height){
+	this.updated = {};
 	
 	this.size = {width: width, height: width};
 	this.pixels = {width: width * 78, height: height * 78};
@@ -54,6 +57,8 @@ function Game(width, height){
 	this.bearY = 27;	
 
 	this.tag = "game";
+
+	this.players = {};
 
 	this.draw = function(){
 		//tiled background
@@ -98,11 +103,31 @@ Game.prototype.update = function(io) {
 	var now = new Date().getTime() / 1000;
 	this.currentSec = Math.floor(now - this.startsecond);
 
-	io.sockets.emit('update_clients', {game: this, time: this.currentSec});
+
+	var updatedGame = tools.buildUpdated(this);
+	if(Object.keys(updatedGame).length) console.log(updatedGame);
+	io.sockets.emit('update_clients', {time: this.currentSec, update: updatedGame});
 	
 	setTimeout( this.update.bind(this, io) , 50);
 	
 };
+
+Game.prototype.addUpdate = function(arg){
+	if(arg == "all"){
+		this.updated = {};
+		for(var prop in this){
+			if(this.hasOwnProperty(prop) && this[prop] !== null && this[prop] !== undefined){
+				this.updated[prop] = true;
+			}
+		}
+	}else{
+		[].slice.call(arguments).forEach(function(prop){
+
+			this.updated[prop] = true;
+
+		}.bind(this));
+	}
+}
 
 Game.prototype.start = function(io){
 	io.sockets.emit("startgame_client", {game: this, trees:this.trees, notes: this.notes, objects: this.objects});
@@ -110,7 +135,7 @@ Game.prototype.start = function(io){
 
 
 Game.prototype.collide = function(agent){
-	if(agent.x > this.pixels.width || agent.y > this.pixels.height || agent.x < 0 || agent.y < 0) return true;
+	if(agent.x + agent.width > this.pixels.width || agent.y + agent.height > this.pixels.height || agent.x < 0 || agent.y < 0) return true;
 	return false;
 }
 
@@ -146,10 +171,8 @@ Game.prototype.forAllTrees = function(func){
 
 Game.prototype.forAllPlayers = function(func){
 	var result = false;
-	for(var name in this.teams){
-		for(var i = 0; i < this.teams[name].players.length; i++){
-			if(func(this.teams[name].players[i])) result = true;
-		}
+	for(var name in this.players){
+		if(func(this.players[name])) result = true;
 	}
 	return result;
 }
@@ -157,14 +180,11 @@ Game.prototype.forAllPlayers = function(func){
 Game.prototype.forAllAlivePlayers = function(func){
 	var result = false;
 
-	for(var name in this.teams){
-		for(var i = 0; i < this.teams[name].players.length; i++){
-			if(this.teams[name].players[i].dead) return;
-			if(func(this.teams[name].players[i])){
-				result = true;
-			} 
-			
-		}
+	for(var name in this.players){
+		if(this.players[name].dead) return;
+		if(func(this.players[name])){
+			result = true;
+		} 		
 	}
 
 	return result;
@@ -174,13 +194,9 @@ Game.prototype.forAllAlivePlayers = function(func){
 Game.prototype.forAllOtherPlayers = function(player, func){
 	var result = false;
 
-	for(var name in this.teams){
-
-		for(var i = 0; i < this.teams[name].players.length; i++){
-
-			if(player !== this.teams[name].players[i]){
-				if(func(this.teams[name].players[i])) return true;
-			} 
+	for(var name in this.players){
+		if(player !== this.players[name]){
+			if(func(this.players[name])) return true;
 		}
 	}
 
@@ -192,12 +208,9 @@ Game.prototype.forAllOtherPlayers = function(player, func){
 Game.prototype.forAllOtherAlivePlayers = function(player, func){
 	var result = false;
 
-	for(var name in this.teams){
-
-		for(var i = 0; i < this.teams[name].players.length; i++){
-			if(player !== this.teams[name].players[i] && !this.teams[name].players[i].dead){
-				if(func(this.teams[name].players[i])) result = true;
-			}
+	for(var name in this.players){
+		if(player !== this.players[name] && !this.players[name].dead){
+			if(func(this.players[name])) result = true;
 		}
 	}
 	return result;
@@ -266,7 +279,7 @@ Game.prototype.addPlayer = function(name, master){
 	
 	for(var tName in this.teams){
 		
-		var tLength = this.teams[tName].players.length;
+		var tLength = this.teams[tName].playersCount;
 		
 		//check if all teams are at max
 		if(tLength !== this.currentTeamMax) allMax = false;
@@ -274,7 +287,13 @@ Game.prototype.addPlayer = function(name, master){
 		
 		if(tLength < this.currentTeamMax){
 			
-			return this.teams[tName].addPlayer(name);
+			newPlayer = new Player({name: name, team: tName})
+			newPlayer.addUpdate("all");
+			newPlayer.spawn();
+			this.players[name] = newPlayer;
+			this.teams[tName].playersCount++;
+			this.addUpdate("players");
+			return newPlayer;
 			
 			break;
 			
@@ -285,10 +304,15 @@ Game.prototype.addPlayer = function(name, master){
 	if(allMax && aTeam != ""){
 		
 		this.currentTeamMax++;
-		
-		return this.teams[aTeam].addPlayer(name);
-	}
 
+		newPlayer = new Player({name: name, team: aTeam})
+		newPlayer.addUpdate("all");
+		newPlayer.spawn();
+		this.players[name] = newPlayer;
+		this.teams[aTeam].playersCount++;
+		this.addUpdate("players");
+		return newPlayer;
+	}
 }
 
 Game.prototype.findPlayerByName = function(name){
@@ -311,7 +335,5 @@ Game.prototype.hasPlayer = function(name){
 	if(!this.findPlayerByName(name)) return false;
 	else return true;
 }
-
-var oneGame = new Game(60, 60);
 
 module.exports = oneGame;

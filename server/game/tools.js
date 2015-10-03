@@ -1,5 +1,54 @@
 var tools = {};
 
+tools.buildUpdated = function(root){
+	var result = {};
+
+	function findInArray(arr, addTo){
+		var found = false;
+		for(var i = 0; i < arr.length; i++){
+			var current = arr[i];
+			for(var prop in current.updated){
+				addTo[i] = {};
+				found = true;
+				findAndAdd(current, addTo);
+			}
+		}
+		return found;
+	}
+	function findInObject(obj, addTo){
+		var found = false;
+		for(var prop1 in obj){
+			var current = obj[prop1];
+			for(var prop2 in current.updated){
+				found = true;
+				addTo[prop1] = {};
+				findAndAdd(current, addTo[prop1]);
+			}
+		}
+		return found;
+	}
+
+	function findAndAdd(node, addTo){
+		for(var prop in node.updated){
+			delete node.updated[prop];
+			if(node[prop].constructor == Array){
+				addTo[prop] = [];
+				if(findInArray(node[prop], addTo[prop])){
+				}else addTo[prop] = node[prop]; 
+			}else if(node[prop].constructor == Object){
+				addTo[prop] = {};
+				if(findInObject(node[prop], addTo[prop])){
+				}else addTo[prop] = node[prop]; 
+			}else{
+				addTo[prop] = node[prop]; 
+			} 
+		}
+	}
+	findAndAdd(root, result);
+
+	return result;
+}
+
 tools.checkAll = function(agent, obstacles){
 	if(agent.constructor != Array) agent = [agent];
 	if(obstacles.constructor != Array) obstacles = [obstacles];

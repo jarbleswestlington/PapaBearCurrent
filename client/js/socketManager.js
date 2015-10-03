@@ -30,9 +30,13 @@ socket.on('stealTotal', function(data) {
 	
 });
 
-socket.on('update_clients', function(data) {
 
-	game.server = data.game;
+
+socket.on('update_clients', function(data) {
+	if(!user.confirmed) return;
+
+	$.extend(true, game.server, data.update);
+
 	if(user.mode == "player") user.server = game.findUser();
 
 	game.currentSec = data.time;
@@ -57,7 +61,10 @@ socket.on('remove_object', function(data) {
 
 socket.on("death", function(data){
 	
-	user.notes = [];
+
+	user.notes.filter(function(note){
+		return !note.resetOnDeath;
+	});
 	
 	user.log.has = false;
 

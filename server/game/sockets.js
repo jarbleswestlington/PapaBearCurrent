@@ -27,6 +27,7 @@ function setUp(game, server){
 			var player = game.findPlayerByName(data.name)
 			player.log.has = false;
 			player.log.stolen = false;
+			player.addUpdate("log");
 		
 		});
 
@@ -79,7 +80,9 @@ function setUp(game, server){
 			var player = game.findPlayerByName(data.name);
 
 			player.log.has = true;
-	 		 
+			player.addUpdate("log");
+			team.addUpdate("score");
+
 			socket.emit('stealTotal', {total: woodTotal})
 
 		});
@@ -90,21 +93,21 @@ function setUp(game, server){
 
 			player.chatText = data.message;
 			player.chatting = true;
-		
+			player.addUpdate("chatting", "chatText");
+
 			if(!data.time) data.time = 5000;
 
 			setTimeout(function() { 
+				player.addUpdate("chatting");
 			 	player.chatting = false;	
 			 }, data.time);
 
 		});
 
 		socket.on('arm', function(data){
-
 			var player = game.findPlayerByName(data.name);
-
 			player.attacking = data.armed;
-
+			player.addUpdate("attacking");
 		});
 		
 		socket.on('change_team', function(data){
@@ -113,6 +116,7 @@ function setUp(game, server){
 			
 			if(player.renderteam != data.team){ 
 				player.renderteam = data.team;
+				player.addUpdate("renderteam");
 				console.log(player.name + " disguised themself as the " + data.team + " team");
 			}
 			
@@ -123,10 +127,12 @@ function setUp(game, server){
 			var player = game.findPlayerByName(data.name);
 
 			player.weapon.state = "winding up";
+			player.addUpdate("weapon");
 
 			setTimeout(function() { 
 				player.weapon.state = "attacking";
 				player.frozen = true;
+				player.addUpdate("weapon", "frozen");
 				player.swipe();
 			}, 250);
 
@@ -136,16 +142,9 @@ function setUp(game, server){
 			setTimeout(function() { 
 				player.weapon.state = "ready";
 				player.frozen = false;
+				player.addUpdate("weapon", "frozen");
 			}, 1800);
  
-		});
-
-		socket.on('slash', function(data){
-
-			var player = game.findPlayerByName(data.player.name);
-
-			player.slashing = data.slashed;
-
 		});
 
 		socket.on('getNote', function(data){
@@ -160,8 +159,11 @@ function setUp(game, server){
 			var player = game.findPlayerByName(data.name);
 
 			player.log.has = false;
+			player.addUpdate("log");
 
 			game.teams[data.team].score += data.amount;
+			game.addUpdate("teams");
+
 
 		});
 
@@ -170,6 +172,8 @@ function setUp(game, server){
 			var player = game.findPlayerByName(data.name);
 
 			player.log.has = true;
+			player.addUpdate("log");
+
 
 			game.trees[data.id].removed = true;
 
@@ -229,11 +233,13 @@ function setUp(game, server){
 			   player.direction = "R";
 
 			}
+			player.addUpdate("direction");
 			
 			if(player.legalMove(dummy)){
 				
 				player.x = dummy.x;
 				player.y = dummy.y;
+				player.addUpdate("x", "y");
 			}
 
 			player.defense();
@@ -263,9 +269,17 @@ function setUp(game, server){
 		socket.on("give_power", function(data){
 
 			var player = game.findPlayerByName(data.name);
-			
-			var powerGive = powers.index[data.power];
-			if(powerGive) powerGive.giveTo(player);
+
+			if(data.power == "all"){
+				for(var power in powers.index){
+					if(!powers.index[power].exclusive) powers.index[power].giveTo(player);
+				}
+			}else{
+				var powerGive = powers.index[data.power];
+				if(powerGive) powerGive.giveTo(player);
+			}
+
+
 
 		});
 

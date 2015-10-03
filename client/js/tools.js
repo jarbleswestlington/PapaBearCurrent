@@ -1,5 +1,4 @@
 var tools = {};
-console.log(tools);
 
 tools.checkAll = function(agent, obstacles){
 	if(agent.constructor != Array) agent = [agent];
@@ -74,11 +73,11 @@ tools.getRandomArbitrary = function( numone,  numtwo) {
 	return Math.floor(Math.random() * (numtwo - numone) + 1);
 }
 
-tools.makeId = function(){
+tools.makeId = function(num){
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    for( var i=0; i < 5; i++ )
+    for( var i=0; i < num; i++ )
         text += possible.charAt(Math.floor(Math.random() * possible.length));
 
     return text;

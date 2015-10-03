@@ -18,7 +18,7 @@ chatController.show = function(){
 }
 
 chatController.submit = function(text, time){
-	
+	console.log("submitted");
 	this.started = false;
 
 	$('#chatView').hide();
