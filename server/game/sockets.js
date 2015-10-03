@@ -162,6 +162,8 @@ function setUp(game, server){
 			player.addUpdate("log");
 
 			game.teams[data.team].score += data.amount;
+			game.addUpdate("teams");
+
 
 		});
 

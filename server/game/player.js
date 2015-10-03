@@ -46,7 +46,7 @@ module.exports = function(game){
 		//this.image = args.image || null;
 		this.character = Math.floor((Math.random() * 3) + 1);
 		this.draw = function(){
-			if(this.dead) renderer.drawImage(game.server.teams[this.team].name + "corpse", this.x- 4, this.y);
+			if(this.dead) renderer.drawImage(this.team + "corpse", this.x- 4, this.y);
 			else if(this.powers.papaBear){
 				renderer.drawImage("playershadow", this.x-1 , this.y+ 21);
 				var papaSpriteFinder= {
@@ -64,7 +64,7 @@ module.exports = function(game){
 					"D":{x:2 + ((this.character-1) * 43), y:75, width:41, height:35},
 					"U":{x:2 + ((this.character-1) * 43), y:113, width:41, height:36},
 				}
-				renderer.drawSprite(game.server.teams[this.renderteam].name + "team", this.x,this.y, playerSpriteFinder[this.direction]);
+				renderer.drawSprite(this.renderteam + "team", this.x,this.y, playerSpriteFinder[this.direction]);
 			}
 			if(!this.dead && !this.powers.papaBear){
 				if(this.log.has){

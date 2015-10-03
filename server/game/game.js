@@ -106,7 +106,7 @@ Game.prototype.update = function(io) {
 
 	var updatedGame = tools.buildUpdated(this);
 	if(Object.keys(updatedGame).length) console.log(updatedGame);
-	io.sockets.emit('update_clients', {game: this, time: this.currentSec, update: updatedGame});
+	io.sockets.emit('update_clients', {time: this.currentSec, update: updatedGame});
 	
 	setTimeout( this.update.bind(this, io) , 50);
 	

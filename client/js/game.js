@@ -27,13 +27,8 @@ game.forAllTrees = function(func){
 
 game.forAllPlayers = function(func){
 	
-	for(var name in game.server.teams){
-
-		for(var i = 0; i < game.server.teams[name].players.length; i++){
-			
-			func(game.server.teams[name].players[i]);
-		}
-
+	for(var name in game.server.players){	
+		func(game.server.players[name]);
 	}
 	
 }

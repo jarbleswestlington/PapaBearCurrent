@@ -30,15 +30,12 @@ socket.on('stealTotal', function(data) {
 	
 });
 
-function parseUpdate(root, update){
-	for(var prop in update){
-		root[prop] = update[prop];
-	}
-}
+
 
 socket.on('update_clients', function(data) {
+	if(!user.confirmed) return;
 
-	parseUpdate(game.server, data.update);
+	$.extend(true, game.server, data.update);
 
 	if(user.mode == "player") user.server = game.findUser();
 
@@ -64,7 +61,10 @@ socket.on('remove_object', function(data) {
 
 socket.on("death", function(data){
 	
-	user.notes = [];
+
+	user.notes.filter(function(note){
+		return !note.resetOnDeath;
+	});
 	
 	user.log.has = false;
 
