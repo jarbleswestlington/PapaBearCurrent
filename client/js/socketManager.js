@@ -62,8 +62,8 @@ socket.on('remove_object', function(data) {
 socket.on("death", function(data){
 	
 
-	user.notes.filter(function(note){
-		return !note.resetOnDeath;
+	user.notes.filter(function(id){
+		return !notesIndex[id].resetOnDeath;
 	});
 	
 	user.log.has = false;
