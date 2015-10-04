@@ -21,7 +21,9 @@
 new Note("steal1",
  ["If you manage to steal your opponent's wood, there is a considerable payoff."], {
 	 prob: 1,
-	 condition: 0
+	 condition: 0,
+	 once:false,
+	 resetOnDeath:true
  }
 );
 
@@ -133,7 +135,7 @@ new Note("papaBear1",
  ["You are now Papa Bear"], {
 	 prob: 2,
 	 condition: function(){
-		  return !game.getPowerStats("papaBear").has
+		  return !game.getPowerStats("papaBear").has;
 	 }, 
 	 action:{
 		 func: user.givePower,
