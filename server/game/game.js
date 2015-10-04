@@ -1,7 +1,7 @@
+var oneGame = new Game(60, 60);
 var Tree = require('./objects.js').Tree;
 var Note = require('./objects.js').Note;
 var tools = require('./tools.js');
-var oneGame = new Game(60, 60);
 var Player = require('./player.js')(oneGame);
 
 function getRandomInt(min, max) {
@@ -105,7 +105,7 @@ Game.prototype.update = function(io) {
 
 
 	var updatedGame = tools.buildUpdated(this);
-	if(Object.keys(updatedGame).length) console.log(updatedGame);
+	//if(Object.keys(updatedGame).length) console.log(updatedGame);
 	io.sockets.emit('update_clients', {time: this.currentSec, update: updatedGame});
 	
 	setTimeout( this.update.bind(this, io) , 50);

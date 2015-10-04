@@ -9,7 +9,7 @@
 //change key direction from UPLEFTDOWNRIGHT to ULDR for consistency
 
 //connect to sockets on server
-var socket = io.connect(window.location.hostname);
+var socket = io.connect(window.location.hostname, {reconnection: false});
 socket.on('connect', function(data) {
 	
 	if(!user.master) socket.emit("confirm_name", {name: user.name});

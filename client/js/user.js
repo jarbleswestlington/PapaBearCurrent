@@ -223,7 +223,7 @@ user.pickUp = function(item, index){
 		
 	if(noteIndex[item.power]) {
 		user.notes.push(noteIndex[item.power]);
-		user.readNote(noteIndex[item.power]);
+		user.readNote(noteIndex[item.power].id);
 	}
 	
 	user.givePower(item.power);
@@ -267,7 +267,12 @@ user.interactWNote = function(){
 			}
 		
 			var notes = noteIndex[probability].filter(function(note){
-				return note.condition() && user.once ? user.notes.indexOf(note.id) == -1 : true;
+				if(note.condition()){
+					if(note.once ? user.notes.indexOf(note.id) == -1 : true){
+						return true;
+					}
+				}
+
 			});
 			
 		
@@ -331,8 +336,6 @@ user.chopTree = function(treeId){
 };
 
 user.readNote = function(id){
-
-	console.log(id);
 	note = noteIndex[id];
 	renderer.UI["game screen"].item = note.lines;
 	renderer.UI["game screen"].render = true;

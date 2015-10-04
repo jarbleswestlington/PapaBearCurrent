@@ -1,5 +1,4 @@
- var Obj = require('./objects.js').Obj;
-var game = require('./game.js');
+var Obj = require('./objects.js').Obj;
 
 var powers = {}
 powers.index = {};
@@ -30,6 +29,7 @@ function Power(name, opts){
 
 Power.prototype.lose = function(player, fromIncludes){
 	var sockets = require("./sockets.js").access;
+	var game = require('./game.js');
 
 	console.log(player.name + " lost the power:" + this.name, fromIncludes);
 
