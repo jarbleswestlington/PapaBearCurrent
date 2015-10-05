@@ -274,8 +274,6 @@ user.interactWNote = function(){
 
 			notes = notes.filter(function(note){
 				if(note.condition() == true){
-					console.log(note.once);
-					console.log(user.notes.indexOf(note.id));
 					if(note.once){
 						if(user.notes.indexOf(note.id) == -1) return true;
 					}else return true;
@@ -283,7 +281,6 @@ user.interactWNote = function(){
 				return false;
 			});	
 		
-			console.log(notes);
 			if(notes.length > 0) redo = false;
 			
 		}while(redo);
