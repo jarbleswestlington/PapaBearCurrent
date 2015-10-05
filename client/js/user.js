@@ -265,16 +265,21 @@ user.interactWNote = function(){
 			}else{
 				probability = 2;
 			}
-		
-			var notes = noteIndex[probability].filter(function(note){
-				if(note.condition()){
-					if(note.once ? user.notes.indexOf(note.id) == -1 : true){
-						return true;
-					}
-				}
 
-			});
-			
+		
+			var notes = noteIndex[probability];
+
+			//prevent it from getting a probability index with nothing in it
+			if(!notes) continue;
+
+			notes = notes.filter(function(note){
+				if(note.condition() == true){
+					if(note.once){
+						if(user.notes.indexOf(note.id) == -1) return true;
+					}else return true;
+				}
+				return false;
+			});	
 		
 			if(notes.length > 0) redo = false;
 			
@@ -287,6 +292,8 @@ user.interactWNote = function(){
 		this.readNote(note.id);
 
 		this.getNote(z, note);
+
+		console.log(user.notes);
 			
 		break;				
 
