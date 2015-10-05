@@ -19,8 +19,12 @@ var Note = function(name, lines, options){
 	
 	this.lines = lines;
 
-	this.once = options.once || true;
-	this.resetOnDeath = options.resetOnDeath || false;
+	if(options.once) this.once = true;
+	else if(options.once == false) this.once = false;
+	else this.once = true;
+
+	if(options.resetOnDeath) this.resetOnDeath = true;
+	else this.resetOnDeath = false;
 	this.probability = options.prob;
 	
 	if(options.action){
