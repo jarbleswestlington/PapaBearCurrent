@@ -76,15 +76,19 @@ game.findUser = function(name){
 
 game.update = function (modifier) {
 	
+	if(builder.on) user.action = false;
+
 	user.move(modifier);
 	user.interactWBase();
 	user.interactWTree();
 	user.interactWNote();
 	user.interactWObject();
-	
+
+	if(user.do.constructor == Function) user.do();
+	else if(user.do.constructor == Array) user.do.forEach(function(action){ action() });	
+	user.do = function(){};
+
 	renderer.updateCamera();
-	
-	
 };
 
 game.stateManager = function () {

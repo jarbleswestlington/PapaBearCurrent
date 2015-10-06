@@ -14,7 +14,7 @@ var user = {
 	frozen:false,
 	inPlace:false,
 	confirmed: false,
-	
+	do: function(){},
 	mPlayers : [],
 	
 	notes:[],
@@ -125,7 +125,6 @@ user.interactWBase = function(){
 						renderer.UI["space bar"].item = "Steal Wood";
 										
 						if(this.action){
-							this.action = false;							
 							this.stealWood(team.name);
 						}
 
@@ -155,9 +154,7 @@ user.interactWTree = function(){
 					renderer.UI["space bar"].item = "Chop Tree";
 							
 					if(this.action){
-						this.action = false;
-						this.chopTree(i);
-			
+						this.do = this.chopTree.bind(this, i);			
 					}	
 				
 				}
@@ -182,9 +179,8 @@ user.interactWObject = function(){
 			renderer.UI["space bar"].item = "Chop Wall";
 			
 			if(this.action){
-				this.action = false;				
-				if(!!this.server.powers.papaBear) this.chopWall(i, .2);
-				else this.chopWall(i, 1);
+				if(!!this.server.powers.papaBear) this.do = this.chopWall.bind(this, i, .2);
+				else this.do = this.chopWall.bind(this, i, 1);
 			} 
 	
 			
@@ -199,11 +195,9 @@ user.interactWObject = function(){
 			renderer.UI["space bar"].render = true;
 			renderer.UI["space bar"].item = "Pick Up";
 			
-			if(!this.action){
-				this.action = false;
-				continue;	
-			} 			
-			user.pickUp(game.client.objects[i], i);
+			if(this.action){
+				this.do = user.pickUp.bind(user, game.client.objects[i], i);
+			}
 			
 			break;
 			
@@ -246,10 +240,7 @@ user.interactWNote = function(){
 		renderer.UI["space bar"].render = true;
 		renderer.UI["space bar"].item = "Pick Up";
 
-		if(!this.action){
-			this.action = false;
-			continue;	
-		}
+		if(!this.action) continue;
 							
 		var redo = true;
 		
@@ -289,12 +280,8 @@ user.interactWNote = function(){
 
 		var note = notes[random];
 
-		this.readNote(note.id);
-
-		this.getNote(z, note);
-
-		console.log(user.notes);
-			
+		this.do = [user.readNote.bind(user, note.id), user.getNote.bind(user, z, note)];
+					
 		break;				
 
 	}

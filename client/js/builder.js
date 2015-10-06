@@ -10,8 +10,7 @@ builder.refs = {}
 
 builder.refs["wall"] = {width: 35, height: 35};
 
-builder.start = function(type){
-		
+builder.start = function(type){	
 	this.item = type;
 	this.on = true;
 	user.inPlace = true;
@@ -20,12 +19,10 @@ builder.start = function(type){
 };
 
 builder.scrap = function(){
-		
 	this.item = null;
 	this.on = false;
 	user.inPlace = false;
 	this.rejected = false;
-	
 };
 
 builder.request = function(){

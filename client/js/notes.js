@@ -25,6 +25,7 @@ var Note = function(name, lines, options){
 
 	if(options.resetOnDeath) this.resetOnDeath = true;
 	else this.resetOnDeath = false;
+	
 	this.probability = options.prob;
 	
 	if(options.action){
