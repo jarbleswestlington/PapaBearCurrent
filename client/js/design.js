@@ -1,3 +1,5 @@
+//allow various render contexts
+//change key direction from UPLEFTDOWNRIGHT to ULDR for consistency
 //make weapon.js, put spear and sword in there
 //prevent duplicate notes
 //allow various texts to appear for each note
