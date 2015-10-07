@@ -250,13 +250,16 @@ user.interactWNote = function(){
 		
 			var probability = 1;
 		
-			//customize this
-			if(chance < 10){
+			if(chance < 15){
 				probability = 1;	
-			}else{
-				probability = 2;
 			}
-
+			else if(chance < 45){
+				probability = 2;
+			}else if(chance < 50){
+				probability = 10;
+			}else{
+				probability = 3;
+			}
 		
 			var notes = noteIndex[probability];
 
