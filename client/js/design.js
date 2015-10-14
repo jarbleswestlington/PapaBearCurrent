@@ -62,9 +62,8 @@ new Note("sword1",
  ["You have picked up a sword.",
  " Press 'shift' to swing it."], {
 	 prob: 3,
-	 condition: 0
-	 //action:{ func: user.givePower, args: ["sword"]
-		 //also should not have sword,
+	 condition: 0,
+	 action:{ func: user.givePower, args: ["sword"]},
  }
 );
 
@@ -88,7 +87,7 @@ new Note("text1",["Appearances can be deceiving...stay alert."], {
 
 new Note("disguise",
  ["You have picked up a disguise.", 
-  "press r,g or b to impersonate another team."], {
+  "press m and then r,g or b to impersonate another team."], {
 	  prob: 1,
 	  condition:function(){ return game.getCurrentSec() >= 180},
 	  action:{

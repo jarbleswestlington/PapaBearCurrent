@@ -64,7 +64,7 @@ inputManager.processInput = function(){
 	
 	if (16 in inputManager.keys) { // Player pressed shift
 		
-		if(inputManager.pressable.shift && user.server.weapon.state == "ready"){
+		if(inputManager.pressable.shift && user.server.weapon.state == "ready" && user.server.powers.sword){
 						
 			inputManager.pressable.shift = false;
 			user.swipe();

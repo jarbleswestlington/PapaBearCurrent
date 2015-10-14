@@ -252,8 +252,7 @@ user.interactWNote = function(){
 		
 			if(chance < 15){
 				probability = 1;	
-			}
-			else if(chance < 45){
+			}else if(chance < 45){
 				probability = 2;
 			}else if(chance < 50){
 				probability = 10;
