@@ -14,11 +14,12 @@ socket.on('name_confirmed', function(data) {
 socket.on('startgame_client', function(data) {
 
 	game.server = data.game;
-	game.client.trees = data.trees;
-	game.client.notes = data.notes;
-	game.client.objects = data.objects;
+	game.saved.grid = data.grid;
+	game.saved.objects = data.objects;
 	
 	game.started = true;
+
+
 
 	console.log("game started by server");
 	
@@ -40,6 +41,8 @@ socket.on('update_clients', function(data) {
 	if(user.mode == "player") user.server = game.findUser();
 
 	game.currentSec = data.time;
+
+	game.stateManager();
 		
 });
 
@@ -50,12 +53,12 @@ socket.on('play_sound', function(data) {
 });
 
 socket.on('add_object', function(data) {
-	game.client.objects.push(data)
+	game.saved.objects.push(data)
 });
 
 socket.on('remove_object', function(data) {
 
-	game.client.objects[data.index].removed = true;
+	game.saved.objects[data.index].removed = true;
 	
 });
 
@@ -82,13 +85,13 @@ socket.on("death", function(data){
 
 socket.on('treeChopped', function(data) {
 		
-	game.client.trees[data.number].removed = true;
+	game.saved.grid[data.gridCoord.x][data.gridCoord.y].removed = true;
 
 });
 
 socket.on('noteGot', function(data) {
 
-	game.client.notes[data.number].removed = true;
+	game.saved.grid[data.gridCoord.x][data.gridCoord.y].removed = true;
 		
 });
 

@@ -29,7 +29,7 @@ module.exports = function(game, io){
 	game.defineTerritory("forest", {x: 0, y: 0, height: game.size.height, width: 5});
 	game.defineTerritory("forest", {x: 0, y: 0, height: 5, width: game.size.width});
 	
-	game.spawnNotesAndTrees();
+	game.generate();
 
 	new Power("spear", {
 		group: "weapon",

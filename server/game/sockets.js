@@ -18,7 +18,6 @@ function setUp(game, server){
 		console.log("connection has opened");
 
 		if(game.state == "started"){
-
 			console.log("started game on " + socket.id)
 			game.start(io);
 		}
@@ -149,8 +148,8 @@ function setUp(game, server){
 
 		socket.on('getNote', function(data){
 
-			game.notes[data.id].removed = true;
-			io.sockets.emit('noteGot', {number: data.id});
+			game.grid[data.gridCoords.x][data.gridCoords.y].contains.removed = true;
+			io.sockets.emit('noteGot', {gridCoords: data.gridCoords});
 
 		});
 
@@ -174,10 +173,8 @@ function setUp(game, server){
 			player.log.has = true;
 			player.addUpdate("log");
 
-
-			game.trees[data.id].removed = true;
-
-			io.sockets.emit('treeChopped', {number: data.id});
+			game.grid[data.gridCoords.x][data.gridCoords.y].contains.removed = true;
+			io.sockets.emit('treeChopped', {gridCoords: data.gridCoords});
 
 		});
 		

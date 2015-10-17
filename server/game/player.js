@@ -210,8 +210,8 @@ module.exports = function(game){
 		dummy.tag = this.tag;
 		var playerCollisions = [
 			game,
+			game.forAllHardGridObjects.bind(game),
 			game.forAllTeams.bind(game),
-			game.trees,
 			game.objects,
 			game.forAllOtherAlivePlayers.bind(game, this)
 		];

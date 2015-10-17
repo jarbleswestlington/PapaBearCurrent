@@ -268,7 +268,7 @@ inputManager.registerKey(87, {
 });
 
 
-//view the soundscape.playWhen function to see a guide to what level you should pass into the third arguments
+//view the soundscape.playFrom function to see a guide to what level you should pass into the third arguments
 //soundscape.playWhen("swipe", function(){ return user.server.weapon.state == "attacking" });
 //soundscape.playFrom("bear", {x: 2000, y:2000});
 
@@ -285,9 +285,7 @@ renderer['game'] = function(){
 	renderer.drawAll([
 		game.server,
 	 	game.forAllTeams,
-	 	game.client.trees,
-	 	game.client.notes,
-	 	game.client.objects,
+	 	game.saved.objects,
 	 	game.forAllPlayers,
 		renderer.UI["timer"],
 		renderer.UI["notes"],
@@ -297,7 +295,7 @@ renderer['game'] = function(){
 		builder
 	]);
 	//to edit whats happening
-	//find the draw funtions either on the server instance or the client instance of these objects
+	//find the draw funtions either on the server instance or the saved instance of these objects
 };
 
 //or you can explicitly state what to draw (good for small little screens)

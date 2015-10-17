@@ -14,8 +14,16 @@ function buildGrid(width, height){
 	
 	for(var x = 0; x < width; x++){
 		grid.push([]);
-		for(var y = 0; y < width; y++){
+		for(var y = 0; y < height; y++){
 			grid[x].push(new GridNode({x: x, y:y}));
+		}
+	}
+
+	grid.forEach = function(func){
+		for(var x = 0; x < grid.length; x++){
+			for(var y = 0; y < grid[x].length; y++){
+				func(grid[x][y]);
+			}
 		}
 	}
 	
@@ -59,23 +67,25 @@ function Game(width, height){
 	this.tag = "game";
 
 	this.players = {};
+	
+	Object.defineProperty(this, 'grid', {value: buildGrid(width, height), enumerable: false});
+	Object.defineProperty(this, 'elephant', {value: {}, enumerable: false});
+	Object.defineProperty(this, 'objects', {value: [], enumerable: false});
 
 	this.draw = function(){
 		//tiled background
 		for(var x = 0; x < ((this.size.width/12.1)); x++){
-		
 			for(var y = 0; y < ((this.size.height/10.34)); y++){
 				renderer.drawImage("background", x * 944, y * 807);
+			}
+		}
 
+		for(var x = 0; x < game.saved.grid.length; x++){
+			for(var y = 0; y < game.saved.grid[x].length; y++){
+				if(game.saved.grid[x][y].contains) game.saved.grid[x][y].contains.draw();
 			}
 		}
 	}
-		
-	Object.defineProperty(this, 'grid', {value: buildGrid(width, height), enumerable: false});
-	Object.defineProperty(this, 'elephant', {value: {}, enumerable: false});
-	Object.defineProperty(this, 'trees', {value: [], enumerable: false});
-	Object.defineProperty(this, 'notes', {value: [], enumerable: false});
-	Object.defineProperty(this, 'objects', {value: [], enumerable: false});
 	
 };
 
@@ -130,7 +140,7 @@ Game.prototype.addUpdate = function(arg){
 }
 
 Game.prototype.start = function(io){
-	io.sockets.emit("startgame_client", {game: this, trees:this.trees, notes: this.notes, objects: this.objects});
+	io.sockets.emit("startgame_client", {game: this, grid: this.grid, objects: this.objects});
 };
 
 
@@ -142,12 +152,42 @@ Game.prototype.collide = function(agent){
 Game.prototype.collideCheck = function(dummy){
 	return !tools.checkAll(dummy, [
 		this,
+		this.forAllHardGridObjects.bind(this),
 		this.forAllTeams.bind(this),
 		this.forAllAlivePlayers.bind(this),
-		this.trees,
 		this.objects,
 	]);
 }
+
+Game.prototype.forAllGridNodes = function(func){
+	var result = false;
+
+	for(var x = 0; x < this.grid.length; x++){
+		for(var y = 0; y < this.grid[x].length; y++){
+			if(func(this.grid[x][y])) result = true;
+		}
+	}
+
+	return result;
+};
+
+Game.prototype.forAllHardGridObjects = function(func){
+	var result = false;
+
+	for(var x = 0; x < this.grid.length; x++){
+		for(var y = 0; y < this.grid[x].length; y++){
+			node = this.grid[x][y];
+			if(node.contains && node.contains.hard){
+
+				if(func(node.contains)) result = true;
+
+
+			}
+		}
+	}
+
+	return result;
+};
 
 Game.prototype.forAllTeams = function(func){
 	var result = false;
@@ -232,7 +272,7 @@ Game.prototype.defineTerritory = function(type, coords){
 	}
 }
 
-Game.prototype.spawnNotesAndTrees = function(){
+Game.prototype.generate = function(){
 	
 	for(var x = 0; x < this.size.width; x++){
 		
@@ -245,10 +285,10 @@ Game.prototype.spawnNotesAndTrees = function(){
 				var chance = Math.random() * 100;
 
 				if(chance <= 89){
-					this.trees.push(new Tree (x, y));
+					this.grid[x][y].contains = new Tree (x, y);
 				}
 				if(chance > 89 && chance <= 93){
-					this.notes.push(new Note (x, y));
+					this.grid[x][y].contains = new Note (x, y);
 				}
 				
 			}else{
@@ -256,10 +296,10 @@ Game.prototype.spawnNotesAndTrees = function(){
 				var chance = Math.random() * 100;
 
 				if(chance <= 40){
-					this.trees.push(new Tree (x, y));
+					this.grid[x][y].contains = new Tree (x, y);
 				}
 				if(chance > 89 && chance <= 91){
-					this.notes.push(new Note (x, y));
+					this.grid[x][y].contains = new Note (x, y);
 				}
 				
 				

@@ -6,7 +6,7 @@ var game = {
 	timeLimit:720,
 	currentSec:0,
 	server:null,
-	client:{
+	saved:{
 		trees:[],
 		notes:[]
 	},
@@ -20,8 +20,8 @@ game.getCurrentSec = function(){
 
 game.forAllTrees = function(func){
 
-	for(var i = 0; game.client.trees.length; i++){
-		func(game.client.trees[i].length);
+	for(var i = 0; game.saved.trees.length; i++){
+		func(game.saved.trees[i].length);
 	}
 }
 
@@ -80,8 +80,7 @@ game.update = function (modifier) {
 
 	user.move(modifier);
 	user.interactWBase();
-	user.interactWTree();
-	user.interactWNote();
+	user.interfaceGrid();
 	user.interactWObject();
 
 	if(user.do.constructor == Function) user.do();
@@ -156,6 +155,6 @@ game.stateManager = function () {
 	
 	this.then = now;
 	
-	animate(game.stateManager);
+	if(game.state !== "game") animate(game.stateManager);
 	     
 };

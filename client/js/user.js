@@ -140,71 +140,91 @@ user.interactWBase = function(){
 
 }	
 
-user.interactWTree = function(){
-		
-	if(!this.server.powers.papaBear){
-	
-		for(var i = 0; i < game.client.trees.length; i++){
-			
-			if(game.client.trees[i].removed == false && !this.server.dead){
-			
-				if(tools.checkCollision(this.server, game.client.trees[i], 41, 36, 78, 78, -25, -25)){
-			
-					renderer.UI["space bar"].render = true;
-					renderer.UI["space bar"].item = "Chop Tree";
-							
-					if(this.action){
-						this.do = this.chopTree.bind(this, i);			
-					}	
-				
-				}
+user.interfaceTree = function(tree){
 
-			}
+	if(this.server.dead || this.server.powers.papaBear) return;
+
+	if(!tools.checkCollision(this.server, tree, 41, 36, 78, 78, -25, -25)) return;
 			
-		}
-	}
+	renderer.UI["space bar"].render = true;
+	renderer.UI["space bar"].item = "Chop Tree";
+			
+	if(this.action){
+		this.do = this.chopTree.bind(this, tree, {x: tree.gridX, y: tree.gridY});			
+	}		
+
+}
+
+user.interfaceWall = function(wall, index){
+
+	if(!tools.colCheck(this.server, wall, {x: -25, y:-25})) return;
+
+	renderer.UI["space bar"].render = true;
+	renderer.UI["space bar"].item = "Chop Wall";
+	
+	if(this.action){
+		if(!!this.server.powers.papaBear) this.do = this.chopWall.bind(this, index, .2);
+		else this.do = this.chopWall.bind(this, index, 1);
+	} 
+
 }
 
 user.interactWObject = function(){
 			
-	for(var i = 0; i < game.client.objects.length; i++){	
+	for(var i = 0; i < game.saved.objects.length; i++){	
+
+		var object = game.saved.objects[i];
 						
-		if(game.client.objects[i].removed || this.server.dead) continue;	
+		if(object.removed || this.server.dead) continue;	
 		
-		if(game.client.objects[i].type == "wall"){
-					
-			if(!tools.colCheck(this.server, game.client.objects[i], {x: -25, y:-25})) continue;
-		
-			renderer.UI["space bar"].render = true;
-			renderer.UI["space bar"].item = "Chop Wall";
-			
-			if(this.action){
-				if(!!this.server.powers.papaBear) this.do = this.chopWall.bind(this, i, .2);
-				else this.do = this.chopWall.bind(this, i, 1);
-			} 
-	
-			
-			break;
-		
-		}else if(game.client.objects[i].type == "power"){
-			
-			if(this.server.powers.invisiblity || this.server.powers.papaBear) continue;
-			
-			if(!tools.colCheck(game.client.objects[i], this.server)) continue;
-			
-			renderer.UI["space bar"].render = true;
-			renderer.UI["space bar"].item = "Pick Up";
-			
-			if(this.action){
-				this.do = user.pickUp.bind(user, game.client.objects[i], i);
-			}
-			
-			break;
-			
-		}
+		if(object.type == "wall") user.interfaceWall(object, i)
+		else if(object.type == "drop") user.interfaceDrop(object, i);
 				
 	}
 	
+}
+
+
+user.interfaceDrop = function(drop, index){
+
+	if(this.server.powers.invisiblity || this.server.powers.papaBear) return;
+	
+	if( !tools.colCheck(drop, this.server) ) return;
+	
+	renderer.UI["space bar"].render = true;
+	renderer.UI["space bar"].item = "Pick Up";
+	
+	if(this.action){
+		this.do = user.pickUp.bind(user, drop, index);
+	}
+}
+user.interfaceGrid = function(){
+
+	for(var x = 0; x < game.saved.grid.length; x++){
+		for(var y = 0; y < game.saved.grid[x].length; y++){
+
+			var item = game.saved.grid[x][y].contains;
+			if(!item || item.removed) continue;		
+
+			if(item.tag == "note") user.interfaceNote(item);
+			if(item.tag == "tree") user.interfaceTree(item);
+
+		}
+	}
+}
+
+user.interfaceNote = function(note){
+	//after type
+	if(this.server.powers.papaBear || this.server.powers.invisibility) return;
+										
+	if (!tools.checkCollision({x: note.x + 29, y: note.y + 29}, this.server, 20, 20, 41, 36, 0, 0)) return;		
+	
+	renderer.UI["space bar"].render = true;
+	renderer.UI["space bar"].item = "Pick Up";
+
+	if(!this.action) return;
+	else Note.respond(note);	
+
 }
 
 user.pickUp = function(item, index){
@@ -225,69 +245,6 @@ user.pickUp = function(item, index){
 	item.removed = true;
 			
 	socket.emit("remove_object", {index: index});
-}
-
-user.interactWNote = function(){
-		
-	if(this.server.powers.papaBear || this.server.powers.invisibility) return;
-		
-	for (var z = 0; z < game.client.notes.length; z++){
-				
-		if(game.client.notes[z].removed) continue;		
-							
-		if (!tools.checkCollision({x: game.client.notes[z].x + 29, y: game.client.notes[z].y + 29}, this.server, 20, 20, 41, 36, 0, 0)) continue;		
-		
-		renderer.UI["space bar"].render = true;
-		renderer.UI["space bar"].item = "Pick Up";
-
-		if(!this.action) continue;
-							
-		var redo = true;
-		
-		do{
-			
-			var chance = Math.floor(Math.random() * 100);
-		
-			var probability = 1;
-		
-			if(chance < 15){
-				probability = 1;	
-			}else if(chance < 45){
-				probability = 2;
-			}else if(chance < 50){
-				probability = 10;
-			}else{
-				probability = 3;
-			}
-		
-			var notes = noteIndex[probability];
-
-			//prevent it from getting a probability index with nothing in it
-			if(!notes) continue;
-
-			notes = notes.filter(function(note){
-				if(note.condition() == true){
-					if(note.once){
-						if(user.notes.indexOf(note.id) == -1) return true;
-					}else return true;
-				}
-				return false;
-			});	
-		
-			if(notes.length > 0) redo = false;
-			
-		}while(redo);
-			
-		var random = Math.floor(Math.random() * notes.length);
-
-		var note = notes[random];
-
-		this.do = [user.readNote.bind(user, note.id), user.getNote.bind(user, z, note)];
-					
-		break;				
-
-	}
-	
 }
 
 user.chopWall = function(index, amount){
@@ -313,7 +270,7 @@ user.stealWood = function(team){
 	
 }
 
-user.chopTree = function(treeId){
+user.chopTree = function(tree, gridCoords){
 	
 	if(!this.log.has && !this.server.powers.papaBear){
 		
@@ -323,9 +280,9 @@ user.chopTree = function(treeId){
 		
 		this.log.wood = 50;
 		
-		game.client.trees[treeId].removed = true;
+		tree.removed = true;
 		
-	    socket.emit('chopTree', {id: treeId, name: this.name});
+	    socket.emit('chopTree', {gridCoords: gridCoords, name: this.name});
 				
  	}
 		
@@ -337,11 +294,11 @@ user.readNote = function(id){
 	renderer.UI["game screen"].render = true;
 };
 
-user.getNote = function(noteId, note){
+user.getNote = function(gridCoords, note){
 	if(note.func) note.func.apply(this, note.args);
 	user.notes.push(note.id);
-	game.client.notes[noteId].removed = true;
-	socket.emit('getNote', {id: noteId});	
+	game.saved.grid[gridCoords.x][gridCoords.y].contains.removed = true;
+	socket.emit('getNote', {gridCoords: gridCoords});	
 };
 
 user.depLog = function(){

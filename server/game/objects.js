@@ -12,13 +12,14 @@ function Tree(x, y, opts){
 	this.width =78;
 	this.height = 78;
 	this.treeNum = getRandomInt(1,4);
+	this.gridX = x;
+	this.gridY = y;
 
-	this.ref = "pines";
 	this.hard = true;
 
 	this.draw = function(){
 		if(this.removed) return;
-		renderer.drawSprite(this.ref, this.x - 9, this.y - 9, renderer.spriteData["tree"][this.treeNum]);
+		renderer.drawSprite("pines", this.x - 9, this.y - 9, renderer.spriteData["tree"][this.treeNum]);
 	}
 }
 
@@ -32,16 +33,16 @@ function Note(x, y, opts){
 	this.tag = "note";
 	this.x = x * 78;
 	this.y = y * 78;
+	this.gridX = x;
+	this.gridY = y;
 	this.removed = false;
 	this.width =78;
 	this.height = 78;
-
-	this.ref = "rgb(0,0,180)";
-	this.hard = true;
+	this.hard = false;
 
 	this.draw = function(){
 		if(this.removed) return;
-		renderer.drawRect(this.ref, this.x + 29, this.y + 29, 20, 20);
+		renderer.drawRect("rgb(0,0,180)", this.x + 29, this.y + 29, 20, 20);
 	}
 
 }

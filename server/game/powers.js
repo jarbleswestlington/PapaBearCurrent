@@ -47,7 +47,7 @@ Power.prototype.lose = function(player, fromIncludes){
 	}
 	if(this.droppable && !fromIncludes){
 		console.log(this.name + " was dropped by: " + player.name);
-		var obj = {power: this.name, type: "power", hard: false, removed:false, x: player.x, y: player.y, width: 20, height: 20 };
+		var obj = {power: this.name, type: "drop", tag: this.name, hard: false, removed:false, x: player.x, y: player.y, width: 20, height: 20 };
 		var newObj = new Obj(obj)
 		game.objects.push(newObj);
 		sockets.emit("add_object", newObj);
