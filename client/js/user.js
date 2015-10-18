@@ -72,7 +72,7 @@ user.client.weapon.renderData = {
 }
 
 user.usePower = function(power){
-	soundscape.broadcast("swipe", 121);
+	if(power == "sword") soundscape.broadcast("swipe", 20);
 	socket.emit("use_power", {name: user.name, power: power});
 }
 
@@ -193,6 +193,9 @@ user.interfaceTree = function(tree){
 	renderer.UI["space bar"].currentPriority = tree.priority;
 			
 	if(!this.action) return;
+
+	soundscape.broadcast("chop", 10);		
+
 	if(tree.priority < this.queue.currentPriority) return;
 	this.queue = this.chopTree.bind(this, tree, {x: tree.gridX, y: tree.gridY});
 	this.queue.currentPriority = tree.priority;
@@ -234,10 +237,10 @@ user.interfaceDrop = function(drop, index){
 }
 
 user.interfaceNote = function(note){
-	//after type
+
 	if(this.server.powers.papaBear || this.server.powers.invisibility) return;
 										
-	if (!tools.checkCollision({x: note.x + 29, y: note.y + 29}, this.server, 20, 20, 41, 36, 0, 0)) return;		
+	if ( !tools.colCheck(note, this.server) ) return;		
 	
 	if(note.priority < renderer.UI["space bar"].currentPriority) return;
 	renderer.UI["space bar"].render = true;
@@ -246,13 +249,16 @@ user.interfaceNote = function(note){
 
 	if(!this.action) return;
 	if(note.priority < this.queue.currentPriority) return;
-
+	soundscape.play("pickUp");
 	Note.respond(note);	
 	this.queue.currentPriority = note.priority;
 
 }
 
 user.pickUp = function(item, index){
+
+	soundscape.play("pickUp");
+
 	renderer.pickedUp = true;
 	renderer.pickedUpItem = item.power;
 
@@ -271,6 +277,7 @@ user.pickUp = function(item, index){
 			
 	socket.emit("remove_object", {index: index});
 }
+
 
 user.chopWall = function(index, amount){
 	

@@ -202,6 +202,8 @@ new UI("notes", {style: "notes", x: "/1.65", y: "/1.20", width: "/6", height: "/
 //upload all images
 var imageArray = ["bear",
 "playershadow",
+"swordDrop",
+"spearDrop",
 "swordR",
 "swordL",
 "swordD",
@@ -232,14 +234,18 @@ var imageArray = ["bear",
 "spearDia",
 "spearPDia",
 "swordDia",
-];
+"hedgehog",
+"chest"];
 
 imageArray.forEach(function(image){
 	renderer.upload(image);
 });
 
 var audioArray = ["bear", 
-"swipe"];
+"swipe", 
+"chop",
+"pickUp",
+"hit"];
 
 audioArray.forEach(function(audio){
 	soundscape.upload(audio);
