@@ -13,12 +13,8 @@
 //bow and arrow
 //start render x,y-s at the end of anothers
 //onclick method to UI's
-//organize things into one master array - objects//toRender//toCollide
 //allow ghostmovment in master if you hold shift
 
-//how do I prevent a player from doing more than one thing with the action button pressed down
-//right now it will do the action that is called first, when so happens to be the action that is rendered first (and then overlapped)
-//therefor the player will not be doing the action that they see being rendered because it is overlapped by later actions
 
 new Note("steal1",
  ["If you find another village", 
@@ -336,7 +332,6 @@ renderer['game'] = function(){
 	 	game.saved.objects,
 	 	game.forAllPlayers,
 		renderer.UI["timer"],
-		renderer.UI["notes"],
 		renderer.UI['space bar'],
 		renderer.UI['game screen'],
 		renderer.UI["big screen"],
