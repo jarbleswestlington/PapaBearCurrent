@@ -37,7 +37,7 @@ module.exports = function(game){
 		this.spear = {
 			width : 30,
 			height : 5,
-			color: "grey"
+			image:"spear",
 		},
 		this.weapon = {
 		   state: "ready"
@@ -83,7 +83,7 @@ module.exports = function(game){
 						"R":{x:36, y:22},
 						"L":{x:-26, y:22},
 					}			
-					renderer.drawRect(this.spear.color, this.x + spearHelper[this.direction].x, this.y + spearHelper[this.direction].y, getWidth(this), getHeight(this));	
+					renderer.drawImage(this.spear.image + this.direction, this.x + spearHelper[this.direction].x, this.y + spearHelper[this.direction].y);	
 				}	
 			
 			}	
@@ -137,10 +137,10 @@ module.exports = function(game){
 	}
 	
 	Player.prototype.spearColBoxes = {
-		U:{x: 36,y: -22, width:5, height:30},
-		D:{x:0,y:20, width: 5, height:30},
-		R:{x:36,y:22, width: 30, height:5},
-		L:{x:-26,y:+22, width: 30, height:5}
+		U:{x: 36,y: -22, width:6, height:30},
+		D:{x:0,y:20, width: 6, height:30},
+		R:{x:36,y:22, width: 30, height:6},
+		L:{x:-26,y:+22, width: 30, height:6}
 	};
 
 	Player.prototype.spawn = function(func){

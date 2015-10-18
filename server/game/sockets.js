@@ -102,12 +102,6 @@ function setUp(game, server){
 			 }, data.time);
 
 		});
-
-		socket.on('arm', function(data){
-			var player = game.findPlayerByName(data.name);
-			player.attacking = data.armed;
-			player.addUpdate("attacking");
-		});
 		
 		socket.on('change_team', function(data){
 
@@ -121,28 +115,16 @@ function setUp(game, server){
 			
 		});
 
-		socket.on('begin_swipe', function(data){
+		socket.on('use_power', function(data){
 
+			console.log("used", data.power);
 			var player = game.findPlayerByName(data.name);
 
-			player.weapon.state = "winding up";
-			player.addUpdate("weapon");
+			if(!player.powers[data.power]) return;
+			var power = powers.index[data.power];
+			if(!power.onUse) return;
 
-			setTimeout(function() { 
-				player.weapon.state = "attacking";
-				player.frozen = true;
-				player.addUpdate("weapon", "frozen");
-				player.swipe();
-			}, 250);
-
-			setTimeout(function() { 
-			}, 600);
-	
-			setTimeout(function() { 
-				player.weapon.state = "ready";
-				player.frozen = false;
-				player.addUpdate("weapon", "frozen");
-			}, 1800);
+			power.onUse(player);
  
 		});
 

@@ -14,7 +14,7 @@ var user = {
 	frozen:false,
 	inPlace:false,
 	confirmed: false,
-	do: function(){},
+	queue: function(){},
 	mPlayers : [],
 	
 	notes:[],
@@ -23,6 +23,8 @@ var user = {
 	building: {},
 	server: {},
 };
+
+user.queue.currentPriority = -1;
 
 user.log = {
 	has: false,
@@ -69,10 +71,9 @@ user.client.weapon.renderData = {
 	}
 }
 
-user.swipe = function(){
+user.usePower = function(power){
 	soundscape.broadcast("swipe", 121);
-	socket.emit("begin_swipe", {name: user.name,});
-
+	socket.emit("use_power", {name: user.name, power: power});
 }
 
 user.getHoldingCoords = function(obj){
@@ -105,6 +106,45 @@ user.getHoldingCoords = function(obj){
 	return info;
 }
 
+
+user.processActionQueue = function(){
+	if(user.queue.constructor == Function) user.queue();
+	else if(user.queue.constructor == Array) user.queue.forEach(function(action){ action() });	
+	user.queue = function(){};
+	//set priority low so it can be overwritte 
+	user.queue.currentPriority = -1;
+}
+
+user.checkNearbyGridNodes = function(){
+
+	for(var x = 0; x < game.saved.grid.length; x++){
+		for(var y = 0; y < game.saved.grid[x].length; y++){
+
+			var item = game.saved.grid[x][y].contains;
+			if(!item || item.removed) continue;		
+
+			if(item.tag == "note") user.interfaceNote(item);
+			if(item.tag == "tree") user.interfaceTree(item);
+
+		}
+	}
+}
+
+user.checkNearbyObjects = function(){
+			
+	for(var i = 0; i < game.saved.objects.length; i++){	
+
+		var object = game.saved.objects[i];
+						
+		if(object.removed || this.server.dead) continue;	
+		
+		if(object.type == "wall") user.interfaceWall(object, i)
+		else if(object.type == "drop") user.interfaceDrop(object, i);
+				
+	}
+	
+}
+
 user.interactWBase = function(){
 	
 	if(!this.server.powers.papaBear && !this.server.powers.invisibility){
@@ -126,6 +166,7 @@ user.interactWBase = function(){
 										
 						if(this.action){
 							this.stealWood(team.name);
+							this.action = false;	
 						}
 
 					}
@@ -145,72 +186,51 @@ user.interfaceTree = function(tree){
 	if(this.server.dead || this.server.powers.papaBear) return;
 
 	if(!tools.checkCollision(this.server, tree, 41, 36, 78, 78, -25, -25)) return;
-			
+
+	if(tree.priority < renderer.UI["space bar"].currentPriority) return;
 	renderer.UI["space bar"].render = true;
 	renderer.UI["space bar"].item = "Chop Tree";
+	renderer.UI["space bar"].currentPriority = tree.priority;
 			
-	if(this.action){
-		this.do = this.chopTree.bind(this, tree, {x: tree.gridX, y: tree.gridY});			
-	}		
+	if(!this.action) return;
+	if(tree.priority < this.queue.currentPriority) return;
+	this.queue = this.chopTree.bind(this, tree, {x: tree.gridX, y: tree.gridY});
+	this.queue.currentPriority = tree.priority;
 
 }
 
 user.interfaceWall = function(wall, index){
 
 	if(!tools.colCheck(this.server, wall, {x: -25, y:-25})) return;
-
+	
+	if(wall.priority < renderer.UI["space bar"].currentPriority) return;
 	renderer.UI["space bar"].render = true;
 	renderer.UI["space bar"].item = "Chop Wall";
+	renderer.UI["space bar"].currentPriority = wall.priority;
 	
-	if(this.action){
-		if(!!this.server.powers.papaBear) this.do = this.chopWall.bind(this, index, .2);
-		else this.do = this.chopWall.bind(this, index, 1);
-	} 
+	if(!this.action) return;
+	if(wall.priority < this.queue.currentPriority) return;
+	if(!!this.server.powers.papaBear) this.queue = this.chopWall.bind(this, index, .2);
+	else this.queue = this.chopWall.bind(this, index, 1);
+	this.queue.currentPriority = wall.priority;
 
 }
-
-user.interactWObject = function(){
-			
-	for(var i = 0; i < game.saved.objects.length; i++){	
-
-		var object = game.saved.objects[i];
-						
-		if(object.removed || this.server.dead) continue;	
-		
-		if(object.type == "wall") user.interfaceWall(object, i)
-		else if(object.type == "drop") user.interfaceDrop(object, i);
-				
-	}
-	
-}
-
 
 user.interfaceDrop = function(drop, index){
 
 	if(this.server.powers.invisiblity || this.server.powers.papaBear) return;
 	
 	if( !tools.colCheck(drop, this.server) ) return;
-	
+
+	if(drop.priority < renderer.UI["space bar"].currentPriority) return;
 	renderer.UI["space bar"].render = true;
 	renderer.UI["space bar"].item = "Pick Up";
-	
-	if(this.action){
-		this.do = user.pickUp.bind(user, drop, index);
-	}
-}
-user.interfaceGrid = function(){
+	renderer.UI["space bar"].currentPriority = drop.priority;
 
-	for(var x = 0; x < game.saved.grid.length; x++){
-		for(var y = 0; y < game.saved.grid[x].length; y++){
-
-			var item = game.saved.grid[x][y].contains;
-			if(!item || item.removed) continue;		
-
-			if(item.tag == "note") user.interfaceNote(item);
-			if(item.tag == "tree") user.interfaceTree(item);
-
-		}
-	}
+	if(!this.action) return;
+	if(drop.priority < this.queue.currentPriority) return;
+	this.queue = user.pickUp.bind(user, drop, index);
+	this.queue.currentPriority = drop.priority;
 }
 
 user.interfaceNote = function(note){
@@ -219,11 +239,16 @@ user.interfaceNote = function(note){
 										
 	if (!tools.checkCollision({x: note.x + 29, y: note.y + 29}, this.server, 20, 20, 41, 36, 0, 0)) return;		
 	
+	if(note.priority < renderer.UI["space bar"].currentPriority) return;
 	renderer.UI["space bar"].render = true;
 	renderer.UI["space bar"].item = "Pick Up";
+	renderer.UI["space bar"].currentPriority = note.priority;
 
 	if(!this.action) return;
-	else Note.respond(note);	
+	if(note.priority < this.queue.currentPriority) return;
+
+	Note.respond(note);	
+	this.queue.currentPriority = note.priority;
 
 }
 
@@ -290,6 +315,7 @@ user.chopTree = function(tree, gridCoords){
 
 user.readNote = function(id){
 	note = noteIndex[id];
+
 	renderer.UI["game screen"].item = note.lines;
 	renderer.UI["game screen"].render = true;
 };
@@ -333,17 +359,6 @@ user.dash = function(){
 		this.frozen = false;	
 	}.bind(this), 700);
 	
-};
-
-user.arm = function(){
-	if (user.server.attacking == false) {
-		
-	    socket.emit('arm', {name: user.name, armed: true});
-
-	}else {
-		
-	    socket.emit('arm', {name: user.name, armed: false});
-	}
 };
 
 user.move = function(modifier){

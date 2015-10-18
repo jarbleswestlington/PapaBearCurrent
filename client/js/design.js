@@ -58,7 +58,7 @@ new Note("chat1",
  }
 );
 
-new Note("sword1",
+new Note("sword",
  ["You have picked up a sword.",
  " Press 'shift' to swing it."], {
 	 prob: 3,
@@ -67,7 +67,7 @@ new Note("sword1",
  }
 );
 
-new Note("spear1", ["You have picked up a spear.",
+new Note("spear", ["You have picked up a spear.",
 	"Press 'shift' to hold it and 'shift' again to hide it."], {
 	prob: 3,
 	condition: 0,
@@ -140,6 +140,8 @@ renderer.styles = {
 	"note": new Style("rgb(255,255,255)", {fontSize: 1.5, lineWidth: .2}),
 	"on top": new Style("rgb(0,0,0)", {fontSize: 1, lineWidth: .2, paddingX: .85, paddingY: .1}),	
 	"notes": new Style("rgb(0,0,0)", {fontSize: 1, paddingX: .2, paddingY: .2}),	
+	"image": new Style("rgb(0,0,0)", {fontSize: 1, lineWidth: .2, paddingY: -.9}),	
+
 }
 
 new UI("big screen", {style: "block text",x: "/10", y: 100, width: "/1.2", height: "-100"}, {reset:false, startRender: false, 
@@ -163,7 +165,37 @@ new UI("timer",  {style : "block text", x: "/30", y: "/15", width: "/5", height:
 		item: function(){ return (game.timeLimit - game.currentSec) + " seconds remaining" },
 	}
 );
+
 new UI("space bar", {style: "on top", x: "/2.4", y: "/1.20", width: "/6", height: "/10"}, { background: "spacebar", startRender: false});
+
+new UI("shift key", {style: "image", x: "/8", y: "/1.20", width: 70, height: "/10"}, { background: "spacebar", reset: false, startRender: true,
+	condition: function(){
+		if(!user.server.powers) return false;
+
+		if(user.server.powers.powerWeapon){
+			console.log("hasPower");
+
+			this.item = "spearPDia"
+			return true;
+		}
+		if(user.server.powers.sword){
+						console.log("hasSword");
+
+			this.item = "swordDia"
+			return true;
+		}
+		if(user.server.powers.spear){
+			console.log("hasPower");
+
+			this.item = "spearDia"
+			return true;
+		}
+	
+		console.log("checking shift");
+	},
+});
+
+
 new UI("notes", {style: "notes", x: "/1.65", y: "/1.20", width: "/6", height: "/10"}, 
 	{ reset: false, type: "grid", rows: 2, cols:8, item: "rgb(0,0,255)", ref: user.notes });
 
@@ -174,6 +206,14 @@ var imageArray = ["bear",
 "swordL",
 "swordD",
 "swordU",
+"spearR",
+"spearL",
+"spearD",
+"spearU",
+"spearPR",
+"spearPL",
+"spearPD",
+"spearPU",
 "counter",
 "pile",
 "backpacks",
@@ -188,7 +228,11 @@ var imageArray = ["bear",
 "bluecorpse",
 "redcorpse",
 "greencorpse",
-"spacebar"];
+"spacebar",
+"spearDia",
+"spearPDia",
+"swordDia",
+];
 
 imageArray.forEach(function(image){
 	renderer.upload(image);
@@ -292,6 +336,7 @@ renderer['game'] = function(){
 		renderer.UI['space bar'],
 		renderer.UI['game screen'],
 		renderer.UI["big screen"],
+		renderer.UI["shift key"],
 		builder
 	]);
 	//to edit whats happening

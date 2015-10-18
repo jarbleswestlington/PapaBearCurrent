@@ -44,7 +44,6 @@ renderer.upload = function(src){
 }
 
 renderer.updateCamera = function(){
-	
 	this.camera.y = canvas.height/2 - (user.server.y + user.server.height/2);
 	this.camera.x = canvas.width/2 - (user.server.x + user.server.width/2);
 };
@@ -53,7 +52,6 @@ renderer.drawUI = function(image, coordX, coordY, stretchX, stretchY){
 	
 	if(!this.refs[image]){
 		ctx.fillStyle = image;
-		
 		ctx.fillRect(coordX, coordY, stretchX, stretchY);
 	} 
 	else if(stretchX && stretchY){
@@ -126,6 +124,7 @@ renderer.hasLoaded = function(){
 renderer.reset = function(){
 	this.toReset.forEach(function(item){
 		item.render = false;
+		item.currentPriority = -1;
 	});
 }
 
@@ -211,6 +210,8 @@ var UI = function(name, box, options){
 		this.mode = "player";	
 		this.type = "block";
 	}
+
+	this.currentPriority = -1;
 	
 	this.check = function(){
 		if(this.condition && !this.condition()) return false;
@@ -232,6 +233,8 @@ var UI = function(name, box, options){
 		style.apply();
 
 		this[this.type](itemIn, style);
+
+
 	}
 
 	this.block = function(item, style){

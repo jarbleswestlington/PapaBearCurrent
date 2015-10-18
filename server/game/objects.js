@@ -14,7 +14,7 @@ function Tree(x, y, opts){
 	this.treeNum = getRandomInt(1,4);
 	this.gridX = x;
 	this.gridY = y;
-
+	this.priority = 1;
 	this.hard = true;
 
 	this.draw = function(){
@@ -39,6 +39,7 @@ function Note(x, y, opts){
 	this.width =78;
 	this.height = 78;
 	this.hard = false;
+	this.priority = 3;
 
 	this.draw = function(){
 		if(this.removed) return;
@@ -53,6 +54,7 @@ function Obj(data){
 		this[prop] = data[prop];
 	}
 
+	this.priority = 4;
 	this.removed = false;
 	this.ref = "rgb(180,0,0)";
 

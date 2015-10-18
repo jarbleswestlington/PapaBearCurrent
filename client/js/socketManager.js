@@ -19,8 +19,6 @@ socket.on('startgame_client', function(data) {
 	
 	game.started = true;
 
-
-
 	console.log("game started by server");
 	
 });
@@ -42,7 +40,7 @@ socket.on('update_clients', function(data) {
 
 	game.currentSec = data.time;
 
-	game.stateManager();
+	// game.stateManager();
 		
 });
 
@@ -85,13 +83,13 @@ socket.on("death", function(data){
 
 socket.on('treeChopped', function(data) {
 		
-	game.saved.grid[data.gridCoord.x][data.gridCoord.y].removed = true;
+	game.saved.grid[data.gridCoords.x][data.gridCoords.y].removed = true;
 
 });
 
 socket.on('noteGot', function(data) {
 
-	game.saved.grid[data.gridCoord.x][data.gridCoord.y].removed = true;
+	game.saved.grid[data.gridCoords.x][data.gridCoords.y].removed = true;
 		
 });
 

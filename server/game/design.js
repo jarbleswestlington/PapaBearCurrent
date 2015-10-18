@@ -35,18 +35,28 @@ module.exports = function(game, io){
 		group: "weapon",
 		exclusive: true,
 		onRecieve: function(player){
-			player.spear.color = "grey";
+			player.spear.image = "spear";
+			player.attacking = true;
+			player.addUpdate("attacking");
 			player.addUpdate("spear");
+		},
+		onUse: function(player){
+			player.attacking = !player.attacking;
+			player.addUpdate("attacking");
+		},
+		onLose: function(player){
+			player.attacking = false;
+			player.addUpdate("attacking");
 		},
 		droppable:true,
 	});
 	new Power("powerWeapon", {
 		onRecieve: function(player){
-			player.spear.color = "yellow";
+			player.spear.image = "spearP";
 			player.addUpdate("spear");
 		},
 		onLose: function(player){
-			player.spear.color = "grey";
+			player.spear.image = "spear";
 			player.addUpdate("spear");
 		},
 		include: ["spear"],
@@ -54,6 +64,30 @@ module.exports = function(game, io){
 		exclusive: true,
 		droppable:true,
 	});
+
+	new Power("sword", {group: "weapon", droppable: true, exclusive: true,
+	    onUse: function(player){	
+			player.weapon.state = "winding up";
+			player.addUpdate("weapon");
+
+			setTimeout(function() { 
+				player.weapon.state = "attacking";
+				player.frozen = true;
+				player.addUpdate("weapon", "frozen");
+				player.swipe();
+			}, 250);
+
+			setTimeout(function() { 
+			}, 600);
+	
+			setTimeout(function() { 
+				player.weapon.state = "ready";
+				player.frozen = false;
+				player.addUpdate("weapon", "frozen");
+			}, 1800);
+	    },
+	});
+
 	new Power("disguise");
 	new Power("invisibility", {exclusive: true,	
 		onRecieve: function(player){
@@ -66,7 +100,6 @@ module.exports = function(game, io){
 		}
 	});
 	new Power("telescope");
-	new Power("sword", {group: "weapon", droppable: true, exclusive: true});
 	new Power("papaBear", {
 		exclusive: true,
 		onRecieve: function(player){

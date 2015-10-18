@@ -80,12 +80,10 @@ game.update = function (modifier) {
 
 	user.move(modifier);
 	user.interactWBase();
-	user.interfaceGrid();
-	user.interactWObject();
+	user.checkNearbyGridNodes();
+	user.checkNearbyObjects();
 
-	if(user.do.constructor == Function) user.do();
-	else if(user.do.constructor == Array) user.do.forEach(function(action){ action() });	
-	user.do = function(){};
+	user.processActionQueue();
 
 	renderer.updateCamera();
 };
@@ -155,6 +153,6 @@ game.stateManager = function () {
 	
 	this.then = now;
 	
-	if(game.state !== "game") animate(game.stateManager);
+	animate(game.stateManager);
 	     
 };

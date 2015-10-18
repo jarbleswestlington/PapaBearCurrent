@@ -16,9 +16,9 @@ addEventListener("keyup", function (e) {
 
 addEventListener("mousedown", function (e) {
 	inputManager.mouse.down = true;
-	inputManager.mouse.x = e.clientX;
-	inputManager.mouse.y = e.clientY;
-	inputManager.mouse.collider = {x: e.clientX, y: e.clientY, width: 1, height: 1};
+	inputManager.mouse.x = e.savedX;
+	inputManager.mouse.y = e.savedY;
+	inputManager.mouse.collider = {x: e.savedX, y: e.savedY, width: 1, height: 1};
 	
 }, false);
 
@@ -67,7 +67,7 @@ inputManager.processInput = function(){
 		if(inputManager.pressable.shift && user.server.weapon.state == "ready" && user.server.powers.sword){
 						
 			inputManager.pressable.shift = false;
-			user.swipe();
+			user.usePower("sword");
 		}
 
 	}else{
@@ -133,7 +133,7 @@ inputManager.processInput = function(){
 	if (75 in inputManager.keys) {				
 		if(inputManager.pressable.k && user.server.powers.spear){
 			inputManager.pressable.k = false;
-			user.arm();
+			user.usePower("spear");
 		}
 	}else{
 		inputManager.pressable.k = true;	

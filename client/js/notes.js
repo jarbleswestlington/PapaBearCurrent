@@ -83,6 +83,6 @@ Note.respond = function(noteIn){
 
 	var note = notes[random];
 
-	user.do = [user.readNote.bind(user, note.id), user.getNote.bind(user, {x:noteIn.gridX, y: noteIn.gridY}, note)];
+	user.queue = [user.readNote.bind(user, note.id), user.getNote.bind(user, {x:noteIn.gridX, y: noteIn.gridY}, note)];
 				
 }
