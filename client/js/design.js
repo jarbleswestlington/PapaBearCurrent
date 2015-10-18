@@ -16,6 +16,9 @@
 //allow ghostmovment in master if you hold shift
 
 
+//disguise, telescope, hammer, running boots, cloak
+//status effects -- papabear
+
 new Note("steal1",
  ["If you find another village", 
  "you can make off with a large chunk of their wood."], {

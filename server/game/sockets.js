@@ -126,7 +126,6 @@ function setUp(game, server){
 
 		socket.on('use_power', function(data){
 
-			console.log("used", data.power);
 			var player = game.findPlayerByName(data.name);
 
 			if(!player.powers[data.power]) return;
@@ -139,7 +138,14 @@ function setUp(game, server){
 
 		socket.on('getNote', function(data){
 
-			game.grid[data.gridCoords.x][data.gridCoords.y].contains.removed = true;
+			note = game.grid[data.gridCoords.x][data.gridCoords.y].contains;
+			note.removed = true;
+
+			setTimeout(function(){
+				this.removed = false;
+				io.sockets.emit('noteSpawn', {gridCoords: data.gridCoords});
+			}.bind(note), 2 * 60000);
+
 			io.sockets.emit('noteGot', {gridCoords: data.gridCoords});
 
 		});

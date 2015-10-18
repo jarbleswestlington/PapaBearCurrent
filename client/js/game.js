@@ -43,9 +43,10 @@ game.forAllTeams = function(func){
 
 }
 
-game.getPowerStats = function(power){
+game.getPowerStats = function(power, player){
 	
-	var stats = {has: false, total :0};
+	var stats = {has: false, total :0, had: false};
+	stats.player = {has: false, had: false};
 	
 	game.forAllPlayers(function(player){
 		
