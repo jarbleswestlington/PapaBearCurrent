@@ -141,6 +141,8 @@ renderer.styles = {
 	"on top": new Style("rgb(0,0,0)", {fontSize: 1, lineWidth: .2, paddingX: .85, paddingY: .1}),	
 	"notes": new Style("rgb(0,0,0)", {fontSize: 1, paddingX: .2, paddingY: .2}),	
 	"image": new Style("rgb(0,0,0)", {fontSize: 1, lineWidth: .2, paddingY: -.9}),	
+	"imageWhite": new Style("rgb(255,255,255)", {fontSize: 1, lineWidth: .2, paddingY: -.9}),	
+
 
 }
 
@@ -166,32 +168,34 @@ new UI("timer",  {style : "block text", x: "/30", y: "/15", width: "/5", height:
 	}
 );
 
-new UI("space bar", {style: "on top", x: "/2.4", y: "/1.20", width: "/6", height: "/10"}, { background: "spacebar", startRender: false});
+new UI("wood counter", {style: "imageWhite", x: "-200", y: "/1.20", width: 90, height: "/10"}, { background: "pile", startRender: true, reset: false,
+	condition: function(){
+		if(!user.server.powers) return;
+		if(!user.server.powers.papaBear){
+			this.item = user.server.log.wood.toString();
+			return true;
+		}
+	}
+});
 
-new UI("shift key", {style: "image", x: "/8", y: "/1.20", width: 70, height: "/10"}, { background: "spacebar", reset: false, startRender: true,
+new UI("space bar", {style: "on top", x: 200, y: "/1.20", width: "/6", height: "/10"}, { background: "spacebar", startRender: false});
+
+new UI("shift key", {style: "image", x: 100, y: "/1.20", width: 70, height: "/10"}, { background: "spacebar", reset: false, startRender: true,
 	condition: function(){
 		if(!user.server.powers) return false;
 
 		if(user.server.powers.powerWeapon){
-			console.log("hasPower");
-
 			this.item = "spearPDia"
 			return true;
 		}
 		if(user.server.powers.sword){
-						console.log("hasSword");
-
 			this.item = "swordDia"
 			return true;
 		}
 		if(user.server.powers.spear){
-			console.log("hasPower");
-
 			this.item = "spearDia"
 			return true;
 		}
-	
-		console.log("checking shift");
 	},
 });
 
@@ -337,6 +341,7 @@ renderer['game'] = function(){
 		renderer.UI['game screen'],
 		renderer.UI["big screen"],
 		renderer.UI["shift key"],
+		renderer.UI["wood counter"],
 		builder
 	]);
 	//to edit whats happening

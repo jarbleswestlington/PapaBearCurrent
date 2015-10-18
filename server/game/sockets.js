@@ -26,6 +26,7 @@ function setUp(game, server){
 			var player = game.findPlayerByName(data.name)
 			player.log.has = false;
 			player.log.stolen = false;
+			player.log.wood = 0;
 			player.addUpdate("log");
 		
 		});
@@ -79,6 +80,8 @@ function setUp(game, server){
 			var player = game.findPlayerByName(data.name);
 
 			player.log.has = true;
+			player.log.stolen = true;
+			player.log.wood = woodTotal;
 			player.addUpdate("log");
 			team.addUpdate("score");
 
@@ -140,6 +143,7 @@ function setUp(game, server){
 			var player = game.findPlayerByName(data.name);
 
 			player.log.has = false;
+			player.log.wood = 0;
 			player.addUpdate("log");
 
 			game.teams[data.team].score += data.amount;
@@ -153,6 +157,8 @@ function setUp(game, server){
 			var player = game.findPlayerByName(data.name);
 
 			player.log.has = true;
+			player.log.wood = 50;
+
 			player.addUpdate("log");
 
 			game.grid[data.gridCoords.x][data.gridCoords.y].contains.removed = true;
