@@ -64,19 +64,22 @@ function Obj(data){
 		if(this.removed) return;
 		if(this.type == "wall"){
 			renderer.drawImage("hedgehog", this.x - 2, this.y + 2);           
-        }else if(this.type == "power"){
+        }else if(this.type == "drop"){
             if(this.power == "sword"){
-           		renderer.drawImage("swordDrop", this.x, this.y);
+           		renderer.drawImage("swordDia", this.x, this.y);
            	}
            	if(this.power == "spear"){
-           		renderer.drawImage("spearDrop", this.x, this.y);
+           		renderer.drawImage("spearDia", this.x, this.y);
+           	}
+           	if(this.power == "powerWeapon"){
+           		renderer.drawImage("spearPDia", this.x, this.y);
            	}
            	else{
-           		renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
+           		// renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
            	}
        	}
         else{
-			renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
+			// renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
 		}
 	}
 
