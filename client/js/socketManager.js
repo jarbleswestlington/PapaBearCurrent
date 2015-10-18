@@ -60,7 +60,9 @@ socket.on('remove_object', function(data) {
 });
 
 socket.on("death", function(data){
-	
+
+	soundscape.broadcast("hit", 8);
+
 	user.notes.filter(function(id){
 		return !noteIndex[id].resetOnDeath;
 	});

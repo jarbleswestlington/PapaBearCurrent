@@ -42,11 +42,13 @@ function Note(x, y, opts){
 	this.draw = function(){
 		if(this.removed) return;
 		renderer.drawRect(this.ref, this.x + 29, this.y + 29, 20, 20);
+		renderer.drawImage("chest", this.x + 10, this.y + 10);
 	}
 
 }
 
 function Obj(data){
+
 	this.tag = "obj";
 	for(var prop in data){
 		this[prop] = data[prop];
@@ -57,7 +59,22 @@ function Obj(data){
 
 	this.draw = function(){
 		if(this.removed) return;
-		renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
+		if(this.type == "wall"){
+			renderer.drawImage("hedgehog", this.x - 2, this.y + 2);           
+        }else if(this.type == "power"){
+            if(this.power == "sword"){
+           		renderer.drawImage("swordDrop", this.x, this.y);
+           	}
+           	if(this.power == "spear"){
+           		renderer.drawImage("spearDrop", this.x, this.y);
+           	}
+           	else{
+           		renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
+           	}
+       	}
+        else{
+			renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
+		}
 	}
 
 }

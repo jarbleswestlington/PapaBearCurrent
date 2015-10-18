@@ -29,7 +29,7 @@ builder.request = function(){
 		
 	this.requestXY = user.getHoldingCoords(this.refs[this.item]);
 	
-	socket.emit("request_placement", {hp: 10, type: this.item, hard: true, removed:false, x: this.requestXY.x, y: this.requestXY.y, width: this.refs[this.item].width, height: this.refs[this.item].height });
+	socket.emit("request_placement", {hp: 40, type: this.item, hard: true, removed:false, x: this.requestXY.x, y: this.requestXY.y, width: this.refs[this.item].width, height: this.refs[this.item].height });
 		
 };
 
@@ -38,7 +38,7 @@ builder.place = function(){
 	this.rejected = false;
 	this.on = false;	
 	user.inPlace = false;
-	socket.emit("drop_log", {name: user.name});		
+	socket.emit("drop_log", {name: user.name});
 
 };
 

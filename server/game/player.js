@@ -250,7 +250,6 @@ module.exports = function(game){
 	Player.prototype.die = function(){
 		
 		game.elephant[this.name].emit("death", {});
-		
 		this.dead = true;
 		this.attacking = false;		
 		this.renderteam = this.team;

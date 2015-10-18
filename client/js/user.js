@@ -70,7 +70,7 @@ user.client.weapon.renderData = {
 }
 
 user.swipe = function(){
-	soundscape.broadcast("swipe", 121);
+	soundscape.broadcast("swipe", 20);
 	socket.emit("begin_swipe", {name: user.name,});
 
 }
@@ -154,7 +154,8 @@ user.interactWTree = function(){
 					renderer.UI["space bar"].item = "Chop Tree";
 							
 					if(this.action){
-						this.do = this.chopTree.bind(this, i);			
+						this.do = this.chopTree.bind(this, i);	
+						soundscape.broadcast("chop", 10);		
 					}	
 				
 				}
@@ -245,7 +246,8 @@ user.interactWNote = function(){
 		var redo = true;
 		
 		do{
-			
+			soundscape.play("pickUp");
+			//soundscape.broadcast("pickUp", 10);
 			var chance = Math.floor(Math.random() * 100);
 		
 			var probability = 1;
