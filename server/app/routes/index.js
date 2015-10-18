@@ -19,6 +19,15 @@ module.exports = function(app, game){
 	   res.end();
 
 	});
+
+	app.get('/master', function (req, res){
+	   res.writeHead(200, {'Content-Type': 'text/html'});
+
+	   res.write(index);
+
+	   res.end();
+
+	});
 	app.get('/app/player/:name', function (req, res){
 	   res.writeHead(200, {'Content-Type': 'text/html'});
 

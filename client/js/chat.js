@@ -18,7 +18,7 @@ chatController.show = function(){
 }
 
 chatController.submit = function(text, time){
-	console.log("submitted");
+
 	this.started = false;
 
 	$('#chatView').hide();
@@ -30,7 +30,7 @@ chatController.submit = function(text, time){
 	if(!text) chatMessage = $('#chatInput').val();
 	else chatMessage = text;
 	
-	$('#chatInput').val(" ");
+	$('#chatInput').val("");
 	
 	if(chatMessage != "") socket.emit("sendChat", {message: chatMessage, name: user.name, time: time});
 	

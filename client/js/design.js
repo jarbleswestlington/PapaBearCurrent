@@ -267,7 +267,7 @@ inputManager.registerKey("N", {
 	once: true, 
 	mode: "all",
 	on: function(){ 
-			socket.emit('confirm_name', { name: tools.makeId(6) });
+			socket.emit('confirm_name', { name: tools.makeId(6), master: true });
 	},
 });
 

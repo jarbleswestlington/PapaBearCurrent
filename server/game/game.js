@@ -312,8 +312,6 @@ Game.prototype.generate = function(){
 
 Game.prototype.addPlayer = function(name, master){
 		
-	if(master) return;
-		
 	var allMax = true;
 	var aTeam = "";
 	
@@ -327,7 +325,7 @@ Game.prototype.addPlayer = function(name, master){
 		
 		if(tLength < this.currentTeamMax){
 			
-			newPlayer = new Player({name: name, team: tName})
+			newPlayer = new Player({name: name, team: tName, master: master})
 			newPlayer.addUpdate("all");
 			newPlayer.spawn();
 			this.players[name] = newPlayer;

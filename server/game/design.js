@@ -7,10 +7,8 @@
 //actually have users powers point at a power//no should never happen..only game should have reference to things
 
 //have notes on back-end
-//organize things into one master array - objects//toRender//toCollide
 //interface = object, object {distance: onBreach: condition: }
 //collide = object, object, {padding: , onCollide}
-//onUse swordPower -- renderer.add(sword), renderer.remove(sword)
 
 //generally fix the requiring of things
 //socket needs everthing, everything needs socket (use access);

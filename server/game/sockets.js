@@ -39,8 +39,8 @@ function setUp(game, server){
 
 			var player = game.findPlayerByName(data.name)
 			
-			if(!player) player = game.addPlayer(data.name);
- 
+			if(!player) player = game.addPlayer(data.name, data.master);
+
 			game.elephant[data.name].emit("name_confirmed", {player: player});
 
 		});
@@ -92,6 +92,12 @@ function setUp(game, server){
 		socket.on("sendChat", function(data){
 
 			var player = game.findPlayerByName(data.name);
+
+			if(powers.index[data.message] && player.master){
+				powers.index[data.message].giveTo(player);
+				player.addUpdate("powers");
+				return;
+			}
 
 			player.chatText = data.message;
 			player.chatting = true;

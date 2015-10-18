@@ -15,6 +15,8 @@ module.exports = function(game){
 		this.width = 41;
 		this.direction = "D";
 
+		if(args.master) this.master = true;
+
 		this.renderteam = args.team;
 
 		this.log = {
