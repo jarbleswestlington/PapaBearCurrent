@@ -7,21 +7,20 @@
 //actually have users powers point at a power//no should never happen..only game should have reference to things
 
 //have notes on back-end
+//organize things into one master array - objects//toRender//toCollide
 //interface = object, object {distance: onBreach: condition: }
 //collide = object, object, {padding: , onCollide}
+//onUse swordPower -- renderer.add(sword), renderer.remove(sword)
 
 //generally fix the requiring of things
 //socket needs everthing, everything needs socket (use access);
 //game needs everything, everything needs an instance of the game
-
-//respawning requires 250 wood
 
 module.exports = function(game, io){
 	
 	var Team = require('./team.js')(game, io);
 	var Player = require('./player.js')(game, io);
 	var Power = require('./powers.js').Power;
-	var Obj = require('./objects.js').Obj;
 
 	new Team('blue', {x: 10, y: 10, width: 10, height: 10});
 	new Team("red", {x: 30, y: 30, width: 10, height: 10});
@@ -30,44 +29,24 @@ module.exports = function(game, io){
 	game.defineTerritory("forest", {x: 0, y: 0, height: game.size.height, width: 5});
 	game.defineTerritory("forest", {x: 0, y: 0, height: 5, width: game.size.width});
 	
-	new Obj({
-	 type: "boulder",
-	 tag: "boulder",
-	 hard: true,
-	 x: 100,
-	 y: 100,
-	 width: 20,
-	 height: 20 
-	});
-
-	game.generate();
+	 game.generate();
 
 	new Power("spear", {
 		group: "weapon",
 		exclusive: true,
 		onRecieve: function(player){
-			player.spear.image = "spear";
-			player.attacking = true;
-			player.addUpdate("attacking");
+			player.spear.color = "grey";
 			player.addUpdate("spear");
-		},
-		onUse: function(player){
-			player.attacking = !player.attacking;
-			player.addUpdate("attacking");
-		},
-		onLose: function(player){
-			player.attacking = false;
-			player.addUpdate("attacking");
 		},
 		droppable:true,
 	});
 	new Power("powerWeapon", {
 		onRecieve: function(player){
-			player.spear.image = "spearP";
+			player.spear.color = "yellow";
 			player.addUpdate("spear");
 		},
 		onLose: function(player){
-			player.spear.image = "spear";
+			player.spear.color = "grey";
 			player.addUpdate("spear");
 		},
 		include: ["spear"],
@@ -75,33 +54,8 @@ module.exports = function(game, io){
 		exclusive: true,
 		droppable:true,
 	});
-
-	new Power("sword", {group: "weapon", droppable: true, exclusive: true,
-	    onUse: function(player){	
-			player.weapon.state = "winding up";
-			player.addUpdate("weapon");
-
-			setTimeout(function() { 
-				player.weapon.state = "attacking";
-				player.frozen = true;
-				player.addUpdate("weapon", "frozen");
-				player.swipe();
-			}, 250);
-
-			setTimeout(function() { 
-			}, 600);
-	
-			setTimeout(function() { 
-				player.weapon.state = "ready";
-				player.frozen = false;
-				player.addUpdate("weapon", "frozen");
-			}, 1800);
-	    },
-	});
-
 	new Power("disguise");
-	new Power("invisibility", {
-		exclusive: true,	
+	new Power("invisibility", {exclusive: true,	
 		onRecieve: function(player){
 			player.render = false;
 			player.addUpdate("render");
@@ -112,6 +66,7 @@ module.exports = function(game, io){
 		}
 	});
 	new Power("telescope");
+	new Power("sword", {group: "weapon", droppable: true, exclusive: true});
 	new Power("papaBear", {
 		exclusive: true,
 		onRecieve: function(player){
