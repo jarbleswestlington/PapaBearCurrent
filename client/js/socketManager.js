@@ -70,6 +70,8 @@ socket.on("death", function(data){
 
 	soundscape.broadcast("hit", 8);
 
+	user.killer = data.agent;
+
 	user.notes.filter(function(id){
 		return !noteIndex[id].resetOnDeath;
 	});
@@ -91,13 +93,13 @@ socket.on("death", function(data){
 
 socket.on('treeChopped', function(data) {
 		
-	game.saved.grid[data.gridCoords.x][data.gridCoords.y].removed = true;
+	game.saved.grid[data.gridCoords.x][data.gridCoords.y].contains.removed = true;
 
 });
 
 socket.on('noteGot', function(data) {
 
-	game.saved.grid[data.gridCoords.x][data.gridCoords.y].removed = true;
+	game.saved.grid[data.gridCoords.x][data.gridCoords.y].contains.removed = true;
 		
 });
 

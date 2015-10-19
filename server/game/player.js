@@ -9,6 +9,8 @@ module.exports = function(game){
 		this.team = args.team;
 		this.name = args.name;
 
+		this.willRespawn = false;
+
 		this.x = 0;
 		this.y = 0;
 		this.height = 36;
@@ -110,12 +112,12 @@ module.exports = function(game){
 			if(this.attacking){
 				if(agent.tag == "papaBear" && !this.powers.powerWeapon) return;
 				if(tools.colCheckRelative({item: this.spearColBoxes[this.direction], influencer: this}, agent)){
-					if(agent instanceof Player) agent.die();
+					if(agent instanceof Player) agent.die(this.name);
 					return;
 				} 
 			}
 			if(this.powers.papaBear && tools.colCheck(agent, this)){
-				if(agent instanceof Player) agent.die();
+				if(agent instanceof Player) agent.die(this.name);
 				return;
 			}	
 		}
@@ -125,13 +127,13 @@ module.exports = function(game){
 		if(tools.colCheck(agent, this)){
 			if(this.powers.papaBear){
 				if(agent.tag == "powerWeapon"){
-					if(this instanceof Player) this.die();
+					if(this instanceof Player) this.die(agent.name);
 					return;
 				} 
 				else return false;
 			}
 			if(agent.tag == "sword" || agent.tag == "spear" || agent.tag == "powerWeapon" || agent.tag == "papaBear"){
-				if(this instanceof Player) this.die();
+				if(this instanceof Player) this.die(agent.name);
 				return;
 			}
 			//returns true to prevent movement of the agent
@@ -244,15 +246,17 @@ module.exports = function(game){
 
 		box.x += this.x;
 		box.y += this.y;
+		box.name = this.name;
 		if(this.powers.powerWeapon) box.tag = "powerWeapon";
 		else box.tag = "spear";
 		
 		tools.checkAll(box, game.forAllOtherAlivePlayers.bind(game, this));
 	}
 	
-	Player.prototype.die = function(){
+	Player.prototype.die = function(agent){
 		
-		game.elephant[this.name].emit("death", {});
+		console.log(this.name);
+		game.elephant[this.name].emit("death", {agent: agent});
 		this.dead = true;
 		this.attacking = false;		
 		this.renderteam = this.team;
@@ -265,8 +269,6 @@ module.exports = function(game){
 		var team = game.teams[this.team];
 
 		var respawn = function(){
-
-			team.score = team.score - 250;
 
 			this.spawn(function(spawn){
 				setTimeout(function() { 
@@ -282,11 +284,17 @@ module.exports = function(game){
 		var check = function(){
 
 			if(team.score >= 250){
+				team.score = team.score - 250;
+				team.addUpdate("score");
+				this.willRespawn = true;
+				this.addUpdate("willRespawn");
 				respawn();
 			}else{
-				setTimeout(check, 8000);
+				this.willRespawn = false;
+				this.addUpdate("willRespawn");
+				setTimeout(check, 1000);
 			}
-		}
+		}.bind(this);
 
 		check();
 	}
@@ -314,6 +322,7 @@ module.exports = function(game){
 			box.width = box.width;
 			box.height = box.height;
 			box.tag = "sword";
+			box.name = this.name;
 			return box;
 		}.bind(this));
 		

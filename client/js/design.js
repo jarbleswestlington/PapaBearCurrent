@@ -148,11 +148,13 @@ new UI("big screen", {style: "block text",x: "/10", y: 100, width: "/1.2", heigh
 			if(user.server.dead){
 				this.item = [];
 				this.item.push("It costs 250 wood to respawn");
-				if(game.server.teams[user.server.team].score >= 250){
+				if(user.server.willRespawn){
 					this.item.push("Your team has enough wood");
 					this.item.push("You will respawn soon");
 				} 
 				else this.item.push("Your team does not have enough wood");
+
+				if(user.killer) this.item.push("You were killed by " + user.killer);
 				return true;
 			}
 			if(builder.rejected){
