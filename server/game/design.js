@@ -14,11 +14,14 @@
 //socket needs everthing, everything needs socket (use access);
 //game needs everything, everything needs an instance of the game
 
+//respawning requires 250 wood
+
 module.exports = function(game, io){
 	
 	var Team = require('./team.js')(game, io);
 	var Player = require('./player.js')(game, io);
 	var Power = require('./powers.js').Power;
+	var Obj = require('./objects.js').Obj;
 
 	new Team('blue', {x: 10, y: 10, width: 10, height: 10});
 	new Team("red", {x: 30, y: 30, width: 10, height: 10});
@@ -27,6 +30,16 @@ module.exports = function(game, io){
 	game.defineTerritory("forest", {x: 0, y: 0, height: game.size.height, width: 5});
 	game.defineTerritory("forest", {x: 0, y: 0, height: 5, width: game.size.width});
 	
+	new Obj({
+	 type: "boulder",
+	 tag: "boulder",
+	 hard: true,
+	 x: 100,
+	 y: 100,
+	 width: 20,
+	 height: 20 
+	});
+
 	game.generate();
 
 	new Power("spear", {
@@ -87,7 +100,8 @@ module.exports = function(game, io){
 	});
 
 	new Power("disguise");
-	new Power("invisibility", {exclusive: true,	
+	new Power("invisibility", {
+		exclusive: true,	
 		onRecieve: function(player){
 			player.render = false;
 			player.addUpdate("render");

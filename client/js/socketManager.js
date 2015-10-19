@@ -30,6 +30,12 @@ socket.on('stealTotal', function(data) {
 });
 
 
+socket.on('noteSpawn', function(data) {
+	
+	game.saved.grid[data.gridCoords.x][data.gridCoords.y].contains.removed = false;
+	
+});
+
 
 socket.on('update_clients', function(data) {
 	if(!user.confirmed) return;

@@ -212,7 +212,9 @@ Game.prototype.forAllTrees = function(func){
 Game.prototype.forAllPlayers = function(func){
 	var result = false;
 	for(var name in this.players){
-		if(func(this.players[name])) result = true;
+		var player = this.players[name];
+		if(player.removed) continue;
+		if(func(player)) result = true;
 	}
 	return result;
 }
@@ -221,23 +223,26 @@ Game.prototype.forAllAlivePlayers = function(func){
 	var result = false;
 
 	for(var name in this.players){
-		if(this.players[name].dead) return;
-		if(func(this.players[name])){
-			result = true;
-		} 		
+		var player = this.players[name];
+		if(player.dead) continue;
+		if(player.removed) continue;
+		if(func(player)) result = true;
 	}
 
 	return result;
 
 }
 
-Game.prototype.forAllOtherPlayers = function(player, func){
+Game.prototype.forAllOtherPlayers = function(playerIn, func){
 	var result = false;
 
 	for(var name in this.players){
-		if(player !== this.players[name]){
-			if(func(this.players[name])) return true;
-		}
+		var player = this.players[name];
+		if(player.dead) continue;
+		if(player.removed) continue;
+		if(playerIn == player) continue;
+		
+		if(func(player)) result = true;
 	}
 
 	return result;
@@ -245,13 +250,15 @@ Game.prototype.forAllOtherPlayers = function(player, func){
 
 }
 
-Game.prototype.forAllOtherAlivePlayers = function(player, func){
+Game.prototype.forAllOtherAlivePlayers = function(playerIn, func){
 	var result = false;
 
 	for(var name in this.players){
-		if(player !== this.players[name] && !this.players[name].dead){
-			if(func(this.players[name])) result = true;
-		}
+		var player = this.players[name];
+		if(player.dead) continue;
+		if(player.removed) continue;
+		if(playerIn == player) continue;
+		if(func(player)) result = true;
 	}
 	return result;
 
@@ -353,16 +360,15 @@ Game.prototype.addPlayer = function(name, master){
 	}
 }
 
-Game.prototype.findPlayerByName = function(name){
+Game.prototype.findPlayerByName = function(nameIn){
 
 	var playerGot;
 		
-	this.forAllPlayers(function(player){
+	for(var name in this.players){
+		var player = this.players[name];
+		if(player.name == nameIn) playerGot = player;
+	}
 
-		if(player.name == name) playerGot = player;
-
-	});
-	
 	if(playerGot) return playerGot;
 	else return false;
 	

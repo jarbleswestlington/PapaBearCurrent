@@ -17,7 +17,6 @@ canvas.setAttribute("id", "game");
 document.body.appendChild(canvas);
 
 $(document).ready(function() {
-
 	game.state = 'loading';
 	
 	renderer.state = "loading";
@@ -26,3 +25,7 @@ $(document).ready(function() {
 	game.stateManager();
 
 });
+
+window.onbeforeunload = function (e) {
+ 	socket.emit("left_game", {name: user.name});
+};

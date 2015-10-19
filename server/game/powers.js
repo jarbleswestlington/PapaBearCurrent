@@ -31,7 +31,7 @@ Power.prototype.lose = function(player, fromIncludes){
 	var sockets = require("./sockets.js").access;
 	var game = require('./game.js');
 
-	console.log(player.name + " lost the power:" + this.name, fromIncludes);
+	console.log(player.name + " lost the power:" + this.name);
 
 	if(this.onLose) {
 		this.onLose(player);

@@ -36,6 +36,7 @@ module.exports = function(game){
 		this.powers = {};
 		this.tag = "player";
 
+		this.removed = false;
 		this.spear = {
 			width : 30,
 			height : 5,
@@ -261,16 +262,33 @@ module.exports = function(game){
 
 		this.addUpdate("dead", "attacking", "renderteam", "log");
 
-		this.spawn(function(spawn){
+		var team = game.teams[this.team];
 
-			setTimeout(function() { 
-				this.x = spawn.x;
-				this.y = spawn.y;
-				this.dead = false;
-				this.addUpdate("x", "y", "dead");
-			 }.bind(this), 8000);
+		var respawn = function(){
 
-		}.bind(this));
+			team.score = team.score - 250;
+
+			this.spawn(function(spawn){
+				setTimeout(function() { 
+					this.x = spawn.x;
+					this.y = spawn.y;
+					this.dead = false;
+					this.addUpdate("x", "y", "dead");
+				}.bind(this), 8000);
+			}.bind(this));
+
+		}.bind(this);
+
+		var check = function(){
+
+			if(team.score >= 250){
+				respawn();
+			}else{
+				setTimeout(check, 8000);
+			}
+		}
+
+		check();
 	}
 	
 	Player.prototype.loseAllPowers = function(){

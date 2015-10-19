@@ -1,6 +1,7 @@
 //setUp Game object;
 var game = {
 	
+	live:false,
 	connected:false,
 	gameState:"init",
 	timeLimit:720,
@@ -28,7 +29,9 @@ game.forAllTrees = function(func){
 game.forAllPlayers = function(func){
 	
 	for(var name in game.server.players){	
-		func(game.server.players[name]);
+		var player = game.server.players[name];
+		if(player.removed) continue;
+		func(player);
 	}
 	
 }
@@ -43,9 +46,10 @@ game.forAllTeams = function(func){
 
 }
 
-game.getPowerStats = function(power){
+game.getPowerStats = function(power, player){
 	
-	var stats = {has: false, total :0};
+	var stats = {has: false, total :0, had: false};
+	stats.player = {has: false, had: false};
 	
 	game.forAllPlayers(function(player){
 		
@@ -105,8 +109,9 @@ game.stateManager = function () {
    
 	if(game.state == "waiting"){
 		
+
 		if(user.confirmed){
-			
+
 			renderer.state = "intro";
 
 			

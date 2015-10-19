@@ -52,34 +52,31 @@ function Note(x, y, opts){
 function Obj(data){
 
 	this.tag = "obj";
-	for(var prop in data){
-		this[prop] = data[prop];
-	}
-
 	this.priority = 4;
 	this.removed = false;
 	this.ref = "rgb(180,0,0)";
 
+	for(var prop in data){
+		this[prop] = data[prop];
+	}
+
 	this.draw = function(){
 		if(this.removed) return;
+		
 		if(this.type == "wall"){
 			renderer.drawImage("hedgehog", this.x - 2, this.y + 2);           
         }else if(this.type == "drop"){
             if(this.power == "sword"){
            		renderer.drawImage("swordDia", this.x, this.y);
-           	}
-           	if(this.power == "spear"){
+           	}else if(this.power == "spear"){
            		renderer.drawImage("spearDia", this.x, this.y);
-           	}
-           	if(this.power == "powerWeapon"){
+           	}else if(this.power == "powerWeapon"){
            		renderer.drawImage("spearPDia", this.x, this.y);
+           	}else{
+           		renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
            	}
-           	else{
-           		// renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
-           	}
-       	}
-        else{
-			// renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
+       	}else{
+			renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
 		}
 	}
 
