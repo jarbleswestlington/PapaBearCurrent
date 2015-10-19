@@ -194,8 +194,6 @@ user.interfaceTree = function(tree){
 			
 	if(!this.action) return;
 
-	soundscape.broadcast("chop", 10);		
-
 	if(tree.priority < this.queue.currentPriority) return;
 	this.queue = this.chopTree.bind(this, tree, {x: tree.gridX, y: tree.gridY});
 	this.queue.currentPriority = tree.priority;
@@ -249,7 +247,7 @@ user.interfaceNote = function(note){
 
 	if(!this.action) return;
 	if(note.priority < this.queue.currentPriority) return;
-	soundscape.play("pickUp");
+	
 	Note.respond(note);	
 	this.queue.currentPriority = note.priority;
 
@@ -281,6 +279,8 @@ user.pickUp = function(item, index){
 
 user.chopWall = function(index, amount){
 	
+	soundscape.broadcast("chop", 10);		
+
 	chatController.submit("Chop!", 60);
 	socket.emit("chop_wall", {index: index, amount:amount});
 	
@@ -313,6 +313,8 @@ user.chopTree = function(tree, gridCoords){
 		this.log.wood = 50;
 		
 		tree.removed = true;
+
+		soundscape.broadcast("chop", 10);		
 		
 	    socket.emit('chopTree', {gridCoords: gridCoords, name: this.name});
 				
@@ -331,6 +333,13 @@ user.getNote = function(gridCoords, note){
 	if(note.func) note.func.apply(this, note.args);
 	user.notes.push(note.id);
 	game.saved.grid[gridCoords.x][gridCoords.y].contains.removed = true;
+
+	if (note.name == "empty"){
+		soundscape.play("emptyChest");
+	}else{
+		soundscape.play("pickUp");
+	}
+
 	socket.emit('getNote', {gridCoords: gridCoords});	
 };
 
