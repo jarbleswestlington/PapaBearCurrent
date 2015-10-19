@@ -46,20 +46,27 @@ game.forAllTeams = function(func){
 
 }
 
-game.getPowerStats = function(power, player){
+game.getPowerStats = function(power){
 	
-	var stats = {has: false, total :0, had: false};
-	stats.player = {has: false, had: false};
+	var stats = {has: false, current:0, had: false, teamHas: false};
 	
 	game.forAllPlayers(function(player){
 		
 		if(player.powers[power]){
-			stats.total++;
+			if(player.team == user.team) stats.teamHas = true;
+			stats.current++;
 			stats.has = true;
 		}
 		
 	});
 	
+	var serverStats = game.server.powerStats[power];
+
+	if(serverStats){
+		stats.had = serverStats.had;
+		stats.total = serverStats.total;
+	}
+
 	return stats;
 }
 

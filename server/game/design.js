@@ -30,15 +30,17 @@ module.exports = function(game, io){
 	game.defineTerritory("forest", {x: 0, y: 0, height: game.size.height, width: 5});
 	game.defineTerritory("forest", {x: 0, y: 0, height: 5, width: game.size.width});
 	
-	new Obj({
+	//example of how to make an object
+	var boulder = new Obj({
 	 type: "boulder",
 	 tag: "boulder",
 	 hard: true,
 	 x: 100,
 	 y: 100,
-	 width: 20,
-	 height: 20 
+	 width: 1000,
+	 height: 1000 
 	});
+	game.objects.push(boulder);
 
 	game.generate();
 

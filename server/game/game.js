@@ -30,6 +30,7 @@ function buildGrid(width, height){
 	return grid;
 }
 
+
 function GridNode(data){
 		
 	this.x = data.x || null;
@@ -67,6 +68,8 @@ function Game(width, height){
 	this.tag = "game";
 
 	this.players = {};
+
+	this.powerStats = {};
 	
 	Object.defineProperty(this, 'grid', {value: buildGrid(width, height), enumerable: false});
 	Object.defineProperty(this, 'elephant', {value: {}, enumerable: false});
@@ -315,6 +318,18 @@ Game.prototype.generate = function(){
 		}
 	}
 	
+}
+
+Game.prototype.powerStatsUpdate = function(powerIn){
+
+	console.log(powerIn);
+	if(!this.powerStats[powerIn]) this.powerStats[powerIn] = {had: false, total: 0};
+	stats = this.powerStats[powerIn];
+	stats.had = true;
+	stats.total++;
+
+	this.addUpdate("powerStats");
+
 }
 
 Game.prototype.addPlayer = function(name, master){

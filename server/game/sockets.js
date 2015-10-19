@@ -274,6 +274,8 @@ function setUp(game, server){
 			}else{
 				var powerGive = powers.index[data.power];
 				if(powerGive) powerGive.giveTo(player);
+				game.powerStatsUpdate(data.power);
+
 			}
 
 
