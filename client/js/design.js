@@ -141,14 +141,18 @@ renderer.styles = {
 	"notes": new Style("rgb(0,0,0)", {fontSize: 1, paddingX: .2, paddingY: .2}),	
 	"image": new Style("rgb(0,0,0)", {fontSize: 1, lineWidth: .2, paddingY: -.9}),	
 	"imageWhite": new Style("rgb(255,255,255)", {fontSize: 1, lineWidth: .2, paddingY: -.9}),	
-
-
 }
 
 new UI("big screen", {style: "block text",x: "/10", y: 100, width: "/1.2", height: "-100"}, {reset:false, startRender: false, 
 	condition: function(){
 			if(user.server.dead){
-				this.item = "You will respawn soon";
+				this.item = [];
+				this.item.push("It costs 250 wood to respawn");
+				if(game.server.teams[user.server.team].score >= 250){
+					this.item.push("Your team has enough wood");
+					this.item.push("You will respawn soon");
+				} 
+				else this.item.push("Your team does not have enough wood");
 				return true;
 			}
 			if(builder.rejected){
@@ -270,7 +274,8 @@ inputManager.registerKey("N", {
 	once: true, 
 	mode: "all",
 	on: function(){ 
-			socket.emit('confirm_name', { name: tools.makeId(6), master: true });
+		if(user.server && game.live) socket.emit("left_game", {name: user.server.name});
+		socket.emit('confirm_name', { name: tools.makeId(6), master: true });
 	},
 });
 
@@ -278,9 +283,10 @@ inputManager.registerKey(188, {
 	master: true, 
 	once: true, 
 	mode: "player",
+	onCondition: function(){ return !game.live },
 	on: function(){ 
-			var cur = user.mPlayers.indexOf(user.name);
-			if(user.mPlayers[cur-1]) user.name = user.mPlayers[cur-1];
+		var cur = user.mPlayers.indexOf(user.name);
+		if(user.mPlayers[cur-1]) user.name = user.mPlayers[cur-1];
 	} 
 });
 
@@ -288,9 +294,10 @@ inputManager.registerKey(190, {
 	master: true, 
 	once: true, 
 	mode: "player",
+	onCondition: function(){ return !game.live },
 	on: function(){ 
-			var cur = user.mPlayers.indexOf(user.name);
-			if(user.mPlayers[cur+1]) user.name = user.mPlayers[cur+1];
+		var cur = user.mPlayers.indexOf(user.name);
+		if(user.mPlayers[cur+1]) user.name = user.mPlayers[cur+1];
 	}
 });
 

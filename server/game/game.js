@@ -360,16 +360,15 @@ Game.prototype.addPlayer = function(name, master){
 	}
 }
 
-Game.prototype.findPlayerByName = function(name){
+Game.prototype.findPlayerByName = function(nameIn){
 
 	var playerGot;
 		
-	this.forAllPlayers(function(player){
+	for(var name in this.players){
+		var player = this.players[name];
+		if(player.name == nameIn) playerGot = player;
+	}
 
-		if(player.name == name) playerGot = player;
-
-	});
-	
 	if(playerGot) return playerGot;
 	else return false;
 	

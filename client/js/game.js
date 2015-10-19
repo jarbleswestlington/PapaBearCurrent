@@ -1,6 +1,7 @@
 //setUp Game object;
 var game = {
 	
+	live:false,
 	connected:false,
 	gameState:"init",
 	timeLimit:720,
@@ -29,11 +30,7 @@ game.forAllPlayers = function(func){
 	
 	for(var name in game.server.players){	
 		var player = game.server.players[name];
-		if(player.removed) {
-
-			console.log("hes gone!");
-			continue;
-		}
+		if(player.removed) continue;
 		func(player);
 	}
 	
@@ -114,7 +111,7 @@ game.stateManager = function () {
 		
 
 		if(user.confirmed){
-			
+
 			renderer.state = "intro";
 
 			
