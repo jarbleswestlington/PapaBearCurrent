@@ -83,7 +83,7 @@ new Note("text1",["Appearances can be deceiving...stay alert."], {
 
 new Note("disguise",
  ["You have picked up a disguise.", 
-  "press m and then r,g or b to impersonate another team."], {
+  "press r,g, or b to impersonate another team."], {
 	  prob: 1,
 	  condition:function(){ return game.getCurrentSec() >= 180},
 	  action:{
@@ -156,7 +156,7 @@ new UI("big screen", {style: "block text",x: "/10", y: 100, width: "/1.2", heigh
 		}
 	}
 );
-new UI("game screen", {style: "block text", x: "/6", y: 200, width: "/1.3", height: "-200"}, {reset:false});
+new UI("game screen", {style: "block text", x: "/6", y: 100, width: "/1.3", height: "-200"}, {reset:false});
 new UI("action prompt", {style: "large", x: "/4", y: "-100", width: "/2", height: "/1"}, {type: "block", reset:false}),
 new UI("timer",  {style : "block text", x: "/30", y: "/15", width: "/5", height: "/8"}, {
 		reset:false,
@@ -245,6 +245,7 @@ var audioArray = ["bear",
 "swipe", 
 "chop",
 "pickUp",
+"emptyChest",
 "hit"];
 
 audioArray.forEach(function(audio){

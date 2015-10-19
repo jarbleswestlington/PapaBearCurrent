@@ -249,7 +249,13 @@ user.interfaceNote = function(note){
 
 	if(!this.action) return;
 	if(note.priority < this.queue.currentPriority) return;
+	
+	if (note.name == "empty"){
+	soundscape.play("emptyChest");
+	}
+	else{
 	soundscape.play("pickUp");
+	}
 	Note.respond(note);	
 	this.queue.currentPriority = note.priority;
 
