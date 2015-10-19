@@ -280,6 +280,12 @@ function setUp(game, server){
 
 		});
 
+		socket.on('left_game', function(data) {
+			var player = game.findPlayerByName(data.name);
+			if(!player) return;
+			player.removed = true;
+			player.addUpdate("removed");
+		});
 	});
 	
 	localio = io;

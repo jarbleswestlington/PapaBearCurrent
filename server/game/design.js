@@ -14,6 +14,8 @@
 //socket needs everthing, everything needs socket (use access);
 //game needs everything, everything needs an instance of the game
 
+//respawning requires 250 wood
+
 module.exports = function(game, io){
 	
 	var Team = require('./team.js')(game, io);
@@ -27,6 +29,8 @@ module.exports = function(game, io){
 	game.defineTerritory("forest", {x: 0, y: 0, height: game.size.height, width: 5});
 	game.defineTerritory("forest", {x: 0, y: 0, height: 5, width: game.size.width});
 	
+	// new Obj()
+
 	game.generate();
 
 	new Power("spear", {
@@ -87,7 +91,8 @@ module.exports = function(game, io){
 	});
 
 	new Power("disguise");
-	new Power("invisibility", {exclusive: true,	
+	new Power("invisibility", {
+		exclusive: true,	
 		onRecieve: function(player){
 			player.render = false;
 			player.addUpdate("render");

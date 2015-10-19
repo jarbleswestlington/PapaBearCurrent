@@ -12,9 +12,18 @@ module.exports = function(app, game){
 
 	   var pName = req.params.name;
    
-	   if(!game.hasPlayer(pName)) game.addPlayer(pName, pName == "master" ? true : false);
+	   if(!game.hasPlayer(pName)){
+	   		  console.log("finding player 3")
 
+	 		game.addPlayer(pName, pName == "master" ? true : false);
+	   }else{
+	   		console.log("finding player 2")
+
+		   	var player = game.findPlayerByName(data.name);
+		   	player.removed = false;
+	   }
 	   res.write(index);
+			console.log("finding player 1")
 
 	   res.end();
 

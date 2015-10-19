@@ -28,7 +28,13 @@ game.forAllTrees = function(func){
 game.forAllPlayers = function(func){
 	
 	for(var name in game.server.players){	
-		func(game.server.players[name]);
+		var player = game.server.players[name];
+		if(player.removed) {
+
+			console.log("hes gone!");
+			continue;
+		}
+		func(player);
 	}
 	
 }
@@ -106,6 +112,7 @@ game.stateManager = function () {
    
 	if(game.state == "waiting"){
 		
+
 		if(user.confirmed){
 			
 			renderer.state = "intro";

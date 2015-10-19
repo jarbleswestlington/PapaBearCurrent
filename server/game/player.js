@@ -36,6 +36,7 @@ module.exports = function(game){
 		this.powers = {};
 		this.tag = "player";
 
+		this.removed = false;
 		this.spear = {
 			width : 30,
 			height : 5,
