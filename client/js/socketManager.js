@@ -103,6 +103,12 @@ socket.on('noteGot', function(data) {
 		
 });
 
+socket.on('kill', function(data) {
+	renderer.UI["big screen"].forceRender = true;
+	renderer.UI["big screen"].item = "You killed " + data.reactant;		
+});
+
+
 socket.on('placement_result', function(data) {
 	if(data.success) builder.place();
 	else builder.reject();

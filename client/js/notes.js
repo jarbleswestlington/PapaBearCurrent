@@ -43,8 +43,6 @@ var Note = function(name, lines, options){
 
 Note.respond = function(noteIn){
 
-	console.log(game.getPowerStats("powerWeapon"));
-
 	var redo = true;
 	
 	do{

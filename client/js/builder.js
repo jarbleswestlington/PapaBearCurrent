@@ -1,4 +1,3 @@
-
 var builder = {
 	on:false,
 	item:null,
@@ -7,7 +6,7 @@ var builder = {
 
 builder.refs = {}
 
-builder.refs["wall"] = {width: 35, height: 35};
+builder.refs["wall"] = {width: 42, height: 50};
 
 builder.start = function(type){	
 	this.item = type;

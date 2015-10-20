@@ -186,6 +186,8 @@ user.interfaceTree = function(tree){
 
 	if(!tools.checkCollision(this.server, tree, 41, 36, 78, 78, -25, -25)) return;
 
+	if(this.server.log.has) return;
+	
 	if(tree.priority < renderer.UI["space bar"].currentPriority) return;
 	renderer.UI["space bar"].render = true;
 	renderer.UI["space bar"].item = "Chop Tree";
@@ -324,8 +326,8 @@ user.chopTree = function(tree, gridCoords){
 user.readNote = function(id){
 	note = noteIndex[id];
 
-	renderer.UI["game screen"].item = note.lines;
-	renderer.UI["game screen"].render = true;
+	renderer.UI["big screen"].forceRender = true;
+	renderer.UI["big screen"].item = note.lines;
 };
 
 user.getNote = function(gridCoords, note){
