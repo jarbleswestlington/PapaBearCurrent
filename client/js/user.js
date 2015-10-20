@@ -162,9 +162,7 @@ user.interactWBase = function(){
 					if(team.score != 0){
 				
 						renderer.UI["space bar"].render = true;
-						renderer.UI["space bar"].item = "Steal Wood";
-							
-							n			
+						renderer.UI["space bar"].item = "Steal Wood";		
 						if(this.action){
 							this.stealWood(team.name);
 							this.action = false;	
