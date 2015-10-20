@@ -149,7 +149,13 @@ renderer.styles = {
 
 new UI("big screen", {style: "block text",x: "/10", y: 100, width: "/1.2", height: "-100"}, {reset:false, startRender: false, 
 	condition: function(){
-			if(user.server.dead){
+			if(builder.rejected){
+
+				this.item = "You cannot build here";
+				return true;
+
+			}else if(user.server.dead){
+
 				this.item = [];
 				this.item.push("It costs 250 wood to respawn");
 				if(user.server.willRespawn){
@@ -159,12 +165,13 @@ new UI("big screen", {style: "block text",x: "/10", y: 100, width: "/1.2", heigh
 				else this.item.push("Your team does not have enough wood");
 
 				if(user.killer) this.item.push("You were killed by " + user.killer);
+				this.forceRender = false;
+				return true;
+
+			}else if(this.forceRender){
 				return true;
 			}
-			if(builder.rejected){
-				this.item = "You cannot build here";
-				return true;
-			}
+
 			return game.state !== "game";
 		}
 	}

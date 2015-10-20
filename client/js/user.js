@@ -326,8 +326,8 @@ user.chopTree = function(tree, gridCoords){
 user.readNote = function(id){
 	note = noteIndex[id];
 
-	renderer.UI["game screen"].item = note.lines;
-	renderer.UI["game screen"].render = true;
+	renderer.UI["big screen"].forceRender = true;
+	renderer.UI["big screen"].item = note.lines;
 };
 
 user.getNote = function(gridCoords, note){

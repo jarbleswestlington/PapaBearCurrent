@@ -9,6 +9,8 @@ module.exports = function(game){
 		this.team = args.team;
 		this.name = args.name;
 
+		this.freeCamera = false;
+
 		this.willRespawn = false;
 
 		this.x = 0;
@@ -257,8 +259,9 @@ module.exports = function(game){
 	
 	Player.prototype.die = function(agent){
 		
-		console.log(this.name);
 		game.elephant[this.name].emit("death", {agent: agent});
+		game.elephant[agent].emit("kill", {reactant: this.name});
+
 		this.dead = true;
 		this.attacking = false;		
 		this.renderteam = this.team;
