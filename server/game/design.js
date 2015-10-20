@@ -31,6 +31,8 @@ module.exports = function(game, io){
 	game.defineTerritory("forest", {x: 0, y: 0, height: game.size.height, width: 5});
 	game.defineTerritory("forest", {x: 0, y: 0, height: 5, width: game.size.width});
 	
+	game.defineTerritory("boulder", {x: 1, y: 1, height: 10, width: 10});
+
 	//example of how to make an object
 	var boulder = new Obj({
 	 type: "boulder",
@@ -41,7 +43,7 @@ module.exports = function(game, io){
 	 width: 1000,
 	 height: 1000 
 	});
-	game.objects.push(boulder);
+	// game.objects.push(boulder);
 
 	game.generate();
 
@@ -102,9 +104,50 @@ module.exports = function(game, io){
 	    },
 	});
 
-	new Power("disguise");
+	new Power("dash", {
+		key: "X",	
+		exclusive: true,
+		droppable: true,
+		group:"support",
+		dropImg: "dashboots",
+	});
+
+
+	new Power("disguise", {
+		key: "X",	
+		exclusive: true,
+		droppable: true,
+		group:"support",
+		dropImg: "disguise",
+		onUse: function(player){
+
+			var go = false;
+			game.forAllTeams(function(team){
+				if(go){
+					player.renderteam = team.name;
+					go = false;
+				}else if(team.name == player.renderteam){
+
+					go = true;
+				}
+			});
+
+			if(go){
+				for(var team in game.teams){
+					player.renderteam = game.teams[team].name;
+					break;
+				}
+			}
+
+			player.addUpdate("renderteam");
+		}
+	});
 	new Power("invisibility", {
-		exclusive: true,	
+		key: "X",	
+		exclusive: true,
+		droppable: true,
+		group:"support",
+		dropImg: "cloak",
 		onRecieve: function(player){
 			player.render = false;
 			player.addUpdate("render");
@@ -114,7 +157,21 @@ module.exports = function(game, io){
 			player.addUpdate("render");
 		}
 	});
-	new Power("telescope");
+	new Power("telescope",{		
+		key: "X",	
+		exclusive: true,
+		droppable: true,
+		group:"support",
+		dropImg: "telescope",
+		onUse: function(player){
+			player.freeCamera = !player.freeCamera;
+			player.addUpdate("freeCamera");
+		},
+		onLose: function(player){
+			player.freeCamera = false;
+			player.addUpdate("freeCamera");
+		}
+	});
 	new Power("papaBear", {
 		exclusive: true,
 		onRecieve: function(player){

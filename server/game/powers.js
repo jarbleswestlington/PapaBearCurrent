@@ -18,11 +18,16 @@ function Power(name, opts){
 	this.onLose = opts.onLose || null;
 	this.onCollide = opts.onCollide || null; //if collded with player that used
 
+	this.dropImg = opts.dropImg || null;
+
+	this.key = opts.key || null;
+
 	this.handicap = opts.handicap || null; //(no woodcutting, no notes, no stealing, etc, no collisions)
 	this.default = opts.default || false;
 
 	this.include = opts.include || null;
 	this.exclusive = opts.exclusive || false;
+
 	this.group = opts.group || false;
 
 }
@@ -47,7 +52,7 @@ Power.prototype.lose = function(player, fromIncludes){
 	}
 	if(this.droppable && !fromIncludes){
 		console.log(this.name + " was dropped by: " + player.name);
-		var obj = {power: this.name, type: "drop", tag: this.name, hard: false, removed:false, x: player.x, y: player.y, width: 20, height: 20 };
+		var obj = {power: this.name, type: "drop", img: this.dropImg, tag: this.name, hard: false, removed:false, x: player.x, y: player.y, width: 45, height: 45 };
 		var newObj = new Obj(obj)
 		game.objects.push(newObj);
 		sockets.emit("add_object", newObj);
@@ -60,7 +65,11 @@ Power.prototype.giveTo = function(player, fromIncludes){
 	if(this.exclusive && !fromIncludes){
 		if(this.group){
 			for(var name in player.powers){
-				if(player.powers[name] && powers.index[name].group == this.group) powers.index[name].lose(player, player.powers[name].included);	 
+				if(player.powers[name] && powers.index[name].group == this.group){
+		
+
+					powers.index[name].lose(player, player.powers[name].included);
+				} 	 
 			}
 		}else {
 			player.loseAllPowers();

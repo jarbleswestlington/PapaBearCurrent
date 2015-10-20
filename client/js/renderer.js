@@ -44,8 +44,10 @@ renderer.upload = function(src){
 }
 
 renderer.updateCamera = function(){
-	this.camera.y = canvas.height/2 - (user.server.y + user.server.height/2);
-	this.camera.x = canvas.width/2 - (user.server.x + user.server.width/2);
+	if(!user.server.freeCamera){
+		this.camera.y = canvas.height/2 - (user.server.y + user.server.height/2);
+		this.camera.x = canvas.width/2 - (user.server.x + user.server.width/2);
+	}
 };
 
 renderer.drawUI = function(image, coordX, coordY, stretchX, stretchY){
@@ -61,9 +63,14 @@ renderer.drawUI = function(image, coordX, coordY, stretchX, stretchY){
 	
 }
 
-renderer.drawImage = function(image, coordX, coordY){
-	if(typeof image == "object") this.drawImage(image.image, image.x, image.y);
-	else ctx.drawImage(this.refs[image], coordX + this.camera.x, coordY + this.camera.y);
+renderer.drawImage = function(image, coordX, coordY, width, height){
+
+	if(typeof image == "object") this.drawImage(image.image, image.x, image.y, image.width, image.height);
+	else{
+		if(width && height) ctx.drawImage(this.refs[image], coordX + this.camera.x, coordY + this.camera.y, width, height);
+		else ctx.drawImage(this.refs[image], coordX + this.camera.x, coordY + this.camera.y);
+
+	}
 };
 
 renderer.drawImageRelative = function(item , influence){
@@ -132,8 +139,13 @@ var Style = function(color, options){
 
 	if(!color) color = "white";
 	
-	if(options.fontSize) this.fontSize = canvas.width/(40 / options.fontSize);
-	else this.fontSize = 1;
+
+	if(typeof options.fontSize == "string"){
+		this.fontSize = parseFloat(options.fontSize);
+	}else if(options.fontSize){
+		 this.fontSize = canvas.width/(40 / options.fontSize);
+	}else this.fontSize = 1;
+
 	
 	this.apply = function(){
 
@@ -150,9 +162,16 @@ var Style = function(color, options){
 	this.padding = {};
 	if(options.paddingX) this.padding.x = canvas.width/( 40 / options.paddingX );
 	else this.padding.x = 0;
+
+
+	if(typeof options.paddingY == "string"){
+		this.padding.y = parseFloat(options.paddingY);
+	}else if(options.paddingY){
+		 this.padding.y = canvas.width/(40 / options.paddingY);
+	}else this.padding.y = 0;
 	
-	if(options.paddingY) this.padding.y = canvas.width/( 40 / options.paddingY );
-	else this.padding.y = 0;
+	// if(options.paddingY) this.padding.y = canvas.width/( 40 / options.paddingY );
+	// else this.padding.y = 0;
 		
 	//if(!renderer.styles[name]) renderer.styles[name] = this;
 	

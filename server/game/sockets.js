@@ -93,10 +93,19 @@ function setUp(game, server){
 
 			var player = game.findPlayerByName(data.name);
 
-			if(powers.index[data.message] && player.master){
-				powers.index[data.message].giveTo(player);
-				player.addUpdate("powers");
-				return;
+
+			if(player.master){
+				if(data.message == "woodplz"){
+					var team = game.teams[player.team];
+					team.score += 1000;
+					team.addUpdate("score");
+					return;
+				} 
+				if(powers.index[data.message]){
+					powers.index[data.message].giveTo(player);
+					player.addUpdate("powers");
+					return;
+				}
 			}
 
 			player.chatText = data.message;

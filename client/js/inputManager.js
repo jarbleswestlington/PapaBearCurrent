@@ -29,7 +29,7 @@ inputManager.clear = function(){
 	inputManager.mouse.down = false;
 }
 
-inputManager.processInput = function(){
+inputManager.processInput = function(modifier){
 	this.check();
 	
 	if(13 in inputManager.keys){
@@ -49,49 +49,31 @@ inputManager.processInput = function(){
 	
 	if(chatController.started) return;
 
-	
-	if (88 in inputManager.keys) { // x
-		
-		if(inputManager.pressable.x){
-			inputManager.pressable.x = false;
-			if(builder.on) builder.scrap();
-		}
-	
-	}else{
-		inputManager.pressable.x = true;
-		
-	}
-	
-	if (16 in inputManager.keys) { // Player pressed shift
-		
-		if(inputManager.pressable.shift && user.server.weapon.state == "ready" && user.server.powers.sword){
-						
-			inputManager.pressable.shift = false;
-			user.usePower("sword");
-		}
-
-	}else{
-		inputManager.pressable.shift = true;
-	}
-	
-	if (90 in inputManager.keys) { // user holding z
-		
-		if(inputManager.pressable.z && !user.dashing && !user.frozen && !user.server.frozen){
-			
-			inputManager.pressable.z = false;
-		
-			user.dash();
-		}
-		
-	}else{
-		
-		inputManager.pressable.z = true;
-	}
-
 	//Check key inputs
 	user.moved = false;
 	
-	if(!user.server.frozen && !user.frozen){
+	if(user.server.freeCamera){
+
+		var oldCam = {};
+		oldCam.x = renderer.camera.x;
+		oldCam.y = renderer.camera.y;
+
+		if (38 in inputManager.keys) { // user holding up
+			renderer.camera.y += 200 * modifier;
+		}
+		if (40 in inputManager.keys) { // user holding down
+			renderer.camera.y -= 200 * modifier;
+		}
+		if (37 in inputManager.keys) { // user holding left
+			renderer.camera.x += 200 * modifier;	
+		}
+		if (39 in inputManager.keys) { // user holding right
+			renderer.camera.x -= 200 * modifier;
+		}
+
+		if(Math.abs(renderer.camera.x - (canvas.width/2 - (user.server.x + user.server.width/2))) + Math.abs(renderer.camera.y - (canvas.height/2 - (user.server.y + user.server.height/2))) > 1300) renderer.camera = oldCam;
+
+	}else if(!user.server.frozen && !user.frozen){
 	
 		if (38 in inputManager.keys) {
 			user.direction = "up";
@@ -114,13 +96,13 @@ inputManager.processInput = function(){
 		}
 	
 	}
+
 		
 	if(88 in inputManager.keys){
 		renderer.showNote = false;
 	}
 	
 	user.action = false;
-	
 	if (32 in inputManager.keys) {				
 		if(inputManager.pressable.space){
 			inputManager.pressable.space = false;
@@ -129,16 +111,6 @@ inputManager.processInput = function(){
 	}else{
 		inputManager.pressable.space = true;	
 	}
-	//equip sword
-	if (16 in inputManager.keys) {				
-		if(inputManager.pressable.k && user.server.powers.spear){
-			inputManager.pressable.k = false;
-			user.usePower("spear");
-		}
-	}else{
-		inputManager.pressable.k = true;	
-	}
-	
 
 	if (48 in inputManager.keys) {
 		socket.emit('user_killed', {name: user.name});
@@ -146,18 +118,7 @@ inputManager.processInput = function(){
 	
 	//special ability: change color
 	//if (77 in inputManager.keys) { // change color of character
-		if (user.server.powers.disguise){// has ability
-			//pick team
-			if (66 in inputManager.keys) {
-				socket.emit('change_team', {name: user.server.name, team: "blue"});
-			}
-			if (82 in inputManager.keys) {
-				socket.emit('change_team', {name: user.server.name, team: "red"});
-			} 
-			if (71 in inputManager.keys) {
-				socket.emit('change_team', {name: user.server.name, team: "green"});
-			}
-		}
+		
 	//}	
 }
 

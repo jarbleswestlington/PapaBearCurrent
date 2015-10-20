@@ -1,5 +1,7 @@
 var tools = require('./tools.js');
 
+var powers = require('./tools.js');
+
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -67,11 +69,13 @@ function Obj(data){
 			renderer.drawImage("hedgehog", this.x - 2, this.y + 2);           
         }else if(this.type == "drop"){
             if(this.power == "sword"){
-           		renderer.drawImage("swordDia", this.x, this.y);
+           		renderer.drawImage("swordDia", this.x, this.y, this.width, this.height);
            	}else if(this.power == "spear"){
-           		renderer.drawImage("spearDia", this.x, this.y);
+           		renderer.drawImage("spearDia", this.x, this.y, this.width, this.height);
            	}else if(this.power == "powerWeapon"){
-           		renderer.drawImage("spearPDia", this.x, this.y);
+           		renderer.drawImage("spearPDia", this.x, this.y, this.width, this.height);
+           	}else if(this.img){
+           		renderer.drawImage(this.img, this.x, this.y, this.width, this.height);
            	}else{
            		renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
            	}

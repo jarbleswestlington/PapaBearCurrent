@@ -14,7 +14,7 @@ module.exports = function(app, game){
 
 		if(!game.hasPlayer(pName)){
 			console.log("making player");
-			game.addPlayer(pName);
+			if(pName !== "master") game.addPlayer(pName);
 		}else{
 			console.log("what");
 		   	var player = game.findPlayerByName(pName);
