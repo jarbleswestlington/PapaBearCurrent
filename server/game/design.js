@@ -112,6 +112,14 @@ module.exports = function(game, io){
 		dropImg: "dashboots",
 	});
 
+	new Power("hammer", {
+		key: "C",	
+		exclusive: true,
+		default: true,
+		group:"build",
+		dropImg: "hammerDia",
+	});
+
 
 	new Power("disguise", {
 		key: "X",	

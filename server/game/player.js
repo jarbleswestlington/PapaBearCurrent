@@ -185,6 +185,8 @@ module.exports = function(game){
 
 		if(!func){
 
+			this.getAllDefaultPowers();
+
 			this.x = spawnPlayer.x;
 			this.y = spawnPlayer.y;
 			this.addUpdate("x", "y");
@@ -195,6 +197,15 @@ module.exports = function(game){
 		}
 
 	}
+
+	Player.prototype.getAllDefaultPowers = function(){
+
+		for(var power in powers.index){
+			if(powers.index[power].default){
+				powers.index[power].giveTo(this);
+			}
+		}
+	};
 
 	Player.prototype.addUpdate = function(arg){
 		if(arg == "all"){

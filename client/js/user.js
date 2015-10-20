@@ -188,6 +188,8 @@ user.interfaceTree = function(tree){
 
 	if(!tools.checkCollision(this.server, tree, 41, 36, 78, 78, -25, -25)) return;
 
+	if(this.server.log.has) return;
+	
 	if(tree.priority < renderer.UI["space bar"].currentPriority) return;
 	renderer.UI["space bar"].render = true;
 	renderer.UI["space bar"].item = "Chop Tree";
