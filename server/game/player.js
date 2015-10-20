@@ -128,16 +128,18 @@ module.exports = function(game){
 			if(this.powers.papaBear){
 				if(agent.tag == "powerWeapon"){
 					if(this instanceof Player) this.die(agent.name);
-					return;
-				} 
-				else return false;
+				}
+				if(agent.tag == "wall"){
+					return true;
+				}
+				return false;
 			}
 			if(agent.tag == "sword" || agent.tag == "spear" || agent.tag == "powerWeapon" || agent.tag == "papaBear"){
 				if(this instanceof Player) this.die(agent.name);
 				return;
 			}
 			//returns true to prevent movement of the agent
-			else return true;
+			return true;
 		}
 	}
 	

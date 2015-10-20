@@ -15,6 +15,10 @@
 //onclick method to UI's
 //allow ghostmovment in master if you hold shift
 
+// 4) give me tutorial images and I will implement
+// 5) finish UI
+// 6) telescope
+
 
 //disguise, telescope, hammer, running boots, cloak
 //status effects -- papabear
@@ -139,7 +143,7 @@ renderer.styles = {
 	"note": new Style("rgb(255,255,255)", {fontSize: 1.5, lineWidth: .2}),
 	"on top": new Style("rgb(0,0,0)", {fontSize: 1, lineWidth: .2, paddingX: .85, paddingY: .1}),	
 	"notes": new Style("rgb(0,0,0)", {fontSize: 1, paddingX: .2, paddingY: .2}),	
-	"image": new Style("rgb(0,0,0)", {fontSize: 1, lineWidth: .2, paddingY: -.9}),	
+	"image": new Style("rgb(0,0,0)", {fontSize: "60", paddingY: "-60"}),	
 	"imageWhite": new Style("rgb(255,255,255)", {fontSize: 1, lineWidth: .2, paddingY: -.9}),	
 }
 
@@ -173,7 +177,7 @@ new UI("timer",  {style : "block text", x: "/30", y: "/15", width: "/5", height:
 	}
 );
 
-new UI("wood counter", {style: "imageWhite", x: "-200", y: "/1.20", width: 90, height: "/10"}, { background: "pile", startRender: true, reset: false,
+new UI("wood counter", {style: "imageWhite", x: "-200", y: "-125", width: 90, height: 70}, { background: "pile", startRender: true, reset: false,
 	condition: function(){
 		if(!user.server.powers) return;
 		if(!user.server.powers.papaBear){
@@ -183,9 +187,25 @@ new UI("wood counter", {style: "imageWhite", x: "-200", y: "/1.20", width: 90, h
 	}
 });
 
-new UI("space bar", {style: "on top", x: 200, y: "/1.20", width: "/6", height: "/10"}, { background: "spacebar", startRender: false});
+new UI("space bar", {style: "on top", x: 200, y: "-125", width: "/6", height: 70}, { background: "spacebar", startRender: false});
 
-new UI("shift key", {style: "image", x: 100, y: "/1.20", width: 70, height: "/10"}, { background: "spacebar", reset: false, startRender: true,
+new UI("x key", {style: "image", x: 120, y:  "-125", width: 70, height: 70}, { background: "xkey", reset: false, startRender: true,
+	condition: function(){
+		if(!user.server.powers) return false;
+
+		if(user.server.powers.disguise){
+			this.item = "disguise";
+			return true;
+		}
+		if(user.server.powers.invisibility){
+			this.item = "cloak";
+			return true;
+		}
+		
+	},
+});
+
+new UI("z key", {style: "image", x: 40, y:  "-125", width: 70, height: 70}, { background: "zkey", reset: false, startRender: true,
 	condition: function(){
 		if(!user.server.powers) return false;
 
@@ -203,7 +223,6 @@ new UI("shift key", {style: "image", x: 100, y: "/1.20", width: 70, height: "/10
 		}
 	},
 });
-
 
 new UI("notes", {style: "notes", x: "/1.65", y: "/1.20", width: "/6", height: "/10"}, 
 	{ reset: false, type: "grid", rows: 2, cols:8, item: "rgb(0,0,255)", ref: user.notes });
@@ -244,7 +263,14 @@ var imageArray = ["bear",
 "spearPDia",
 "swordDia",
 "hedgehog",
-"chest"];
+"chest",
+"zkey",
+"xkey",
+"hammerDia",
+"cloak",
+"disguise",
+"telescope",
+"dashboots"];
 
 imageArray.forEach(function(image){
 	renderer.upload(image);
@@ -260,6 +286,59 @@ var audioArray = ["bear",
 audioArray.forEach(function(audio){
 	soundscape.upload(audio);
 });
+
+	
+	if (90 in inputManager.keys) { // user holding z
+		
+		if(inputManager.pressable.z && !user.dashing && !user.frozen && !user.server.frozen){
+			
+			inputManager.pressable.z = false;
+		
+		}
+		
+	}else{
+		
+		inputManager.pressable.z = true;
+	}
+
+
+inputManager.registerKey("Z", {
+	master: true, 
+	once: true, 
+	mode: "player",
+	on: function(){ 
+			if(inputManager.pressable.shift && user.server.weapon.state == "ready" && user.server.powers.sword){
+				user.usePower("sword");
+			}
+			if(user.server.powers.spear){
+				user.usePower("spear");
+			}
+
+		}, 
+	}
+);
+
+inputManager.registerKey("X", {
+	master: true, 
+	once: true, 
+	mode: "player",
+	on: function(){ 
+			if(user.server.powers.disguise){
+				user.usePower("disguise");
+			}
+			if(user.server.powers.dash){
+				user.dash();
+			}
+			if(user.server.powers.telescope){
+				user.usePower("telescope");
+			}
+			if(user.server.powers.dash){
+				user.dash();
+			}
+		}, 
+	}
+);
+
 
 inputManager.registerKey("M", {
 	master: true, 
@@ -348,13 +427,15 @@ renderer['game'] = function(){
 	renderer.drawAll([
 		game.server,
 	 	game.forAllTeams,
-	 	game.saved.objects,
 	 	game.forAllPlayers,
+	 	game.saved.objects,
 		renderer.UI["timer"],
 		renderer.UI['space bar'],
 		renderer.UI['game screen'],
 		renderer.UI["big screen"],
-		renderer.UI["shift key"],
+		renderer.UI["z key"],
+		renderer.UI["x key"],
+
 		renderer.UI["wood counter"],
 		builder
 	]);

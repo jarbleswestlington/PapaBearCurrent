@@ -13,8 +13,6 @@ builder.start = function(type){
 	this.item = type;
 	this.on = true;
 	user.inPlace = true;
-	user.log.has = false;
-	user.log.stolen = false;
 };
 
 builder.scrap = function(){
@@ -32,7 +30,8 @@ builder.request = function(){
 };
 
 builder.place = function(){
-	
+	user.log.has = false;
+	user.log.stolen = false;
 	this.rejected = false;
 	this.on = false;	
 	user.inPlace = false;

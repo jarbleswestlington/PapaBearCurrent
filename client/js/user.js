@@ -147,7 +147,7 @@ user.checkNearbyObjects = function(){
 
 user.interactWBase = function(){
 	
-	if(!this.server.powers.papaBear && !this.server.powers.invisibility){
+	if(!this.server.powers.papaBear){
 			
 		game.forAllTeams(function(team){
 			
@@ -163,7 +163,8 @@ user.interactWBase = function(){
 				
 						renderer.UI["space bar"].render = true;
 						renderer.UI["space bar"].item = "Steal Wood";
-										
+							
+							n			
 						if(this.action){
 							this.stealWood(team.name);
 							this.action = false;	
@@ -265,7 +266,7 @@ user.pickUp = function(item, index){
 	}, 1000);
 		
 	if(noteIndex[item.power]) {
-		user.notes.push(noteIndex[item.power]);
+		user.notes.push(noteIndex[item.power].id);
 		user.readNote(noteIndex[item.power].id);
 	}
 	
@@ -390,21 +391,5 @@ user.move = function(modifier){
 		if(this.inPlace) this.amount = 0;
 		
 		socket.emit('move_input', {direction: this.direction, name: this.name, amount: this.amount});
-	}
-};
-
-var getWidth = function(player){
-	if (player.direction == "U" || player.direction == "D"){
-		return player.spear.height;
-	}else if (player.direction == "L" || player.direction == "R"){
-		return player.spear.width;
-	}
-};
-
-var getHeight = function(player){
-	if (player.direction == "U" || player.direction == "D"){
-		return player.spear.width;
-	}else if (player.direction == "L" || player.direction == "R"){
-		return player.spear.height;
 	}
 };

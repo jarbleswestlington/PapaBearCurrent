@@ -301,6 +301,8 @@ Game.prototype.generate = function(){
 					this.grid[x][y].contains = new Note (x, y);
 				}
 				
+			}else if( this.inTerritory("boulder", {x:x, y:y}) ){
+
 			}else{
 				
 				var chance = Math.random() * 100;
@@ -322,7 +324,6 @@ Game.prototype.generate = function(){
 
 Game.prototype.powerStatsUpdate = function(powerIn){
 
-	console.log(powerIn);
 	if(!this.powerStats[powerIn]) this.powerStats[powerIn] = {had: false, total: 0};
 	stats = this.powerStats[powerIn];
 	stats.had = true;

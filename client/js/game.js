@@ -136,7 +136,7 @@ game.stateManager = function () {
 	if(game.state == "game" && game.server){
   
 	    if(user.mode == "player"){	
-			inputManager.processInput();
+			inputManager.processInput(delta/1000);
 			game.update(delta / 1000);	
 		} 
 				
