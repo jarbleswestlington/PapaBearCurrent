@@ -289,6 +289,8 @@ Game.prototype.generate = function(){
 		for(var y = 0; y < this.size.height; y++){
 			
 			if(this.inTerritory("team", {x:x, y: y})){
+
+			}else if( this.inTerritory("boulder", {x:x, y:y}) ){
 				
 			}else if( this.inTerritory("forest", {x:x, y:y}) ){
 
@@ -301,8 +303,6 @@ Game.prototype.generate = function(){
 					this.grid[x][y].contains = new Note (x, y);
 				}
 				
-			}else if( this.inTerritory("boulder", {x:x, y:y}) ){
-
 			}else{
 				
 				var chance = Math.random() * 100;

@@ -89,7 +89,7 @@ socket.on("death", function(data){
 		user.log.stolenFrom = "";
 	}
 
-})
+});
 
 socket.on('treeChopped', function(data) {
 		
