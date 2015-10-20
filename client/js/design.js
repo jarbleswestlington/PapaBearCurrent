@@ -141,7 +141,7 @@ renderer.styles = {
 	"large": new Style("rgb(255,255,255)", {fontSize: 1.8, lineWidth: 1}),
 	"block text": new Style("rgb(255,255,255)", {fontSize: .75, lineWidth: .2}),
 	"note": new Style("rgb(255,255,255)", {fontSize: 1.5, lineWidth: .2}),
-	"on top": new Style("rgb(0,0,0)", {fontSize: 1, lineWidth: .2, paddingX: .85, paddingY: .1}),	
+	"on top": new Style("rgb(80,80,80)", {fontSize: 1, lineWidth: .2, paddingX: .85, paddingY: .1}),	
 	"notes": new Style("rgb(0,0,0)", {fontSize: 1, paddingX: .2, paddingY: .2}),	
 	"image": new Style("rgb(0,0,0)", {fontSize: "60", paddingY: "-60"}),	
 	"imageWhite": new Style("rgb(255,255,255)", {fontSize: 1, lineWidth: .2, paddingY: -.9}),	
@@ -149,7 +149,13 @@ renderer.styles = {
 
 new UI("big screen", {style: "block text",x: "/10", y: 100, width: "/1.2", height: "-100"}, {reset:false, startRender: false, 
 	condition: function(){
-			if(user.server.dead){
+			if(builder.rejected){
+
+				this.item = "You cannot build here";
+				return true;
+
+			}else if(user.server.dead){
+
 				this.item = [];
 				this.item.push("It costs 250 wood to respawn");
 				if(user.server.willRespawn){
@@ -159,12 +165,13 @@ new UI("big screen", {style: "block text",x: "/10", y: 100, width: "/1.2", heigh
 				else this.item.push("Your team does not have enough wood");
 
 				if(user.killer) this.item.push("You were killed by " + user.killer);
+				this.forceRender = false;
+				return true;
+
+			}else if(this.forceRender){
 				return true;
 			}
-			if(builder.rejected){
-				this.item = "You cannot build here";
-				return true;
-			}
+
 			return game.state !== "game";
 		}
 	}
@@ -187,7 +194,20 @@ new UI("wood counter", {style: "imageWhite", x: "-200", y: "-125", width: 90, he
 	}
 });
 
-new UI("space bar", {style: "on top", x: 200, y: "-125", width: "/6", height: 70}, { background: "spacebar", startRender: false});
+new UI("space bar", {style: "on top", x: 280, y: "-125", width: "/6", height: 70}, { background: "spacebar", startRender: false});
+
+new UI("c key", {style: "image", x: 200, y:  "-125", width: 70, height: 70}, { background: "ckey", reset: false, startRender: true,
+	condition: function(){
+		if(!user.server.powers) return false;
+
+		if(user.server.powers.hammer && user.server.log.has){
+			this.item = "hammerDia";
+			return true;
+		}
+		
+	},
+});
+
 
 new UI("x key", {style: "image", x: 120, y:  "-125", width: 70, height: 70}, { background: "xkey", reset: false, startRender: true,
 	condition: function(){
@@ -278,7 +298,8 @@ var imageArray = ["bear",
 "cloak",
 "disguise",
 "telescope",
-"dashboots"];
+"dashboots",
+"ckey"];
 
 imageArray.forEach(function(image){
 	renderer.upload(image);
@@ -334,6 +355,24 @@ inputManager.registerKey("X", {
 );
 
 
+inputManager.registerKey("C", {
+	once: true, 
+	mode: "player",
+	on: function(){ 
+		builder.start("wall");
+	},
+	onCondition: function(){
+		return user.server.log.has && user.server.powers.hammer;
+	},
+	off: function(){
+		builder.request();
+	},
+	offCondition: function(){
+		return builder.on;
+	},
+});
+
+
 inputManager.registerKey("M", {
 	master: true, 
 	once: true, 
@@ -386,22 +425,6 @@ inputManager.registerKey(191, {
 	}
 });
 
-inputManager.registerKey(87, {
-	once: true, 
-	mode: "player",
-	on: function(){ 
-		builder.start("wall");
-	},
-	onCondition: function(){
-		return user.server.log.has;
-	},
-	off: function(){
-		builder.request();
-	},
-	offCondition: function(){
-		return builder.on;
-	},
-});
 
 
 //view the soundscape.playFrom function to see a guide to what level you should pass into the third arguments
@@ -429,7 +452,7 @@ renderer['game'] = function(){
 		renderer.UI["big screen"],
 		renderer.UI["z key"],
 		renderer.UI["x key"],
-
+		renderer.UI["c key"],
 		renderer.UI["wood counter"],
 		builder
 	]);
