@@ -201,6 +201,14 @@ new UI("x key", {style: "image", x: 120, y:  "-125", width: 70, height: 70}, { b
 			this.item = "cloak";
 			return true;
 		}
+		if(user.server.powers.telescope){
+			this.item = "telescope";
+			return true;
+		}
+		if(user.server.powers.dash){
+			this.item = "dashboots";
+			return true;
+		}
 		
 	},
 });
@@ -286,20 +294,6 @@ var audioArray = ["bear",
 audioArray.forEach(function(audio){
 	soundscape.upload(audio);
 });
-
-	
-	if (90 in inputManager.keys) { // user holding z
-		
-		if(inputManager.pressable.z && !user.dashing && !user.frozen && !user.server.frozen){
-			
-			inputManager.pressable.z = false;
-		
-		}
-		
-	}else{
-		
-		inputManager.pressable.z = true;
-	}
 
 
 inputManager.registerKey("Z", {

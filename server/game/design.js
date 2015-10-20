@@ -43,7 +43,7 @@ module.exports = function(game, io){
 	 width: 1000,
 	 height: 1000 
 	});
-	// game.objects.push(boulder);
+	game.objects.push(boulder);
 
 	game.generate();
 

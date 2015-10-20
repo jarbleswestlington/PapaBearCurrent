@@ -116,10 +116,6 @@ inputManager.processInput = function(modifier){
 		socket.emit('user_killed', {name: user.name});
 	}
 	
-	//special ability: change color
-	//if (77 in inputManager.keys) { // change color of character
-		
-	//}	
 }
 
 inputManager.toCheck = [];
