@@ -56,5 +56,5 @@ builder.draw = function(){
 	if(!builder.on) return;
 	
 	var xy = user.getHoldingCoords(builder.refs[builder.item]);
-	renderer.drawImage("hedgehog", xy.x, xy.y);
+	renderer.drawImage("hedgehog", xy.x - 5, xy.y - 13);
 }

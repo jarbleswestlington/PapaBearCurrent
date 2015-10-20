@@ -66,7 +66,7 @@ function Obj(data){
 		if(this.removed) return;
 		
 		if(this.type == "wall"){
-			renderer.drawImage("hedgehog", this.x - 2, this.y + 2);           
+			renderer.drawImage("hedgehog", this.x - 5, this.y - 13);           
         }else if(this.type == "drop"){
             if(this.power == "sword"){
            		renderer.drawImage("swordDia", this.x, this.y, this.width, this.height);
