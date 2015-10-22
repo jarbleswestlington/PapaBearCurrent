@@ -66,7 +66,7 @@ function Obj(data){
 		if(this.removed) return;
 		
 		if(this.type == "wall"){
-			renderer.drawImage("hedgehog", this.x - 5, this.y - 13);           
+			renderer.drawImage("hedgehog", this.x - 2, this.y - 10);           
         }else if(this.type == "drop"){
             if(this.power == "sword"){
            		renderer.drawImage("swordDia", this.x, this.y, this.width, this.height);
@@ -79,7 +79,9 @@ function Obj(data){
            	}else{
            		renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
            	}
-       	}else{
+       	}else if(this.type == "boulder"){
+           		renderer.drawImage("bearStatue", this.x, this.y);
+           	}else{
 			renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
 		}
 	}

@@ -27,53 +27,86 @@ new Note("steal1",
  ["If you find another village", 
  "you can make off with a large chunk of their wood."], {
 	 prob: 2,
-	 condition:function(){game.getCurrentSec() <= 180}
+	 condition:function(){ return game.getCurrentSec() <= 180}
  }
 );
 
 new Note("build",
- ["By pressing 'w' you can place a barrier using whatever wood you are currently holding"], {
-	 prob: 2,
-	 condition:function(){game.getCurrentSec() <= 180}
- }
-);
-
-new Note("empty",
- ["This chest is empty"], {
-	 prob: 1,
-	 condition: 0,
-	 once: false
- }
-);
-
-
-new Note("dash1",
- ["Press Z to preform a dash."], {
-	prob: 1,
-	condition: 0
+ ["By pressing 'd' you can place a barrier using whatever wood you are currently holding"], {
+	 prob: 3,
+	 condition:function(){ return game.getCurrentSec() <= 180}
  }
 );
 
 new Note("chat1", 
  ["Press ENTER to type messages to nearby players."], {
 	prob: 2,
-	condition:function(){game.getCurrentSec() <= 180}
+	condition:function(){return game.getCurrentSec() <= 180}
  }
 );
 
+new Note("disguise",
+ ["You have picked up a disguise.", 
+  "press s to impersonate another team."], {
+	  prob: 1,
+	  condition:0,
+	  action:{
+		    func: user.givePower,
+	  		args: ["disguise"]
+	  }
+  }
+); 
+
+
+new Note("text1",["Appearances can be deceiving...be on your gaurd."], {
+	prob: 1,
+	condition: 0,
+ }
+);
+
+new Note("text2", ["Some notes can give you immense power. This note does not."], {
+	prob: 1,
+	condition: function(){
+		 return !game.getPowerStats("papaBear").has
+	}
+ }
+);
+
+new Note("empty",
+ ["This chest is empty"], {
+	 prob: 4,
+	 once: false
+ }
+);
+
+new Note("dash1",
+ ["You have picked up magic boots.",
+ "Press S to preform a dash."], {
+	prob: 1,
+	condition:function(){ return game.getCurrentSec() >= 100},
+   	action:{
+		    func: user.givePower,
+	  		args: ["dash"]
+	  		//also Game.currentsec > 180,
+	  }
+	}
+);
+
+
+
 new Note("sword",
  ["You have picked up a sword.",
- " Press 'shift' to swing it."], {
+ " Press 'A' to swing it."], {
 	 prob: 3,
-	 condition: 0,
+	 condition:function(){ return game.getCurrentSec() >= 100},
 	 action:{ func: user.givePower, args: ["sword"]},
  }
 );
 
 new Note("spear", ["You have picked up a spear.",
-	"Press 'shift' to hold it and 'shift' again to hide it."], {
+	"Press 'A' to hold it and 'A' again to hide it."], {
 	prob: 3,
-	condition: 0,
+	condition:function(){ return game.getCurrentSec() >= 100},
  	action:{
 		 func: user.givePower, args: ["spear"],
 		 resetOnDeath: true
@@ -82,27 +115,8 @@ new Note("spear", ["You have picked up a spear.",
  }
 );
 
-new Note("text1",["Appearances can be deceiving...stay alert."], {
-	prob: 2,
-	condition:function(){ return game.getCurrentSec() >= 180 && game.getCurrentSec() <= 360}
- }
-);
-
-new Note("disguise",
- ["You have picked up a disguise.", 
-  "press r,g, or b to impersonate another team."], {
-	  prob: 1,
-	  condition:function(){ return game.getCurrentSec() >= 180},
-	  action:{
-		    func: user.givePower,
-	  		args: ["disguise"]
-	  		//also Game.currentsec > 180,
-	  }
-  }
-); 
-
 new Note("powerWeapon",
- ["Press 'shift' to sheath and unsheathe a golden spear. This weapon can kill PAPA BEAR"], {
+ ["Press 'A' to sheath and unsheathe a golden spear. This weapon can kill PAPA BEAR"], {
 	 prob:1, 
 	 condition: function(){ return game.getCurrentSec() >= 360 && !game.getPowerStats("powerWeapon").has },
 	 action:{
@@ -114,17 +128,10 @@ new Note("powerWeapon",
 new Note("powerWeapon2",
  ["Only the golden spear can defeat PAPA BEAR"], {
 	 prob: 1,
-	 condition: function(){return game.getCurrentSec() >= 360 && !game.getPowerStats("papaBear").has }
+	 condition: function(){return game.getCurrentSec() >= 360 && !game.getPowerStats("papaBear").has },
   }
 ); 
 
-new Note("text2", ["Some notes can give you immense power. This note does not."], {
-	prob: 1,
-	condition: function(){
-		 return !game.getPowerStats("papaBear").has
-	}
- }
-);
 
 new Note("papaBear1",
  ["You are now Papa Bear"], {
@@ -196,7 +203,7 @@ new UI("wood counter", {style: "imageWhite", x: "-200", y: "-125", width: 90, he
 
 new UI("space bar", {style: "on top", x: 280, y: "-125", width: "/6", height: 70}, { background: "spacebar", startRender: false});
 
-new UI("c key", {style: "image", x: 200, y:  "-125", width: 70, height: 70}, { background: "ckey", reset: false, startRender: true,
+new UI("c key", {style: "image", x: 200, y:  "-125", width: 70, height: 70}, { background: "dkey", reset: false, startRender: true,
 	condition: function(){
 		if(!user.server.powers) return false;
 
@@ -209,7 +216,7 @@ new UI("c key", {style: "image", x: 200, y:  "-125", width: 70, height: 70}, { b
 });
 
 
-new UI("x key", {style: "image", x: 120, y:  "-125", width: 70, height: 70}, { background: "xkey", reset: false, startRender: true,
+new UI("x key", {style: "image", x: 120, y:  "-125", width: 70, height: 70}, { background: "skey", reset: false, startRender: true,
 	condition: function(){
 		if(!user.server.powers) return false;
 
@@ -233,7 +240,7 @@ new UI("x key", {style: "image", x: 120, y:  "-125", width: 70, height: 70}, { b
 	},
 });
 
-new UI("z key", {style: "image", x: 40, y:  "-125", width: 70, height: 70}, { background: "zkey", reset: false, startRender: true,
+new UI("z key", {style: "image", x: 40, y:  "-125", width: 70, height: 70}, { background: "akey", reset: false, startRender: true,
 	condition: function(){
 		if(!user.server.powers) return false;
 
@@ -292,14 +299,15 @@ var imageArray = ["bear",
 "swordDia",
 "hedgehog",
 "chest",
-"zkey",
-"xkey",
+"akey",
+"skey",
 "hammerDia",
 "cloak",
 "disguise",
 "telescope",
 "dashboots",
-"ckey"];
+"dkey",
+"bearStatue"];
 
 imageArray.forEach(function(image){
 	renderer.upload(image);
@@ -317,7 +325,7 @@ audioArray.forEach(function(audio){
 });
 
 
-inputManager.registerKey("Z", {
+inputManager.registerKey("A", {
 	master: true, 
 	once: true, 
 	mode: "player",
@@ -333,7 +341,7 @@ inputManager.registerKey("Z", {
 	}
 );
 
-inputManager.registerKey("X", {
+inputManager.registerKey("S", {
 	master: true, 
 	once: true, 
 	mode: "player",
@@ -353,7 +361,7 @@ inputManager.registerKey("X", {
 );
 
 
-inputManager.registerKey("C", {
+inputManager.registerKey("D", {
 	once: true, 
 	mode: "player",
 	on: function(){ 
