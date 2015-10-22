@@ -31,6 +31,14 @@ new Note("steal1",
  }
 );
 
+new Note("steal1",
+ ["Wood will keep your village alive", 
+ "It takes 250 wood to respawn if you are killed."], {
+	 prob: 2,
+	 condition:function(){game.getCurrentSec() <= 180}
+ }
+);
+
 new Note("build",
  ["By pressing 'd' you can place a barrier using whatever wood you are currently holding"], {
 	 prob: 3,
