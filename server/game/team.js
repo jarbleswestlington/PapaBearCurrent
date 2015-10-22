@@ -84,6 +84,20 @@ module.exports = function(game, io){
 		game.addUpdate("teams");
 	}
 
+	Team.prototype.totalAlivePlayers = function(){
+
+		var alive = game.getTeamPlayers(this.name).filter(function(player){
+			if(!player.dead) return true;
+		});
+
+		return alive.length;
+	}
+
+	Team.prototype.isExtinct = function(){
+		if(this.totalAlivePlayers() <= 0 && this.score < 250) return true;
+		else return false;
+	}
+
 	return Team;
 };
 

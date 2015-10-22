@@ -364,15 +364,17 @@ user.givePower = function(power){
 };
 
 user.dash = function(){
+
+	if(this.dashing) return;
 	
 	this.dashing = true;
 	
 	setTimeout(function(){
-		this.dashing = false;
 		this.frozen = true;
 	}.bind(this), 100);
 	
 	setTimeout(function(){
+		this.dashing = false;
 		this.frozen = false;	
 	}.bind(this), 700);
 	

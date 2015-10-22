@@ -342,13 +342,11 @@ inputManager.registerKey("X", {
 				user.usePower("disguise");
 			}
 			if(user.server.powers.dash){
+				console.log(user.dashing);
 				user.dash();
 			}
 			if(user.server.powers.telescope){
 				user.usePower("telescope");
-			}
-			if(user.server.powers.dash){
-				user.dash();
 			}
 		}, 
 	}

@@ -70,7 +70,7 @@ socket.on("death", function(data){
 
 	soundscape.broadcast("hit", 8);
 
-	user.killer = data.agent;
+	user.killer = data.killer;
 
 	user.notes.filter(function(id){
 		return !noteIndex[id].resetOnDeath;
