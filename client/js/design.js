@@ -32,8 +32,8 @@ new Note("steal1",
 );
 
 new Note("build",
- ["By pressing 'w' you can place a barrier using whatever wood you are currently holding"], {
-	 prob: 2,
+ ["By pressing 'd' you can place a barrier using whatever wood you are currently holding"], {
+	 prob: 3,
 	 condition:function(){game.getCurrentSec() <= 180}
  }
 );
@@ -48,10 +48,15 @@ new Note("empty",
 
 
 new Note("dash1",
- ["Press Z to preform a dash."], {
+ ["Press S to preform a dash."], {
 	prob: 1,
-	condition: 0
- }
+	condition: 0,
+   action:{
+		    func: user.givePower,
+	  		args: ["dash"]
+	  		//also Game.currentsec > 180,
+	  }
+	}
 );
 
 new Note("chat1", 
@@ -65,7 +70,7 @@ new Note("sword",
  ["You have picked up a sword.",
  " Press 'shift' to swing it."], {
 	 prob: 3,
-	 condition: 0,
+	 condition:function(){game.getCurrentSec() >= 120},
 	 action:{ func: user.givePower, args: ["sword"]},
  }
 );
@@ -90,7 +95,7 @@ new Note("text1",["Appearances can be deceiving...stay alert."], {
 
 new Note("disguise",
  ["You have picked up a disguise.", 
-  "press r,g, or b to impersonate another team."], {
+  "press x to impersonate another team."], {
 	  prob: 1,
 	  condition:function(){ return game.getCurrentSec() >= 180},
 	  action:{
@@ -196,7 +201,7 @@ new UI("wood counter", {style: "imageWhite", x: "-200", y: "-125", width: 90, he
 
 new UI("space bar", {style: "on top", x: 280, y: "-125", width: "/6", height: 70}, { background: "spacebar", startRender: false});
 
-new UI("c key", {style: "image", x: 200, y:  "-125", width: 70, height: 70}, { background: "ckey", reset: false, startRender: true,
+new UI("c key", {style: "image", x: 200, y:  "-125", width: 70, height: 70}, { background: "dkey", reset: false, startRender: true,
 	condition: function(){
 		if(!user.server.powers) return false;
 
@@ -209,7 +214,7 @@ new UI("c key", {style: "image", x: 200, y:  "-125", width: 70, height: 70}, { b
 });
 
 
-new UI("x key", {style: "image", x: 120, y:  "-125", width: 70, height: 70}, { background: "xkey", reset: false, startRender: true,
+new UI("x key", {style: "image", x: 120, y:  "-125", width: 70, height: 70}, { background: "skey", reset: false, startRender: true,
 	condition: function(){
 		if(!user.server.powers) return false;
 
@@ -233,7 +238,7 @@ new UI("x key", {style: "image", x: 120, y:  "-125", width: 70, height: 70}, { b
 	},
 });
 
-new UI("z key", {style: "image", x: 40, y:  "-125", width: 70, height: 70}, { background: "zkey", reset: false, startRender: true,
+new UI("z key", {style: "image", x: 40, y:  "-125", width: 70, height: 70}, { background: "akey", reset: false, startRender: true,
 	condition: function(){
 		if(!user.server.powers) return false;
 
@@ -292,14 +297,15 @@ var imageArray = ["bear",
 "swordDia",
 "hedgehog",
 "chest",
-"zkey",
-"xkey",
+"akey",
+"skey",
 "hammerDia",
 "cloak",
 "disguise",
 "telescope",
 "dashboots",
-"ckey"];
+"dkey",
+"bearStatue"];
 
 imageArray.forEach(function(image){
 	renderer.upload(image);
@@ -317,7 +323,7 @@ audioArray.forEach(function(audio){
 });
 
 
-inputManager.registerKey("Z", {
+inputManager.registerKey("A", {
 	master: true, 
 	once: true, 
 	mode: "player",
@@ -333,7 +339,7 @@ inputManager.registerKey("Z", {
 	}
 );
 
-inputManager.registerKey("X", {
+inputManager.registerKey("S", {
 	master: true, 
 	once: true, 
 	mode: "player",
@@ -355,7 +361,7 @@ inputManager.registerKey("X", {
 );
 
 
-inputManager.registerKey("C", {
+inputManager.registerKey("D", {
 	once: true, 
 	mode: "player",
 	on: function(){ 
