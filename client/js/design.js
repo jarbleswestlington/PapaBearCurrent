@@ -24,8 +24,8 @@
 //status effects -- papabear
 
 new Note("steal1",
- ["If you find another village", 
- "you can make off with a large chunk of their wood from their base."], {
+ ["If you find another village's base", 
+ "you can make off with a large chunk of their wood."], {
 	 prob: 4,
 	 condition:function(){ return game.getCurrentSec() <= 180}
  }
@@ -33,39 +33,32 @@ new Note("steal1",
 
 new Note("steal2",
  ["If a theif steals wood from your base", 
- "kill them before they escape and the wood will be returned."], {
+ "kill them before they escape and your wood will be returned."], {
 	 prob: 4,
 	 condition:function(){ return game.getCurrentSec() <= 180}
  }
 );
 
 new Note("survival",
- ["Wood will keep your village alive", 
- "It takes 250 wood to respawn if you are killed."], {
-	 prob: 4,
-	 condition:function(){ return game.getCurrentSec() <= 180 }
- }
-);
-
-new Note("obliteration",
- ["If another team has no wood and you have killed all their players", 
- "None of their players will be able to respawn and they will be finished."], {
+ ["If a team runs out of wood", 
+ "They will be unable to respawn."], {
 	 prob: 4,
 	 condition:function(){ return game.getCurrentSec() <= 180}
  }
 );
 
 new Note("teamwork",
- ["Dropping wood at another teams base will give you twice the wood", 
- "Same thing if they were to drop wood at yours. You might want to make friends"], {
-	 prob: 4,
+ ["If you drop wood at another teams base they get twice as much wood", 
+ "maybe you can convince them to do the same for you?"], {
+	 prob: 1,
 	 condition:function(){ return game.getCurrentSec() <= 180}
  }
 );
 
 new Note("revival",
- ["You can revive a dead team by dropping wood off at their base"],  {
-	 prob: 4,
+ ["You can revive a dead team by dropping wood off at their base",
+ "wood dropped at an enemy base is worth twice as much"],  {
+	 prob: 2,
 	 condition:function(){ return game.getCurrentSec() >= 400},
  }
 );
@@ -88,7 +81,7 @@ new Note("disguise",
  ["You have picked up a disguise.", 
   "press 'S' to impersonate another team."], {
 	  prob: 2,
-	  condition:0,
+	  condition:function(){ return game.getCurrentSec() >= 60},
 	  action:{
 		    func: user.givePower,
 	  		args: ["disguise"]
@@ -124,7 +117,8 @@ new Note("empty",
 );
 
 new Note("time",
-	["The items in chests will change depending on how much time has passed, have patience"], {
+	["The items in chests will change depending on how much time has passed.", 
+	"Patience will be rewarded."], {
 	prob: 1,
 	condition: 0,
 	once: false,
