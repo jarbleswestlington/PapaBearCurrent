@@ -1,4 +1,4 @@
-var oneGame = new Game(60, 60);
+var oneGame = new Game(60, 62);
 var Tree = require('./objects.js').Tree;
 var Note = require('./objects.js').Note;
 var tools = require('./tools.js');

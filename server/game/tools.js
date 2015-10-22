@@ -1,5 +1,21 @@
 var tools = {};
 
+tools.debounce = function(func, wait, immediate) {
+	var timeout;
+	return function() {
+		var context = this, args = arguments;
+
+		if(timeout) return;
+		var later = function() {
+			timeout = null;
+			func.apply(context, args);
+		};
+
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+	};
+};
+
 tools.buildUpdated = function(root){
 	var result = {};
 

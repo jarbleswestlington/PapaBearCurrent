@@ -155,9 +155,13 @@ user.interactWBase = function(){
 		
 				if(this.server.team == team.name){
 
-					this.depLog();
+					this.depLog(team.name);
 				
 				}else{
+
+					if(this.log.has && !this.log.stolen){
+						this.depLog(team.name, 2);
+					}
 				
 					if(team.score != 0){
 				
@@ -169,7 +173,7 @@ user.interactWBase = function(){
 						}
 
 					}
-				
+
 				}
 
 			}
@@ -344,7 +348,9 @@ user.getNote = function(gridCoords, note){
 	socket.emit('getNote', {gridCoords: gridCoords});	
 };
 
-user.depLog = function(){
+user.depLog = function(team, multiplier){
+
+	if(!multiplier) multiplier = 1;
 
 	if(this.log.has){
 		
@@ -352,7 +358,10 @@ user.depLog = function(){
 		  
 		if(this.log.stolen) this.log.stolen = false; 
 		this.log.has = false;
-	   	socket.emit('depLog', {team: this.server.team, name: this.name, amount: this.log.wood});
+
+		this.log.wood = this.log.wood * multiplier;
+
+	   	socket.emit('depLog', {team: team, name: this.name, amount: this.log.wood});
 	
 	}
 };

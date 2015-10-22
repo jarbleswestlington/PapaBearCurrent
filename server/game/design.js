@@ -190,6 +190,16 @@ module.exports = function(game, io){
 			player.height = 63;
 			player.tag = "papaBear";
 			player.addUpdate("x","y","width","height","tag");
+
+			var roarLoop = function(){
+				if(!player.powers.papaBear) return;
+				var delay = 5000 + (Math.random() * 15000);
+				io.sockets.emit('play_sound', {sound: "bear", coords: {x:player.x, y: player.y}, level: 120} );
+				setTimeout(roarLoop, delay);
+			}; 
+
+			roarLoop();
+
 		},
 		onLose: function(player){
 			player.width = 41;

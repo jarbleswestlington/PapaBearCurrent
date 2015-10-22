@@ -51,7 +51,7 @@ socket.on('update_clients', function(data) {
 });
 
 socket.on('play_sound', function(data) {
-
+	console.log("playing", data.sound);
 	soundscape.playFrom(data.sound, data.coords, data.level);
 		
 });

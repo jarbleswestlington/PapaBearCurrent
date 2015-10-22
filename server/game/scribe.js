@@ -35,14 +35,15 @@ Event.prototype.hasTag = function(tag){
 }
 
 Event.prototype.happenedNear = function(distance, comparison){
-	var deltaX = 0;
-	var deltaY = 0;
+	var deltaX = this.location.x - comparison.x;
+	var deltaY = this.location.y - comparison.y;
 
-	if(deltaX)
+	if( Math.abs(deltaX) + Math.abs(deltaY) < distance) return true;
+	else return false;
 }
 
 Event.prototype.happenedWithin = function(distance, comparison){
-	
+	if(tools.colCheck(this.location, comparison, {x: -distance.x, y: -distance.y} ) ) 
 }
 
 // Event.prototype.describe = function(data){

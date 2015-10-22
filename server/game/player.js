@@ -1,5 +1,6 @@
 var tools = require('./tools.js');
 var powers = require('./powers.js').powers;
+var sockets = require("./sockets.js").access;
 
 module.exports = function(game){
 	
@@ -49,6 +50,12 @@ module.exports = function(game){
 		this.weapon = {
 		   state: "ready"
 		}
+
+		function walkSound(io){
+			io.sockets.emit('play_sound', {sound: "footstep", coords: {x:this.x, y: this.y}, level: 15} );
+		};
+
+		this.walkSound = tools.debounce(walkSound, 250);
 
 		//this.image = args.image || null;
 		this.character = Math.floor((Math.random() * 3) + 1);

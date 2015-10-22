@@ -25,7 +25,7 @@
 
 new Note("steal1",
  ["If you find another village", 
- "you can make off with a large chunk of their wood."], {
+ "you can make off with a large chunk of their wood from their base."], {
 	 prob: 4,
 	 condition:function(){ return game.getCurrentSec() <= 180}
  }
@@ -43,7 +43,30 @@ new Note("survival",
  ["Wood will keep your village alive", 
  "It takes 250 wood to respawn if you are killed."], {
 	 prob: 4,
+	 condition:function(){ return game.getCurrentSec() <= 180 }
+ }
+);
+
+new Note("obliteration",
+ ["If another team has no wood and you have killed all their players", 
+ "None of their players will be able to respawn and they will be finished."], {
+	 prob: 4,
 	 condition:function(){ return game.getCurrentSec() <= 180}
+ }
+);
+
+new Note("teamwork",
+ ["Dropping wood at another teams base will give you twice the wood", 
+ "Same thing if they were to drop wood at yours. You might want to make friends"], {
+	 prob: 4,
+	 condition:function(){ return game.getCurrentSec() <= 180}
+ }
+);
+
+new Note("revival",
+ ["You can revive a dead team by dropping wood off at their base"],  {
+	 prob: 4,
+	 condition:function(){ return game.getCurrentSec() >= 400},
  }
 );
 
@@ -73,6 +96,18 @@ new Note("disguise",
   }
 ); 
 
+new Note("telescope",
+ ["You have picked up a telescope", 
+  "press 'S' to equip and the arrow keys to move the camera, press 'S' to return."], {
+	  prob: 2,
+	  condition:0,
+	  action:{
+		    func: user.givePower,
+	  		args: ["disguise"]
+	  }
+  }
+); 
+
 new Note("text1",
 	["Appearances can be deceiving...be on your guard for imposters."], {
 	prob: 2,
@@ -89,10 +124,10 @@ new Note("empty",
 );
 
 new Note("time",
-	["The items in chests will change depending on how much time has passed."], {
+	["The items in chests will change depending on how much time has passed, have patience"], {
 	prob: 1,
 	condition: 0,
-	once: false
+	once: false,
  }
 );
 
@@ -107,7 +142,7 @@ new Note("Earlyspear",
 	["You have picked up a spear.",
 	"Press 'A' to switch between equipping or hiding it."], {
 	prob: 1,
-	condition:function(){ return game.getCurrentSec() >= 60 && game.getCurrentSec() <= 139},
+	condition: function(){ return !game.getPowerStats("spear").had && game.getCurrentSec() <= 149},
  	action:{
 		 func: user.givePower, args: ["spear"]
 	 }
@@ -131,7 +166,7 @@ new Note("sword",
  ["You have picked up a sword.",
  " Press 'A' to swing it."], {
 	 prob: 3,
-	 condition:function(){ return game.getCurrentSec() >= 140},
+	 condition:function(){ return game.getCurrentSec() >= 150},
 	 action:{ func: user.givePower, args: ["sword"]},
  }
 );
@@ -139,7 +174,7 @@ new Note("sword",
 new Note("spear", ["You have picked up a spear.",
 	"Press 'A' to switch between equipping or hiding it."], {
 	prob: 3,
-	condition:function(){ return game.getCurrentSec() >= 140},
+	condition:function(){ return game.getCurrentSec() >= 150},
  	action:{
 		 func: user.givePower, args: ["spear"],
 		 resetOnDeath: true
@@ -149,9 +184,9 @@ new Note("spear", ["You have picked up a spear.",
 );
 
 new Note("powerWeapon",
- ["Press 'A' to sheath and unsheathe a golden spear. This weapon can kill PAPA BEAR"], {
+ ["Press 'A' to sheath and unsheathe a golden spear. This weapon can kill Papa Bear"], {
 	 prob:2, 
-	 condition: function(){ return game.getCurrentSec() >= 360 && !game.getPowerStats("powerWeapon").has },
+	 condition: function(){ return game.getCurrentSec() >= 360 && !game.getPowerStats("powerWeapon").has && !game.getPowerStats("papaBear").teamHas },
 	 action:{
 		 func: user.givePower, args: ["powerWeapon"]
 	 } 
@@ -159,7 +194,7 @@ new Note("powerWeapon",
 ); 
 
 new Note("powerWeapon2",
- ["Only the golden spear can defeat PAPA BEAR"], {
+ ["Only the golden spear can defeat Papa Bear"], {
 	 prob: 3,
 	 condition: function(){return game.getCurrentSec() >= 360 && !game.getPowerStats("papaBear").has },
   }
@@ -169,7 +204,7 @@ new Note("powerWeapon2",
 new Note("papaBear1",
  ["You are now Papa Bear"], {
 	 prob: 2,
-	 condition: function(){return game.getCurrentSec() >= 360 && !game.getPowerStats("papaBear").has },
+	 condition: function(){return game.getCurrentSec() >= 360 && !game.getPowerStats("papaBear").had && !game.getPowerStats("powerWeapon").teamHas },
 	 action:{
 		 func: user.givePower,
 		 args: ["papaBear"]
@@ -352,7 +387,8 @@ var audioArray = ["bear",
 "pickUp",
 "emptyChest",
 "hit",
-"build"];
+"build",
+"footstep"];
 
 audioArray.forEach(function(audio){
 	soundscape.upload(audio);

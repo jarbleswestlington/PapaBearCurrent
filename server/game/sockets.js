@@ -1,7 +1,6 @@
 var powers = require('./powers.js').powers;
 var Obj = require('./objects.js').Obj;
 
-
 var localio;
 var access = {};
 access.emit = function(name, data){
@@ -243,9 +242,12 @@ function setUp(game, server){
 			
 			if(player.legalMove(dummy)){
 				
+				player.walkSound(io);
+
 				player.x = dummy.x;
 				player.y = dummy.y;
 				player.addUpdate("x", "y");
+
 			}
 
 			player.defense();
@@ -286,21 +288,6 @@ function setUp(game, server){
 				game.powerStatsUpdate(data.power);
 
 			}
-
-			if(power == "papaBear"){
-
-				var playBearSound = function(){
-
-					io.sockets.emit('play_sound', {sound: "bear", coords: {x:player.x, y: player.y}, level: 120} );
-
-				}; 
-
-				var delay = 5 + (Math.random() * 15);
-
-				setTimeout(playBearSound, delay);
-			}
-
-
 
 		});
 
