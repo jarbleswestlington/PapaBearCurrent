@@ -121,7 +121,6 @@ new Note("time",
 	"Patience will be rewarded."], {
 	prob: 1,
 	condition: 0,
-	once: false,
  }
 );
 
