@@ -40,7 +40,7 @@ module.exports = function(game, io){
 	 x: 2220,
 	 y: 2220,
 	 width: 150,
-	 height: 162 
+	 height: 130, 
 	});
 	game.objects.push(boulder);
 

@@ -12,6 +12,7 @@ chatController.process = function(){
 chatController.show = function(){
 
 	this.started = true;
+	game.mode = "chat";
 
 	$('#chatView').show();
 	$('#chatInput').focus();
@@ -20,6 +21,7 @@ chatController.show = function(){
 chatController.submit = function(text, time){
 
 	this.started = false;
+	game.mode = "player";
 
 	$('#chatView').hide();
 	

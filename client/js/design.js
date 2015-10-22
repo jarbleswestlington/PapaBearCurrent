@@ -376,7 +376,7 @@ inputManager.registerKey("D", {
 		builder.start("wall");
 	},
 	onCondition: function(){
-		return user.server.log.has && user.server.powers.hammer;
+		return user.server.log.has && user.server.powers.hammer && !user.server.log.stolen;
 	},
 	off: function(){
 		builder.request();

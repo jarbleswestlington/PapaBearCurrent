@@ -15,7 +15,7 @@ function setUp(game, server){
 
 	io.sockets.on('connection', function(socket) {
 		
-		console.log("connection has opened");
+		console.log("connection has opened on " + socket.id);
 
 		if(game.state == "started"){
 			console.log("started game on " + socket.id)
@@ -287,6 +287,19 @@ function setUp(game, server){
 
 			}
 
+			if(power == "papaBear"){
+
+				var playBearSound = function(){
+
+					io.sockets.emit('play_sound', {sound: "bear", coords: {x:player.x, y: player.y}, level: 120} );
+
+				}; 
+
+				var delay = 5 + (Math.random() * 15);
+
+				setTimeout(playBearSound, delay);
+			}
+
 
 
 		});
@@ -302,6 +315,8 @@ function setUp(game, server){
 	localio = io;
 	return io;
 }
+
+
 
 module.exports = {
 	access: access,
