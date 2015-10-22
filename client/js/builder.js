@@ -35,6 +35,7 @@ builder.place = function(){
 	this.on = false;	
 	user.inPlace = false;
 	socket.emit("drop_log", {name: user.name});
+	soundscape.broadcast("build", 10);
 
 };
 
