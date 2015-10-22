@@ -273,8 +273,8 @@ new UI("notes", {style: "notes", x: "/1.65", y: "/1.20", width: "/6", height: "/
 //upload all images
 var imageArray = ["bear",
 "playershadow",
-"swordDrop",
-"spearDrop",
+"sworddrop",
+"speardrop",
 "swordR",
 "swordL",
 "swordD",
