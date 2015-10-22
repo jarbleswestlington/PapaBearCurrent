@@ -38,17 +38,51 @@ new Note("build",
  }
 );
 
+new Note("chat1", 
+ ["Press ENTER to type messages to nearby players."], {
+	prob: 2,
+	condition:function(){game.getCurrentSec() <= 180}
+ }
+);
+
+new Note("disguise",
+ ["You have picked up a disguise.", 
+  "press s to impersonate another team."], {
+	  prob: 1,
+	  condition:0,
+	  action:{
+		    func: user.givePower,
+	  		args: ["disguise"]
+	  }
+  }
+); 
+
+
+new Note("text1",["Appearances can be deceiving...be on your gaurd."], {
+	prob: 1,
+	condition: 0,
+ }
+);
+
+new Note("text2", ["Some notes can give you immense power. This note does not."], {
+	prob: 1,
+	condition: function(){
+		 return !game.getPowerStats("papaBear").has
+	}
+ }
+);
+
 new Note("empty",
  ["This chest is empty"], {
-	 prob: 1,
+	 prob: 4,
 	 condition: 0,
 	 once: false
  }
 );
 
-
 new Note("dash1",
- ["Press S to preform a dash."], {
+ ["You have picked up magic boots.",
+ "Press S to preform a dash."], {
 	prob: 1,
 	condition: 0,
    action:{
@@ -59,26 +93,21 @@ new Note("dash1",
 	}
 );
 
-new Note("chat1", 
- ["Press ENTER to type messages to nearby players."], {
-	prob: 2,
-	condition:function(){game.getCurrentSec() <= 180}
- }
-);
+
 
 new Note("sword",
  ["You have picked up a sword.",
- " Press 'shift' to swing it."], {
+ " Press 'A' to swing it."], {
 	 prob: 3,
-	 condition:function(){game.getCurrentSec() >= 120},
+	 condition:function(){game.getCurrentSec() >= 100}, 
 	 action:{ func: user.givePower, args: ["sword"]},
  }
 );
 
 new Note("spear", ["You have picked up a spear.",
-	"Press 'shift' to hold it and 'shift' again to hide it."], {
+	"Press 'A' to hold it and 'A' again to hide it."], {
 	prob: 3,
-	condition: 0,
+	condition:function(){game.getCurrentSec() >= 100},
  	action:{
 		 func: user.givePower, args: ["spear"],
 		 resetOnDeath: true
@@ -87,27 +116,8 @@ new Note("spear", ["You have picked up a spear.",
  }
 );
 
-new Note("text1",["Appearances can be deceiving...stay alert."], {
-	prob: 2,
-	condition:function(){ return game.getCurrentSec() >= 180 && game.getCurrentSec() <= 360}
- }
-);
-
-new Note("disguise",
- ["You have picked up a disguise.", 
-  "press x to impersonate another team."], {
-	  prob: 1,
-	  condition:function(){ return game.getCurrentSec() >= 180},
-	  action:{
-		    func: user.givePower,
-	  		args: ["disguise"]
-	  		//also Game.currentsec > 180,
-	  }
-  }
-); 
-
 new Note("powerWeapon",
- ["Press 'shift' to sheath and unsheathe a golden spear. This weapon can kill PAPA BEAR"], {
+ ["Press 'A' to sheath and unsheathe a golden spear. This weapon can kill PAPA BEAR"], {
 	 prob:1, 
 	 condition: function(){ return game.getCurrentSec() >= 360 && !game.getPowerStats("powerWeapon").has },
 	 action:{
@@ -123,13 +133,6 @@ new Note("powerWeapon2",
   }
 ); 
 
-new Note("text2", ["Some notes can give you immense power. This note does not."], {
-	prob: 1,
-	condition: function(){
-		 return !game.getPowerStats("papaBear").has
-	}
- }
-);
 
 new Note("papaBear1",
  ["You are now Papa Bear"], {

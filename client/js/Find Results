@@ -1,0 +1,200 @@
+Searching 13 files for "probab"
+
+/Users/garygould/Desktop/fix/PapaBearCurrent/client/js/design.js:
+    4  //prevent duplicate notes
+    5  //allow various texts to appear for each note
+    6: //config probability definitions
+    7  //remove all non input key logic from InpuntManager
+    8  //remove socket emitting from other turn into functions
+
+/Users/garygould/Desktop/fix/PapaBearCurrent/client/js/notes.js:
+   27  	else this.resetOnDeath = false;
+   28  	
+   29: 	this.probability = options.prob;
+   30  	
+   31  	if(options.action){
+   ..
+   52  		var chance = Math.floor(Math.random() * 100);
+   53  	
+   54: 		var probability = 1;
+   55  	
+   56  		if(chance < 15){
+   57: 			probability = 1;	
+   58  		}else if(chance < 45){
+   59: 			probability = 2;
+   60  		}else if(chance < 50){
+   61: 			probability = 10;
+   62  		}else{
+   63: 			probability = 3;
+   64  		}
+   65  	
+   66: 		var notes = noteIndex[probability];
+   67  
+   68: 		//prevent it from getting a probability index with nothing in it
+   69  		if(!notes) continue;
+   70  
+
+9 matches across 2 files
+
+
+Searching 13 files for "prob"
+
+/Users/garygould/Desktop/fix/PapaBearCurrent/client/js/design.js:
+    4  //prevent duplicate notes
+    5  //allow various texts to appear for each note
+    6: //config probability definitions
+    7  //remove all non input key logic from InpuntManager
+    8  //remove socket emitting from other turn into functions
+    .
+   27   ["If you find another village", 
+   28   "you can make off with a large chunk of their wood."], {
+   29: 	 prob: 2,
+   30  	 condition:function(){game.getCurrentSec() <= 180}
+   31   }
+   ..
+   34  new Note("build",
+   35   ["By pressing 'd' you can place a barrier using whatever wood you are currently holding"], {
+   36: 	 prob: 3,
+   37  	 condition:function(){game.getCurrentSec() <= 180}
+   38   }
+   ..
+   41  new Note("chat1", 
+   42   ["Press ENTER to type messages to nearby players."], {
+   43: 	prob: 2,
+   44  	condition:function(){game.getCurrentSec() <= 180}
+   45   }
+   ..
+   49   ["You have picked up a disguise.", 
+   50    "press s to impersonate another team."], {
+   51: 	  prob: 1,
+   52  	  condition:0,
+   53  	  action:{
+   ..
+   60  
+   61  new Note("text1",["Appearances can be deceiving...be on your gaurd."], {
+   62: 	prob: 2,
+   63  	condition: 0,
+   64   }
+   ..
+   66  
+   67  new Note("text2", ["Some notes can give you immense power. This note does not."], {
+   68: 	prob: 1,
+   69  	condition: function(){
+   70  		 return !game.getPowerStats("papaBear").has
+   ..
+   75  new Note("empty",
+   76   ["This chest is empty"], {
+   77: 	 prob: 10,
+   78  	 condition: 0,
+   79  	 once: false
+   ..
+   84   ["You have picked up magic boots.",
+   85   "Press S to preform a dash."], {
+   86: 	prob: 1,
+   87  	condition: 0,
+   88     action:{
+   ..
+   99   ["You have picked up a sword.",
+  100   " Press 'shift' to swing it."], {
+  101: 	 prob: 3,
+  102  	 condition:function(){game.getCurrentSec() >= 100},
+  103  	 action:{ func: user.givePower, args: ["sword"]},
+  ...
+  107  new Note("spear", ["You have picked up a spear.",
+  108  	"Press 'shift' to hold it and 'shift' again to hide it."], {
+  109: 	prob: 3,
+  110  	condition:function(){game.getCurrentSec() >= 100},
+  111   	action:{
+  ...
+  119  new Note("powerWeapon",
+  120   ["Press 'shift' to sheath and unsheathe a golden spear. This weapon can kill PAPA BEAR"], {
+  121: 	 prob:1, 
+  122  	 condition: function(){ return game.getCurrentSec() >= 360 && !game.getPowerStats("powerWeapon").has },
+  123  	 action:{
+  ...
+  129  new Note("powerWeapon2",
+  130   ["Only the golden spear can defeat PAPA BEAR"], {
+  131: 	 prob: 1,
+  132  	 condition: function(){return game.getCurrentSec() >= 360 && !game.getPowerStats("papaBear").has }
+  133    }
+  ...
+  137  new Note("papaBear1",
+  138   ["You are now Papa Bear"], {
+  139: 	 prob: 2,
+  140  	 condition: function(){return game.getCurrentSec() >= 360 && !game.getPowerStats("papaBear").has },
+  141  	 action:{
+
+/Users/garygould/Desktop/fix/PapaBearCurrent/client/js/notes.js:
+   27  	else this.resetOnDeath = false;
+   28  	
+   29: 	this.probability = options.prob;
+   30  	
+   31  	if(options.action){
+   ..
+   34  	} 
+   35  	
+   36: 	if(noteIndex[options.prob]) noteIndex[options.prob].push(this);
+   37: 	else noteIndex[options.prob] = [this];
+   38  
+   39  	noteIndex[this.id] = this;
+   ..
+   52  		var chance = Math.floor(Math.random() * 100);
+   53  	
+   54: 		var probability = 1;
+   55  	
+   56  		if(chance < 15){
+   57: 			probability = 1;	
+   58  		}else if(chance < 45){
+   59: 			probability = 2;
+   60  		}else if(chance < 50){
+   61: 			probability = 10;
+   62  		}else{
+   63: 			probability = 3;
+   64  		}
+   65  	
+   66: 		var notes = noteIndex[probability];
+   67  
+   68: 		//prevent it from getting a probability index with nothing in it
+   69  		if(!notes) continue;
+   70  
+
+26 matches across 2 files
+
+
+Searching 13 files for "probab"
+
+/Users/garygould/Desktop/fix/PapaBearCurrent/client/js/design.js:
+    4  //prevent duplicate notes
+    5  //allow various texts to appear for each note
+    6: //config probability definitions
+    7  //remove all non input key logic from InpuntManager
+    8  //remove socket emitting from other turn into functions
+
+/Users/garygould/Desktop/fix/PapaBearCurrent/client/js/notes.js:
+   27  	else this.resetOnDeath = false;
+   28  	
+   29: 	this.probability = options.prob;
+   30  	
+   31  	if(options.action){
+   ..
+   52  		var chance = Math.floor(Math.random() * 100);
+   53  	
+   54: 		var probability = 1;
+   55  	
+   56  		if(chance < 15){
+   57: 			probability = 1;	
+   58  		}else if(chance < 45){
+   59: 			probability = 2;
+   60  		}else if(chance < 90){
+   61: 			probability = 3;
+   62  		}else{
+   63: 			probability = 4;
+   64  		}
+   65  	
+   66: 		var notes = noteIndex[probability];
+   67  
+   68: 		//prevent it from getting a probability index with nothing in it
+   69  		if(!notes) continue;
+   70  
+
+9 matches across 2 files
