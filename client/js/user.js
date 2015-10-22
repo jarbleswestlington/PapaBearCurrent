@@ -353,13 +353,12 @@ user.depLog = function(team, multiplier){
 	if(!multiplier) multiplier = 1;
 
 	if(this.log.has){
-		
-		chatController.submit(user.log.wood, 1000);
-		  
+				  
 		if(this.log.stolen) this.log.stolen = false; 
 		this.log.has = false;
 
 		this.log.wood = this.log.wood * multiplier;
+		chatController.submit(this.log.wood, 1000);
 
 	   	socket.emit('depLog', {team: team, name: this.name, amount: this.log.wood});
 	

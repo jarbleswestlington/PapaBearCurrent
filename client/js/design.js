@@ -103,7 +103,7 @@ new Note("telescope",
 	  condition:0,
 	  action:{
 		    func: user.givePower,
-	  		args: ["disguise"]
+	  		args: ["telescope"]
 	  }
   }
 ); 

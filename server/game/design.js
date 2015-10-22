@@ -147,7 +147,12 @@ module.exports = function(game, io){
 			}
 
 			player.addUpdate("renderteam");
+		},
+		onLose: function(player){
+			player.renderteam = player.team;
+			player.addUpdate("renderteam");
 		}
+
 	});
 	new Power("invisibility", {
 		key: "S",	
