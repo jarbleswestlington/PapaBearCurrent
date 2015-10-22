@@ -23,7 +23,6 @@ module.exports = function(game, io){
 	var Power = require('./powers.js').Power;
 	var Obj = require('./objects.js').Obj;
 
-
 	new Team('blue', {x: 5, y: 5, width: 10, height: 8});
 	new Team("red", {x: 16, y: 43, width: 7, height: 5});
 	new Team("green", {x: 42, y: 21, width: 10, height: 8});

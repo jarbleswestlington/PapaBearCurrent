@@ -282,6 +282,14 @@ Game.prototype.defineTerritory = function(type, coords){
 	}
 }
 
+Game.prototype.getTeamPlayers = function(team){
+	var players = [];
+	this.forAllPlayers(function(player){
+		if(player.team == team.name) players.push(player);
+	});
+	return players;
+}
+
 Game.prototype.generate = function(){
 	
 	for(var x = 0; x < this.size.width; x++){

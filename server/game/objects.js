@@ -80,7 +80,7 @@ function Obj(data){
            		renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
            	}
        	}else if(this.type == "boulder"){
-           		renderer.drawImage("bearStatue", this.x, this.y, this.width, this.height);
+           		renderer.drawImage("bearStatue", this.x, this.y);
            	}else{
 			renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
 		}

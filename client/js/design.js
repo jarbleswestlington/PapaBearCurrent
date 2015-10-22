@@ -27,7 +27,7 @@ new Note("steal1",
  ["If you find another village", 
  "you can make off with a large chunk of their wood."], {
 	 prob: 2,
-	 condition:function(){game.getCurrentSec() <= 180}
+	 condition:function(){ return game.getCurrentSec() <= 180}
  }
 );
 
@@ -42,14 +42,14 @@ new Note("steal1",
 new Note("build",
  ["By pressing 'd' you can place a barrier using whatever wood you are currently holding"], {
 	 prob: 3,
-	 condition:function(){game.getCurrentSec() <= 180}
+	 condition:function(){ return game.getCurrentSec() <= 180}
  }
 );
 
 new Note("chat1", 
  ["Press ENTER to type messages to nearby players."], {
 	prob: 2,
-	condition:function(){game.getCurrentSec() <= 180}
+	condition:function(){return game.getCurrentSec() <= 180}
  }
 );
 
@@ -83,7 +83,6 @@ new Note("text2", ["Some notes can give you immense power. This note does not."]
 new Note("empty",
  ["This chest is empty"], {
 	 prob: 4,
-	 condition: 0,
 	 once: false
  }
 );
@@ -92,8 +91,8 @@ new Note("dash1",
  ["You have picked up magic boots.",
  "Press S to preform a dash."], {
 	prob: 1,
-	condition: 0,
-   action:{
+	condition:function(){ return game.getCurrentSec() >= 100},
+   	action:{
 		    func: user.givePower,
 	  		args: ["dash"]
 	  		//also Game.currentsec > 180,
@@ -107,7 +106,7 @@ new Note("sword",
  ["You have picked up a sword.",
  " Press 'A' to swing it."], {
 	 prob: 3,
-	 condition:function(){game.getCurrentSec() >= 100}, 
+	 condition:function(){ return game.getCurrentSec() >= 100},
 	 action:{ func: user.givePower, args: ["sword"]},
  }
 );
@@ -115,7 +114,7 @@ new Note("sword",
 new Note("spear", ["You have picked up a spear.",
 	"Press 'A' to hold it and 'A' again to hide it."], {
 	prob: 3,
-	condition:function(){game.getCurrentSec() >= 100},
+	condition:function(){ return game.getCurrentSec() >= 100},
  	action:{
 		 func: user.givePower, args: ["spear"],
 		 resetOnDeath: true
@@ -137,7 +136,7 @@ new Note("powerWeapon",
 new Note("powerWeapon2",
  ["Only the golden spear can defeat PAPA BEAR"], {
 	 prob: 1,
-	 condition: function(){return game.getCurrentSec() >= 360 && !game.getPowerStats("papaBear").has }
+	 condition: function(){return game.getCurrentSec() >= 360 && !game.getPowerStats("papaBear").has },
   }
 ); 
 
@@ -359,13 +358,11 @@ inputManager.registerKey("S", {
 				user.usePower("disguise");
 			}
 			if(user.server.powers.dash){
+				console.log(user.dashing);
 				user.dash();
 			}
 			if(user.server.powers.telescope){
 				user.usePower("telescope");
-			}
-			if(user.server.powers.dash){
-				user.dash();
 			}
 		}, 
 	}

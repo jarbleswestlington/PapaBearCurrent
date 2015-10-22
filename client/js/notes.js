@@ -16,6 +16,8 @@ var Note = function(name, lines, options){
 		this.condition = options.condition;
 
 	}
+
+	if(!this.condition) this.condition = function(){return true};
 	
 	this.lines = lines;
 
@@ -60,6 +62,8 @@ Note.respond = function(noteIn){
 		}else{
 			probability = 4;
 		}
+
+
 	
 		var notes = noteIndex[probability];
 

@@ -109,17 +109,17 @@ module.exports = function(game){
 		//this == thing being hit
 
 		//passive
-		//for AGENT colliding with THIS
+		//for THIS running into AGENT
 		if(agent.tag == "player" || agent.tag == "papaBear"){
 			if(this.attacking){
 				if(agent.tag == "papaBear" && !this.powers.powerWeapon) return;
 				if(tools.colCheckRelative({item: this.spearColBoxes[this.direction], influencer: this}, agent)){
-					if(agent instanceof Player) agent.die(this.name);
+					if(agent instanceof Player) agent.die(this);
 					return;
 				} 
 			}
 			if(this.powers.papaBear && tools.colCheck(agent, this)){
-				if(agent instanceof Player) agent.die(this.name);
+				if(agent instanceof Player) agent.die(this);
 				return;
 			}	
 		}
@@ -129,7 +129,7 @@ module.exports = function(game){
 		if(tools.colCheck(agent, this)){
 			if(this.powers.papaBear){
 				if(agent.tag == "powerWeapon"){
-					if(this instanceof Player) this.die(agent.name);
+					if(this instanceof Player) this.die(agent);
 				}
 				if(agent.tag == "wall"){
 					return true;
@@ -137,7 +137,7 @@ module.exports = function(game){
 				return false;
 			}
 			if(agent.tag == "sword" || agent.tag == "spear" || agent.tag == "powerWeapon" || agent.tag == "papaBear"){
-				if(this instanceof Player) this.die(agent.name);
+				if(this instanceof Player) this.die(agent);
 				return;
 			}
 			//returns true to prevent movement of the agent
@@ -228,6 +228,8 @@ module.exports = function(game){
 	Player.prototype.legalMove = function(dummy){
 
 		dummy.tag = this.tag;
+		dummy.name = this.name;
+
 		var playerCollisions = [
 			game,
 			game.forAllHardGridObjects.bind(game),
@@ -268,10 +270,11 @@ module.exports = function(game){
 		tools.checkAll(box, game.forAllOtherAlivePlayers.bind(game, this));
 	}
 	
-	Player.prototype.die = function(agent){
+	Player.prototype.die = function(killer){
 		
-		game.elephant[this.name].emit("death", {agent: agent});
-		game.elephant[agent].emit("kill", {reactant: this.name});
+		game.elephant[this.name].emit("death", {killer: killer.name});
+		console.log(killer);
+		game.elephant[killer.name].emit("kill", {reactant: this.name});
 
 		this.dead = true;
 		this.attacking = false;		
