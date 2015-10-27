@@ -77,13 +77,14 @@ game.findUser = function(name){
 	if(!name) name = user.name;
 	
 	var playerGot;
+
 	
 	this.forAllPlayers(function(player){
 
 		if(player.name == name) playerGot = player;
 
 	});
-	
+
 	return playerGot;
 }
 
@@ -97,7 +98,10 @@ game.processUpdatePackets = function(){
 		$.extend(true, game.server, data.update);
 	}
 
-	if(user.mode == "player") user.server = game.findUser();
+	if(user.mode == "player") {
+		var playerUpdated = game.findUser();
+		if(playerUpdated) user.server = playerUpdated;
+	}
 
 	game.currentSec = data.time;
 }

@@ -15,13 +15,6 @@
 //onclick method to UI's
 //allow ghostmovment in master if you hold shift
 
-// 4) give me tutorial images and I will implement
-// 5) finish UI
-// 6) telescope
-
-
-//disguise, telescope, hammer, running boots, cloak
-//status effects -- papabear
 
 new Note("steal1",
  ["If you find another village's base", 
@@ -457,7 +450,7 @@ inputManager.registerKey("N", {
 	once: true, 
 	mode: "all",
 	on: function(){ 
-		if(user.server && game.live) socket.emit("left_game", {name: user.server.name});
+		if(user.server && game.server.test) socket.emit("left_game", {name: user.server.name});
 		socket.emit('confirm_name', { name: tools.makeId(6), master: true });
 	},
 });

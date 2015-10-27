@@ -49,7 +49,9 @@ function GridNode(data){
 
 function Game(width, height){
 	this.updated = {};
-	
+
+	this.testing = true;
+
 	this.size = {width: width, height: width};
 	this.pixels = {width: width * 78, height: height * 78};
 	this.teams = {};

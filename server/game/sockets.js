@@ -9,7 +9,7 @@ access.emit = function(name, data){
 
 function setUp(game, server){
 	//setUp sockets
-	var io = require('pedig.io').listen(server);
+	var io = require('pedig.io').listen(server, {'destroy buffer size': Infinity });
 	io.set('log level', 1);
 
 	io.sockets.on('connection', function(socket) {
@@ -243,7 +243,6 @@ function setUp(game, server){
 			if(player.legalMove(dummy)){
 				
 				// player.walkSound(io);
-
 				player.x = dummy.x;
 				player.y = dummy.y;
 				player.addUpdate("x", "y");

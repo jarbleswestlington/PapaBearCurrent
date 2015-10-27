@@ -401,5 +401,14 @@ user.move = function(modifier){
 		if(this.inPlace) this.amount = 0;
 		
 		socket.emit('move_input', {direction: this.direction, name: this.name, amount: this.amount});
+
+		if(game.server.testing){
+
+			game.forAllPlayers(function(player){
+
+				console.log("sending a message!");
+				socket.emit('move_input', {direction: player.direction, name: player.name, amount: 0});
+			})
+		}
 	}
 };

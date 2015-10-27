@@ -1,5 +1,6 @@
 socket.on('name_confirmed', function(data) {
 	
+	console.log(data.player);
 	user.server = data.player;
 	user.name = data.player.name;
 	
@@ -42,9 +43,7 @@ socket.on('noteSpawn', function(data) {
 socket.on('update_clients', function(data) {
 	if(!user.confirmed || game.state !== "game") return;
 
-
 	game.packets.push(data);
-
 
 	// game.stateManager();
 		
