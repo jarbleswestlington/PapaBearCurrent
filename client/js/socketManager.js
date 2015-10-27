@@ -19,6 +19,8 @@ socket.on('startgame_client', function(data) {
 	
 	game.started = true;
 
+	if(user.mode == "player") user.server = game.findUser();
+
 	console.log("game started by server");
 	
 });
@@ -38,13 +40,11 @@ socket.on('noteSpawn', function(data) {
 
 
 socket.on('update_clients', function(data) {
-	if(!user.confirmed) return;
+	if(!user.confirmed || game.state !== "game") return;
 
-	$.extend(true, game.server, data.update);
 
-	if(user.mode == "player") user.server = game.findUser();
+	game.packets.push(data);
 
-	game.currentSec = data.time;
 
 	// game.stateManager();
 		

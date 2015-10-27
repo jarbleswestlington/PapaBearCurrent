@@ -389,7 +389,6 @@ audioArray.forEach(function(audio){
 
 
 inputManager.registerKey("A", {
-	master: true, 
 	once: true, 
 	mode: "player",
 	on: function(){ 
@@ -405,10 +404,10 @@ inputManager.registerKey("A", {
 );
 
 inputManager.registerKey("S", {
-	master: true, 
 	once: true, 
 	mode: "player",
 	on: function(){ 
+
 			if(user.server.powers.disguise){
 				user.usePower("disguise");
 			}

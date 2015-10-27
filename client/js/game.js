@@ -11,6 +11,8 @@ var game = {
 		trees:[],
 		notes:[]
 	},
+
+	packets: [],
 	
 };
 
@@ -85,9 +87,26 @@ game.findUser = function(name){
 	return playerGot;
 }
 
+game.processUpdatePackets = function(){
+	if(!game.packets.length) return;
+
+	var data;
+
+	while(this.packets.length){
+		var data = this.packets.shift();
+		$.extend(true, game.server, data.update);
+	}
+
+	if(user.mode == "player") user.server = game.findUser();
+
+	game.currentSec = data.time;
+}
+
 game.update = function (modifier) {
 	
 	if(builder.on) user.action = false;
+
+	game.processUpdatePackets();
 
 	user.move(modifier);
 	user.interactWBase();
