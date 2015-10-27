@@ -406,8 +406,7 @@ user.move = function(modifier){
 
 			game.forAllPlayers(function(player){
 
-				console.log("sending a message!");
-				socket.emit('move_input', {direction: player.direction, name: player.name, amount: 0});
+				socket.emit('move_input', {direction: player.direction, name: player.name, amount: 0.1});
 			})
 		}
 	}
