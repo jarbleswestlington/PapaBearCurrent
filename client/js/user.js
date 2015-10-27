@@ -390,8 +390,11 @@ user.dash = function(){
 
 user.move = function(modifier){
 
+
 	if( (this.moved || this.dashing) && !(this.dead || this.frozen || this.server.frozen) ){
-		
+
+		console.log("still sending");
+
 		this.amount = 256 * modifier;
 		
 		if(this.server.powers.papaBear) this.amount = this.amount * 1.2;
