@@ -405,8 +405,7 @@ user.move = function(modifier){
 		if(game.server.testing){
 
 			game.forAllPlayers(function(player){
-				console.log("player", player.name);
-				socket.emit('move_input', {direction: player.direction, name: player.name, amount: 0.1});
+				socket.emit('move_input', {direction: player.direction, name: player.name, amount: 1});
 			})
 		}
 	}

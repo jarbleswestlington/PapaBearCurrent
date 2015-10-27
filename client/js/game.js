@@ -1,7 +1,6 @@
 //setUp Game object;
 var game = {
 	
-	live:false,
 	connected:false,
 	gameState:"init",
 	timeLimit:720,
