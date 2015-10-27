@@ -52,7 +52,32 @@ module.exports = function(game){
 		}
 
 		function walkSound(io){
-			io.sockets.emit('play_sound', {sound: "footstep", coords: {x:this.x, y: this.y}, level: 15} );
+
+		var chance = Math.floor(Math.random() * 100);
+	
+		var probability = 1;
+
+		var whichStep = 1;
+
+	
+		//var Obj = require('./objects.js').Obj;
+		//var sockets = require("./sockets.js").access;
+		//var game = require('./game.js');
+
+		//setTimeout(function() { 
+		//	var obj = {type: "footprint", img: "footprint", tag: "footprint", hard: false, removed:false, x: this.x, y: this.y, width: 15, height: 7 };
+		//	var newObj = new Obj(obj)
+		//	game.objects.push(newObj);
+			//game.objects.push(footprint);
+
+			}, 250);
+
+
+		if(chance < 50){
+				io.sockets.emit('play_sound', {sound: "step1", coords: {x:this.x, y: this.y}, level: 15} );
+		}else{
+				io.sockets.emit('play_sound', {sound: "step2", coords: {x:this.x, y: this.y}, level: 15} );
+		}
 		};
 
 		this.walkSound = tools.debounce(walkSound, 250);
