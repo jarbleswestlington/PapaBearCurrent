@@ -14,6 +14,7 @@ var game = {
 	packetsSentSinceUpdate: 0,
 
 	packets: [],
+	packetLimit: 5,
 	
 };
 
@@ -91,7 +92,7 @@ game.findUser = function(name){
 
 game.readyForMovement = function(){
 
-	var limit = 3;
+	var limit = game.packetLimit;
 	if(game.server.testing){
 		limit = limit * Object.keys(game.server.players).length;
 	}
