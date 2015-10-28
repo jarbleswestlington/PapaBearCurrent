@@ -29,22 +29,32 @@ module.exports = function(game, io){
 
 		this.drawScore = function(){
 			//wood piles
-			var row = 1;
+			var row = 2;
 			var col = 1;
 			var x = 0;
 			var y = 0;
+			var offest = 0;
 			for(var i = 1; i < this.score; i+= 150){
 				col += .5;
-				if(row < 2) row += 1;
-				else row = 1;
-				x = -Math.floor(col) * 24;
-				y = -Math.floor(row) * 26;
-				renderer.drawImage("pile", (this.baseX - 53) + x, (this.baseY + 61) + y);
+				if(row < 2){ 
+					row += 1;
+					var offset = 6;
+				}else{
+					row = 1;
+					var offset = 0;
+				}
+
+				x = -Math.floor(col) * 24 + offset;
+				y = -Math.floor(row) * 14;
+
+				renderer.drawImage("pile", (this.baseX - 53) + x, (this.baseY + 78) + y);
 			}
+			//scoreSign
+			renderer.drawImage("counter", this.baseX - 28, this.baseY + 50);
 			//baseScore
 			ctx.fillStyle = "white";
 			ctx.font="11px Georgia";
-			renderer.fillText(this.score, this.baseX - 3, this.baseY + 65);
+			renderer.fillText(this.score, this.baseX - 23, this.baseY + 66);
 		}
 	};
 	

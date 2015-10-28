@@ -384,7 +384,7 @@ user.dash = function(){
 	setTimeout(function(){
 		this.dashing = false;
 		this.frozen = false;	
-	}.bind(this), 700);
+	}.bind(this), 1400);
 	
 };
 

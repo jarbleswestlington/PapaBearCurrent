@@ -241,8 +241,9 @@ function setUp(game, server){
 			player.addUpdate("direction");
 			
 			if(player.legalMove(dummy)){
-				
-				// player.walkSound(io);
+
+				player.walkSound(io);
+
 				player.x = dummy.x;
 				player.y = dummy.y;
 				player.addUpdate("x", "y");

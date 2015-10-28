@@ -361,7 +361,9 @@ var imageArray = ["bear",
 "telescope",
 "dashboots",
 "dkey",
-"bearStatue"];
+"bearStatue",
+"footprint",
+"counter"];
 
 imageArray.forEach(function(image){
 	renderer.upload(image);
@@ -374,7 +376,8 @@ var audioArray = ["bear",
 "emptyChest",
 "hit",
 "build",
-"footstep"];
+"step1",
+"step2"];
 
 audioArray.forEach(function(audio){
 	soundscape.upload(audio);

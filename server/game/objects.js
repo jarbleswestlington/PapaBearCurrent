@@ -81,7 +81,9 @@ function Obj(data){
            	}
        	}else if(this.type == "boulder"){
            		renderer.drawImage("bearStatue", this.x, this.y);
-           	}else{
+        }else if(this.type == "footprint"){
+				renderer.drawImage("footprint", this.x - 2, this.y - 10);
+		}else{
 			renderer.drawRect("rgb(180,100,80)", this.x, this.y, this.width, this.height);
 		}
 	}
