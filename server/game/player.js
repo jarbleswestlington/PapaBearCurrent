@@ -70,7 +70,7 @@ module.exports = function(game){
 		//	game.objects.push(newObj);
 			//game.objects.push(footprint);
 
-			}, 250);
+			//}, 250);
 
 
 		if(chance < 50){

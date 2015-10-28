@@ -39,8 +39,8 @@ module.exports = function(game, io){
 	 hard: true,
 	 x: 2220,
 	 y: 2220,
-	 width: 150,
-	 height: 130, 
+	 width: 169,
+	 height: 189, 
 	});
 	game.objects.push(boulder);
 

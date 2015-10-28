@@ -369,7 +369,8 @@ var imageArray = ["bear",
 "dashboots",
 "dkey",
 "bearStatue",
-"footprint"];
+"footprint",
+"counter"];
 
 imageArray.forEach(function(image){
 	renderer.upload(image);
