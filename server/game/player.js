@@ -1,6 +1,7 @@
 var tools = require('./tools.js');
 var powers = require('./powers.js').powers;
 var sockets = require("./sockets.js").access;
+var Obj = require('./objects.js').Obj;
 
 module.exports = function(game){
 	
@@ -50,37 +51,6 @@ module.exports = function(game){
 		this.weapon = {
 		   state: "ready"
 		}
-
-		function walkSound(io){
-
-		var chance = Math.floor(Math.random() * 100);
-	
-		var probability = 1;
-
-		var whichStep = 1;
-
-	
-		//var Obj = require('./objects.js').Obj;
-		//var sockets = require("./sockets.js").access;
-		//var game = require('./game.js');
-
-		//setTimeout(function() { 
-		//	var obj = {type: "footprint", img: "footprint", tag: "footprint", hard: false, removed:false, x: this.x, y: this.y, width: 15, height: 7 };
-		//	var newObj = new Obj(obj)
-		//	game.objects.push(newObj);
-			//game.objects.push(footprint);
-
-			//}, 250);
-
-
-		if(chance < 50){
-				io.sockets.emit('play_sound', {sound: "step1", coords: {x:this.x, y: this.y}, level: 15} );
-		}else{
-				io.sockets.emit('play_sound', {sound: "step2", coords: {x:this.x, y: this.y}, level: 15} );
-		}
-		};
-
-		this.walkSound = tools.debounce(walkSound, 250);
 
 		//this.image = args.image || null;
 		this.character = Math.floor((Math.random() * 3) + 1);
@@ -135,6 +105,39 @@ module.exports = function(game){
 		}
 
 	};
+
+
+	//random code for gary
+	// var chance = Math.floor(Math.random() * 100);
+
+	// var probability = 1;
+	// if(chance < 50){
+	// 		io.sockets.emit('play_sound', {sound: "step1", coords: {x:this.x, y: this.y}, level: 15} );
+	// }else{
+	// 		io.sockets.emit('play_sound', {sound: "step2", coords: {x:this.x, y: this.y}, level: 15} );
+	// }
+
+	function walkEffects(io){
+
+		//footsteps
+		var soundToPlay = "step1";
+		if(this.stepToggle){
+			this.stepToggle = false;
+			soundToPlay = "step2";
+		}else this.stepToggle = true;
+
+		io.sockets.emit('play_sound', {sound: soundToPlay, coords: {x:this.x, y: this.y}, level: 15} );
+
+		//footprints
+		var obj = {type: "footprint", img: "footprint", tag: "footprint", hard: false, removed:false, x: this.x, y: this.y};
+		var newObj = new Obj(obj)
+		game.objects.push(newObj);
+		io.sockets.emit('add_object', newObj);
+
+	};
+
+	Player.prototype.walkEffects = tools.debounce(walkEffects, 250);
+
 
 	Player.prototype.collide = function(agent){
 		//agent == thing moving

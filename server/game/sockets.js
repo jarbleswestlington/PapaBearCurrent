@@ -242,7 +242,7 @@ function setUp(game, server){
 			
 			if(player.legalMove(dummy)){
 
-				player.walkSound(io);
+				player.walkEffects(io);
 
 				player.x = dummy.x;
 				player.y = dummy.y;
