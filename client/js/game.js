@@ -11,6 +11,8 @@ var game = {
 		notes:[]
 	},
 
+	packetsSentSinceUpdate: 0,
+
 	packets: [],
 	
 };
@@ -85,6 +87,18 @@ game.findUser = function(name){
 	});
 
 	return playerGot;
+}
+
+game.readyForMovement = function(){
+
+	var limit = 3;
+	if(game.server.testing){
+		limit = limit * Object.keys(game.server.players).length;
+	}
+
+	// console.log(limit, game.server.players.length)
+
+	if(game.packetsSentSinceUpdate < limit) return true;
 }
 
 game.processUpdatePackets = function(){

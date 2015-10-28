@@ -390,10 +390,11 @@ user.dash = function(){
 
 user.move = function(modifier){
 
+	if(!game.readyForMovement()) return;
 
 	if( (this.moved || this.dashing) && !(this.dead || this.frozen || this.server.frozen) ){
 
-		console.log("still sending");
+		if(game.server.testing) console.log("still sending");
 
 		this.amount = 256 * modifier;
 		
@@ -405,11 +406,16 @@ user.move = function(modifier){
 		
 		socket.emit('move_input', {direction: this.direction, name: this.name, amount: this.amount});
 
+		game.packetsSentSinceUpdate++;
+
 		if(game.server.testing){
 
 			game.forAllPlayers(function(player){
 				socket.emit('move_input', {direction: player.direction, name: player.name, amount: 1});
-			})
+				game.packetsSentSinceUpdate++;
+			});
+
+
 		}
 	}
 };

@@ -65,22 +65,51 @@ tools.buildUpdated = function(root){
 	return result;
 }
 
+tools.getFunctionName = function(fun) {
+  var ret = fun.toString();
+  ret = ret.substr('function '.length);
+  ret = ret.substr(0, ret.indexOf('('));
+  return ret;
+}
+
+if (!String.prototype.includes) {
+  String.prototype.includes = function() {'use strict';
+    return String.prototype.indexOf.apply(this, arguments) !== -1;
+  };
+}
+
+
 tools.checkAll = function(agent, obstacles){
 	if(agent.constructor != Array) agent = [agent];
 	if(obstacles.constructor != Array) obstacles = [obstacles];
 
-
 	for(var a = 0; a < agent.length; a++){
+
+		var funcArg = function(item){
+			if( item.collide(agent[a]) ) return true;
+		};
+
 		for(var o = 0; o < obstacles.length; o++){
 			if(obstacles[o].constructor == Array){
 				if(!this.checkAll(agent[a], obstacles[o])) return false;
 			}else if(typeof obstacles[o] == "function"){
-				if(obstacles[o](function(item){ if( item.collide(agent[a]) ) return true; })) return false;
+
+				// if( obstacles[o].tag = "Relevant" || tools.getFunctionName(obstacles[o]).includes("Relevant") ){
+				// 	console.log("relevant");
+				// 	if( obstacles[o](funcArg, {x: agent[a].x, y: agent[a].y}) ) return false;
+
+				// }else{
+
+				if( obstacles[o](funcArg, {x: agent[a].x, y: agent[a].y}) ) return false;
+				
 			}else{
 				if(obstacles[o].collide(agent[a])) return false;
 			}
 		}
 	}
+
+	console.log("endMove", Date.now());
+	
 	return true;
 
 };

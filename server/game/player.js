@@ -4,7 +4,7 @@ var sockets = require("./sockets.js").access;
 
 module.exports = function(game){
 	
-	var Player = function(args){
+	function Player(args){
 		this.updated = {};
 
 		this.team = args.team;
@@ -234,12 +234,14 @@ module.exports = function(game){
 
 	Player.prototype.legalMove = function(dummy){
 
+		console.log("startMove", Date.now());
+
 		dummy.tag = this.tag;
 		dummy.name = this.name;
 
 		var playerCollisions = [
 			game,
-			game.forAllHardGridObjects.bind(game),
+			game.forAllRelevantHardGridObjects.bind(game),
 			game.forAllTeams.bind(game),
 			game.objects,
 			game.forAllOtherAlivePlayers.bind(game, this)

@@ -67,6 +67,8 @@ function Game(width, height){
 	this.bearX = 22;
 	this.bearY = 27;	
 
+	this.packets = [];
+
 	this.tag = "game";
 
 	this.players = {};
@@ -157,7 +159,7 @@ Game.prototype.collide = function(agent){
 Game.prototype.collideCheck = function(dummy){
 	return !tools.checkAll(dummy, [
 		this,
-		this.forAllHardGridObjects.bind(this),
+		this.forAllRelevantHardGridObjects.bind(this),
 		this.forAllTeams.bind(this),
 		this.forAllAlivePlayers.bind(this),
 		this.objects,
@@ -175,6 +177,34 @@ Game.prototype.forAllGridNodes = function(func){
 
 	return result;
 };
+
+Game.prototype.forAllRelevantHardGridObjects = function(func, coords){
+
+	console.log("startGrid", Date.now());
+	var result = false;
+
+	var gridX = Math.floor(coords.x/78);
+	var gridY = Math.floor(coords.y/78);
+
+	for(var x = gridX; x < (gridX + 2); x++){
+		for(var y = gridY; y < (gridY + 2); y++){
+			
+			node = this.grid[x][y];
+			if(node.contains && node.contains.hard){
+
+				if(func(node.contains)) result = true;
+
+
+			}		
+		}
+	}
+
+
+	console.log("endGrid", Date.now());
+
+	return result;
+};
+
 
 Game.prototype.forAllHardGridObjects = function(func){
 	var result = false;
@@ -338,7 +368,6 @@ Game.prototype.powerStatsUpdate = function(powerIn){
 	stats = this.powerStats[powerIn];
 	stats.had = true;
 	stats.total++;
-
 	this.addUpdate("powerStats");
 
 }
