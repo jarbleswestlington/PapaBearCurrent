@@ -21,6 +21,8 @@ module.exports = function(game){
 		this.width = 41;
 		this.direction = "D";
 
+		this.dummy = {x: this.x, y: this.y, height: this.height, width: this.width};
+
 		if(args.master) this.master = true;
 
 		this.renderteam = args.team;
@@ -129,14 +131,21 @@ module.exports = function(game){
 		io.sockets.emit('play_sound', {sound: soundToPlay, coords: {x:this.x, y: this.y}, level: 15} );
 
 		//footprints
-		var obj = {type: "footprint", img: "footprint", tag: "footprint", hard: false, removed:false, x: this.x, y: this.y};
+		var obj = {type: "footprint", img: "footprint", tag: "footprint", hard: false, x: this.x, y: this.y};
 		var newObj = new Obj(obj)
 		game.objects.push(newObj);
+		var index = game.objects.length-1;
+
 		io.sockets.emit('add_object', newObj);
+
+		setTimeout(function(){
+			io.sockets.emit('remove_object', {index: index});
+
+		}, 15000)
 
 	};
 
-	Player.prototype.walkEffects = tools.debounce(walkEffects, 250);
+	Player.prototype.walkEffects = tools.bounce(walkEffects, 250, true);
 
 
 	Player.prototype.collide = function(agent){
@@ -186,6 +195,23 @@ module.exports = function(game){
 		R:{x:36,y:22, width: 30, height:6},
 		L:{x:-26,y:+22, width: 30, height:6}
 	};
+
+	Player.prototype.update = function(io){
+
+		if(this.x == this.dummy.x && this.y == this.dummy.y) return;
+		if(this.legalMove(this.dummy)){
+			this.walkEffects(io);
+			this.x = this.dummy.x;
+			this.y = this.dummy.y;
+			this.addUpdate("x", "y");
+		}else{
+			this.dummy.x = this.x;
+			this.dummy.y = this.y;
+		}
+
+		this.defense();
+		this.offense();
+	}
 
 	Player.prototype.spawn = function(func){
 
@@ -262,8 +288,6 @@ module.exports = function(game){
 
 	Player.prototype.legalMove = function(dummy){
 
-		console.log("startMove", Date.now());
-
 		dummy.tag = this.tag;
 		dummy.name = this.name;
 
@@ -310,7 +334,6 @@ module.exports = function(game){
 	Player.prototype.die = function(killer){
 		
 		game.elephant[this.name].emit("death", {killer: killer.name});
-		console.log(killer);
 		game.elephant[killer.name].emit("kill", {reactant: this.name});
 
 		this.dead = true;

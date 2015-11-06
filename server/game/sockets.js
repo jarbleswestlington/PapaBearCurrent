@@ -203,55 +203,39 @@ function setUp(game, server){
 
 		socket.on('move_input', function(data){
 
-			var dummy = {};
 			var player = game.findPlayerByName(data.name);
+
+			var dummy = player.dummy;
 
 			if(!player || player.dead) return;
 
-			dummy.x = player.x;
-			dummy.y = player.y;
-			dummy.width = player.width;
-			dummy.height = player.height;
-
 			if(data.direction == "up"){
 
-			   dummy.y = player.y - data.amount;
+			   dummy.y -= data.amount;
 
 			   player.direction = "U";
 
 			}
 			if(data.direction == "down"){
 
-			   dummy.y = player.y + data.amount;
+			   dummy.y += data.amount;
 			   player.direction = "D";
 
 			}
 			if(data.direction == "left"){
 
-			   dummy.x = player.x - data.amount;
+			   dummy.x -= data.amount;
 			   player.direction = "L";
 
 			}
 			if(data.direction == "right"){
 
-			   dummy.x = player.x + data.amount;
+			   dummy.x += data.amount;
 			   player.direction = "R";
 
 			}
 			player.addUpdate("direction");
-			
-			if(player.legalMove(dummy)){
-
-				player.walkEffects(io);
-
-				player.x = dummy.x;
-				player.y = dummy.y;
-				player.addUpdate("x", "y");
-
-			}
-
-			player.defense();
-			player.offense();
+	
 		});
 		
 		socket.on("request_placement", function(data){

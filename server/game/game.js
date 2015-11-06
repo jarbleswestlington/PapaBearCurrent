@@ -120,6 +120,9 @@ Game.prototype.update = function(io) {
 	var now = new Date().getTime() / 1000;
 	this.currentSec = Math.floor(now - this.startsecond);
 
+	this.forAllPlayers(function(player){
+		player.update(io);
+	});
 
 	var updatedGame = tools.buildUpdated(this);
 	//if(Object.keys(updatedGame).length) console.log(updatedGame);
@@ -180,7 +183,6 @@ Game.prototype.forAllGridNodes = function(func){
 
 Game.prototype.forAllRelevantHardGridObjects = function(func, coords){
 
-	console.log("startGrid", Date.now());
 	var result = false;
 
 	var gridX = Math.floor(coords.x/78);
@@ -198,9 +200,6 @@ Game.prototype.forAllRelevantHardGridObjects = function(func, coords){
 			}		
 		}
 	}
-
-
-	console.log("endGrid", Date.now());
 
 	return result;
 };

@@ -63,6 +63,9 @@ function Obj(data){
 
 	this.draw = function(){
 		if(this.removed) return;
+
+				if(this.tag == "footprint" && !this.removed) console.log("footprint")
+
 		
 		if(this.type == "wall"){
 			renderer.drawImage("hedgehog", this.x - 2, this.y - 10);           

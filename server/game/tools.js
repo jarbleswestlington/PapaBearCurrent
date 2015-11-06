@@ -1,6 +1,6 @@
 var tools = {};
 
-tools.debounce = function(func, wait, immediate) {
+tools.debounce = function(func, wait, runImmediately) {
 	var timeout;
 	return function() {
 		var context = this, args = arguments;
@@ -15,6 +15,31 @@ tools.debounce = function(func, wait, immediate) {
 		timeout = setTimeout(later, wait);
 	};
 };
+
+tools.bounce = function(func, wait, runImmediately) {
+	var timeout;
+	var run = runImmediately;
+	return function() {
+		var context = this, args = arguments;
+
+		var restart = function() {
+			run = true;
+		};
+
+		if(run){
+			func.apply(context, args);
+			run = false;
+			timout = setTimeout(restart, wait);
+		}
+
+		// if(timeout) return;
+	
+
+		// clearTimeout(timeout);
+		// timeout = setTimeout(later, wait);
+	};
+};
+
 
 tools.buildUpdated = function(root){
 	var result = {};
@@ -107,8 +132,6 @@ tools.checkAll = function(agent, obstacles){
 			}
 		}
 	}
-
-	console.log("endMove", Date.now());
 	
 	return true;
 
