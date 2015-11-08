@@ -131,7 +131,9 @@ module.exports = function(game){
 		io.sockets.emit('play_sound', {sound: soundToPlay, coords: {x:this.x, y: this.y}, level: 15} );
 
 		//footprints
-		var obj = {type: "footprint", img: "footprint", tag: "footprint", hard: false, x: this.x, y: this.y};
+		var coords = this.getFootCoordinates();
+
+		var obj = {type: "footprint", img: "footprint", tag: "footprint", hard: false, x: coords.x, y: coords.y};
 		var newObj = new Obj(obj)
 		game.objects.push(newObj);
 		var index = game.objects.length-1;
@@ -408,6 +410,23 @@ module.exports = function(game){
 		tools.checkAll(boxes, game.forAllOtherAlivePlayers.bind(game, this));
 	
 	};
+
+	Player.prototype.getFootCoordinates = function(){
+		if(this.direction == "D"){
+			if(this.stepToggle) return {x: this.x + (this.width - 10), y: this.y  + this.height};
+			else return {x: this.x, y: this.y  + this.height};
+		}
+		if(this.direction == "U"){
+			if(this.stepToggle) return {x: this.x + (this.width - 10), y: this.y + this.height};
+			else return {x: this.x, y: this.y + this.height};
+		}
+		if(this.direction == "R"){
+			return {x: this.x, y: this.y + this.height + 10};
+		}
+		if(this.direction == "L"){
+			return {x: this.x + this.width, y: this.y + this.height + 10};
+		}
+	}
 		
 	Player.prototype.weaponColBoxes = {
 

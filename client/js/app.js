@@ -1,5 +1,12 @@
 //connect to sockets on server
-
+var socket = io.connect(window.location.hostname, {reconnection: false});
+socket.on('connect', function(data) {
+	
+	if(!user.master) socket.emit("confirm_name", {name: user.name});
+	else user.confirmed = true;
+});
+socket.on('error', function() { console.error(arguments) });
+socket.on('message', function() { console.log(arguments) });  
 
 // Create the canvas in the html
 var canvas = document.createElement("canvas");
