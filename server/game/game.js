@@ -125,6 +125,7 @@ Game.prototype.update = function(io) {
 	});
 
 	var updatedGame = tools.buildUpdated(this);
+	console.log(updatedGame);
 	//if(Object.keys(updatedGame).length) console.log(updatedGame);
 	io.sockets.emit('update_clients', {time: this.currentSec, update: updatedGame});
 	

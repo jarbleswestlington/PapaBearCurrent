@@ -40,6 +40,7 @@ socket.on('noteSpawn', function(data) {
 
 
 socket.on('update_clients', function(data) {
+	
 	if(!user.confirmed || game.state !== "game") return;
 
 	if(game.server.testing) console.log("still updating");

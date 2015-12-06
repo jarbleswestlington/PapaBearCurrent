@@ -20,7 +20,7 @@ function Tree(x, y, opts){
 
 	this.draw = function(){
 		if(this.removed) return;
-		renderer.drawSprite("pines", this.x - 9, this.y - 9, renderer.spriteData["tree"][this.treeNum]);
+		renderer.drawSprite("pines", this.x - 9, this.y - 9, {x:0, y:0, width:111, height:131});
 	}
 }
 

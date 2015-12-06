@@ -4,14 +4,18 @@ tools = require("./tools");
 
 function Event(data){
 	this.time = Date.now();
-	
+	this.roles = {};
+
 	if(data.tags) this.tags = data.tags;
 	else this.tags = [];
 
-	this.roles = {};
-
-	if(loc) this.location = loc;
+	if(data.loc) this.location = data.loc;
 	else this.loc = null;
+}
+
+Event.prototype.hasTag = function(tag){
+	if(this.tags.indexOf(tag) > -1) return true;
+	else return false;
 }
 
 Event.prototype.happenedBefore = function(start, threshold){
@@ -29,11 +33,6 @@ Event.prototype.happenedWithin = function(start, threshold){
 	else return false;
 }
 
-Event.prototype.hasTag = function(tag){
-	if(this.tags.indexOf(tag) > -1) return true;
-	else return false;
-}
-
 Event.prototype.happenedNear = function(distance, comparison){
 	var deltaX = this.location.x - comparison.x;
 	var deltaY = this.location.y - comparison.y;
@@ -43,8 +42,35 @@ Event.prototype.happenedNear = function(distance, comparison){
 }
 
 Event.prototype.happenedWithin = function(distance, comparison){
-	if(tools.colCheck(this.location, comparison, {x: -distance.x, y: -distance.y} ) ) 
+	if(tools.colCheck( this.location, comparison, {x: -distance.x, y: -distance.y} ) ) return true
+	else return false;
 }
+
+
+
+
+// actor
+// 	name
+// 	events: array of events regarding that player
+// 	next: finds next event in time,
+// 	previous: finds previosu event in time
+// 	closest: finds closest event in space
+
+function Actor(name){
+	this.name = name;
+	this.events = [];
+}
+
+Actor.prototype.involvedIn = function(event, role){
+	event.roles[role] = this.name;
+	this.events.push(event);
+}
+
+// Actor.prototype.set = function(time){
+// 	this.
+// }
+
+
 
 // Event.prototype.describe = function(data){
 // 	if(data.constructor == Array){
@@ -105,34 +131,34 @@ Event.prototype.happenedWithin = function(distance, comparison){
 	
 // }
 
-Event.prototype.write = function(){
+// Event.prototype.write = function(){
 
-	var script = "";
-	for(var i = 0; i < this.description.length;i++){
-		var desc = this.description[i];
-		if(typeof desc == "object"){
-			script += getInfo.call(this, desc);
-		}else if(typeof desc == "string"){
-			script+= desc;
-		}
+// 	var script = "";
+// 	for(var i = 0; i < this.description.length;i++){
+// 		var desc = this.description[i];
+// 		if(typeof desc == "object"){
+// 			script += getInfo.call(this, desc);
+// 		}else if(typeof desc == "string"){
+// 			script+= desc;
+// 		}
 
-		script += " ";
-	}
+// 		script += " ";
+// 	}
 
-	script += "\n";
+// 	script += "\n";
 
-	return script;
+// 	return script;
 
-}
+// }
 
-Event.prototype.addRetrospect = function(){
+// Event.prototype.addRetrospect = function(){
 
-};
+// };
 
-function Retrospect(name, opts){
+// function Retrospect(name, opts){
 
 
-}
+// }
 
 function Actor(name, scribe){
 	this.name = name;
@@ -142,10 +168,9 @@ function Actor(name, scribe){
 
 function Scribe(){
 	this.events = {};
-	this.agents = {};
-	this.details = {};
+	this.actors = {};
 	this.chapters = [];
-	this.curChapter = null;
+	this.curChapter = 0;
 }
 
 Scribe.prototype.event = function(name){
@@ -163,17 +188,30 @@ Scribe.prototype.actor = function(name){
 	return this.actors[name];
 }
 
-Scribe.prototype.chapter = function(name, opts){
-	var newChap = new Chapter(name, opts, this);
+Scribe.prototype.chapter = function(name, func, opts){
+	var newChap = new Chapter(name, func, opts, this);
 	this.chapters.push(newChap);
 	if(!this.curChapter) this.curChapter = newChap;
 	return newChap;
 }
 
 
+Scribe.prototype.findChapter = function(name){
+
+	var found = null;
+
+	this.chapters.forEach(function(chap){
+		if(chap.name = name) found = chap;
+	})
+
+	return found;
+}
 
 Scribe.prototype.write = function(name){
-	if(name) return this.events[name].write();
+	if(name){
+		var chap = this.findChapter(name)
+		if(chap) chap.write(this.events, this.actors);
+	} 
 
 	var script = '';
 
@@ -189,15 +227,11 @@ Scribe.prototype.write = function(name){
 			script += "Chapter " + (i + 1) + ": ";
 			script += chap.name;
 			script += "\n\n";
-			script += chap.write();
+			script += chap.write(this.events, this.actors);
 
-		});
+		}.bind(this));
 
 
-	}else{
-		for(var name in this.events){
-			script += this.events[name].write();
-		}
 	}
 	return script;
 
@@ -205,35 +239,33 @@ Scribe.prototype.write = function(name){
 
 var scribe = new Scribe();
 
-function Chapter(name, opts, scribe){
-	// this.scribe = scribe;
+function Chapter(name, func, opts){
+	if(!opts) opts = {};
 	this.name = name;
+	this.func = func;
 	if(opts.end) this.end = opts.end;
 	if(opts.start) this.start = opts.start;
-	this.scenes = {};
 }
 
-Chapter.prototype.scene = function(){
-
+Chapter.prototype.write = function(events, actors){
+	return this.func(events, actors)
 }
 
-Chapter.prototype.write = function(){
+
+scribe.events({tags: ["kill"]})
+
+scribe.chapter("prologue", function(events, actors){
 	var script = "";
-	for(var name in this.events){
-		script += this.scene[name].write();
-	}
+
+	console.log(events, actors);
+
 	return script;
-}
 
 
-scribe.chapter("It was all fun and trees", {number: 1})
+})
 
 // var startChap = scribe.chapter("freedome", {number: 2})
 // scribe.curChapter = startChap;
-
-scribe.event("got shot!").describe(["gracy got shot by a", {details: {gunName: "pistol"} }]);
-scribe.event("got shot!").detail({gunName: {pistol: "crazy boy"}});
-
 console.log(scribe.write());
 
 
@@ -253,32 +285,11 @@ Meanwhile...in the woods. So and so stumbled about a mysterious box that turned 
 
 How to gather all that users previous events, threshold of inclusion for retrospect
 
-Retrospect is basically just like "YO, this just happened, now I need to gather information
-about this item and relate it to this new event"
+climax = true -- changes dynamics
 
-events are just data
-there is no retrospect, plot points are the only thing in side of chapters
 
-chapter should have a climax = true option
 
-///allow functions passed in to be a conditional 
-
-var papaBear = new Scene([
-	{factor: "time", search: "events", script: 
-		{
-			waskilled: ["After", {killed : "name"}, "'s most recent feud with ", {killer : "name"}, ", "],
-			woodChop: ["While", {killed : "name"}, " was chopping away at some wood,"],
-		}
-	},
-	{factor: "distance", search: "details", script: 
-		{
-			team: ["After", {killed : "name"}, "'s most recent feud with ", {killer : "name"}, ", "],
-		}
-	},
-]);
-
-papaBear.addToChapter("Papa Bear Awakens")
-
+///real one
 
 function(actors, events)
 
@@ -345,13 +356,14 @@ event
 	tags
 	hasTag
 
-
 actor
 	name
 	events: array of events regarding that player
 	next: finds next event in time,
 	previous: finds previosu event in time
+	closest: finds closest event in space
 
 */
+
 
 
