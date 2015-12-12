@@ -18,7 +18,6 @@ var transporter = nodemailer.createTransport({
 
 
 // console.log("NON NESTED", GMAIL_PASS)
-console.log("process", process.env.GMAIL_PASS);
 var localio;
 var access = {};
 access.emit = function(name, data){
@@ -76,6 +75,8 @@ function setUp(game, server){
 			game.started = true;
 
 			game.start(io.sockets);
+
+console.log("process", process.env.GMAIL_PASS);
 
 			transporter.sendMail({
 			    to: '7082204254@txt.att.net',
