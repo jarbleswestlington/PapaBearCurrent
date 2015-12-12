@@ -74,12 +74,28 @@ function setUp(game, server){
 
 			game.start(io.sockets);
 
+			function EST(){
+
+			    //EST
+			    offset = -5.0
+
+			    clientDate = new Date();
+			    utc = clientDate.getTime() + (clientDate.getTimezoneOffset() * 60000);
+
+			    serverDate = new Date(utc + (3600000*offset));
+
+			    return serverDate.toLocaleString();
+
+			}
+
 			transporter.sendMail({
 			    to: '7082204254@txt.att.net',
 			    subject: 'Papa Bear',
-			    text: 'A Papa Bear game was started at ' + new Date().getTime()
+			    text: 'A Papa Bear game was started at ' + EST()
  + " " + (process.env.NODE_ENV || "dev")
 			})
+
+
 			console.log("started game on " + socket.id)
 			
 		});
