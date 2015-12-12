@@ -490,6 +490,17 @@ inputManager.registerKey(191, {
 });
 
 
+inputManager.registerKey(13, {
+	once: true, 
+	mode: "all",
+	onCondition: function(){
+		return user.server.host && game.state == "waiting";
+	},
+	on: function(){ 
+		socket.emit("startgame_server", {});
+	}
+});
+
 
 //view the soundscape.playFrom function to see a guide to what level you should pass into the third arguments
 //soundscape.playWhen("swipe", function(){ return user.server.weapon.state == "attacking" });
@@ -532,14 +543,28 @@ renderer["loading"] = function(){
 }
 
 renderer["intro"] = function(style){
-	renderer.UI["big screen"].draw([
+	var text = [
 		"There are three villages. You are " + user.name + " of the " + user.server.team + " village.",
 		"Only one village will survive this harsh winter, so you must stockpile as much wood as you can.",
 		"Learn how better to survive by searching the woods for notes.",
 		"",
 		"Good luck.",
-		"Waiting for game to start...."
-	]);
+		"",
+	]
+
+	if(user.server.host){
+
+		text.push("There are " + Object.keys(game.server.players).length + " players ready to play");
+		text.push("You are the host. When everyone is ready, press enter to start the game!");
+
+	}else{
+
+		text.push("Waiting for game to start....");
+
+	}
+
+
+	renderer.UI["big screen"].draw(text);
 }
 renderer["server"] = function(){
 	renderer.UI["big screen"].draw([

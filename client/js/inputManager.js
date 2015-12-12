@@ -34,7 +34,7 @@ inputManager.processInput = function(modifier){
 	
 	if(13 in inputManager.keys){
 		
-		if(inputManager.pressable.enter){
+		if(inputManager.pressable.enter && game.state !== "waiting"){
 			
 			inputManager.pressable.enter = false;	
 		

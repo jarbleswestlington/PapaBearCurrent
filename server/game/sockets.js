@@ -16,10 +16,11 @@ function setUp(game, server){
 		
 		console.log("connection has opened on " + socket.id);
 
-		if(game.state == "started"){
-			console.log("started game on " + socket.id)
-			game.start(io);
-		}
+		console.log("started game on " + socket.id)
+
+		game.send(socket);
+
+		if(game.updating == false) game.update(io);
 		
 		socket.on("drop_log", function(data){
 			var player = game.findPlayerByName(data.name)
@@ -50,12 +51,12 @@ function setUp(game, server){
 
 			game.state = "started";	
 
-			game.start(io);
+			game.started = true;
+
+			game.start(io.sockets);
 
 			console.log("started game on " + socket.id)
 			
-			setTimeout( game.update.bind(game, io) , 0);
-
 		});
 
 		socket.on('stealWood', function(data){
@@ -279,6 +280,10 @@ function setUp(game, server){
 			var player = game.findPlayerByName(data.name);
 			if(!player) return;
 			player.removed = true;
+			game.playersCount--;
+			game.addUpdate("playersCount");
+
+
 			player.addUpdate("removed");
 		});
 	});

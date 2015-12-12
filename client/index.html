@@ -1,26 +1,97 @@
 <!doctype html>
 <html>
 <head>
+	<title>No Fair, Papa Bear</title>
 	<link href = "/css/style.css" type = "text/css" rel = "stylesheet">
-</head>
 <body>
-	<div id = "chatView"><input type = "text" id = "chatInput"></div>
+	<div class = "container-fluid" id = "container">
+	<div class = "hidden-sm hidden-md hidden-lg hidden-xl mobile-warning col-xs-12">Yeah, we appreciate you visiting our game, but its just not gonna work on a screen this small</div>
+	<div class = "col-sm-2 col-xs-12 col-sm-offset-5 bear"><img id = "bear" class = "img-responsive" src = "/images/bear.jpg"><img class = "logo img-responsive" src = "/images/papabearlogo.png"></div>
+	<div class = "text">
+		<span class = "col-xs-12 col-sm-6 col-sm-offset-3 inner">
+		Welcome to No Fair, Papa Bear.
+		This is a game that is about chopping wood with your friends.
+		Thats all! I swear, there is nothing else!
 
-	<script src='/lib/jquery.js'></script>
-	<script src="/socket.io/socket.io.js"></script>
+		 <a role="button" data-toggle="collapse" href=".disclaimer" aria-expanded="false" aria-controls="collapseExample">
+		  Click for help setting up a game
+		</a>
+<br><br>
+				<div class = "collapse disclaimer">
 
-	<script src='/js/app.js'></script>
-	<script src="/js/tools.js"></script>
-	<script src="/js/inputManager.js"></script>
-	<script src="/js/game.js"></script>
-	<script src="/js/user.js"></script>
-	<script src="/js/builder.js"></script>
-	<script src="/js/renderer.js"></script>
-	<script src="/js/notes.js"></script>
-	<script src="/js/chat.js"></script>
-	<script src="/js/sockets.js"></script>
-	<script src="/js/soundscape.js"></script>
-	<script src="/js/design.js"></script>
+							<div class = "box well">
+We recommend playing this game with at least 9 players, and a maximum of 15. Make sure everyone has a <strong>great wifi-connection and is using Google Chrome</strong>. The first player to log on will be the host. Since this project is free, we can only support one game at a time. So there may already be one in progress!
+</div>
+
+</div>
+
+		<span id = "name"> <label >Enter your woodcutter name below </label><input id = "name-input" class = "col-sm-9 col-xs-12 no-padding" type = "text" name = "name">
+				<button class = "col-xs-12 col-sm-3 pointer" id = "submit-name" >Play</button>
+</span>
+
+<br><br>
+
+				<div id = "game-started"></div>
+
+		</span>
+
+
+	</div>
+	</div>
+
+
+		<script src='/lib/jquery.js'></script>
+
+
+		<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+
+		<script>
+		
+		$.ajax({
+		  url: "api/game/started",
+		  success: function(data){
+		  	if(data.started){
+		  		$("#game-started").text("Game currently in progress!");
+		  		$("#game-started").css({display:"block"});
+
+		  	}else{
+		  	}
+		  },
+		});
+
+		$("#submit-name").on("click", function(e){
+
+			var name = $("#name-input").val()
+			if(name === "") return;
+			if(name.includes(" ")){
+				alert("no spaces in your name!")
+				return;
+			}
+			if(/^[a-zA-Z0-9- ]*$/.test(name) == false) {
+    			alert('Your search string contains illegal characters.');
+    			return;
+			}
+			window.location.href = "/player/" + name;
+		})
+
+		function bearLook(num){
+			if(num > 3){
+				$("#bear").attr({src: "images/bear.jpg" })
+				setTimeout(bearLook.bind(null, 1), 7000);
+				return;
+			};
+			$("#bear").attr({src: "images/bearawake" + num + ".jpg" })
+			setTimeout(bearLook.bind(null, ++num), 500);
+		}
+
+		setTimeout(bearLook.bind(null, 1), 5000);
+
+		</script>
 
 </body>
 </html>

@@ -144,11 +144,11 @@ game.stateManager = function () {
 	renderer['clear_frame']();
 	
 	if(user.mode == "master") inputManager.masterKeys(delta/1000);
+	inputManager.processInput(delta/1000);
       
 	if(game.state == "loading"){
 		
 		if(renderer.hasLoaded() && soundscape.hasLoaded()) game.state = "waiting";
-
 	}
    
 	if(game.state == "waiting"){
@@ -156,14 +156,18 @@ game.stateManager = function () {
 
 		if(user.confirmed){
 
+
+
 			renderer.state = "intro";
 
 			
 		}else{
-			
+
 			renderer.state = "server";
 
 		}
+
+
 				  
 
 		if(game.started) game.state = "game";
@@ -173,7 +177,7 @@ game.stateManager = function () {
 	if(game.state == "game" && game.server){
   
 	    if(user.mode == "player"){	
-			inputManager.processInput(delta/1000);
+			// inputManager.processInput(delta/1000);
 			game.update(delta / 1000);	
 		} 
 				

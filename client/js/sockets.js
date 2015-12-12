@@ -11,6 +11,18 @@ socket.on('name_confirmed', function(data) {
 	user.confirmed = true;
 });
 
+socket.on('send_game', function(data) {
+
+	game.server = data.game;
+	game.saved.grid = data.grid;
+	game.saved.objects = data.objects;
+	
+	// if(user.mode == "player") user.server = game.findUser();
+
+	console.log("game started by server");
+	
+});
+
 socket.on('startgame_client', function(data) {
 
 	game.server = data.game;
@@ -41,13 +53,16 @@ socket.on('noteSpawn', function(data) {
 
 socket.on('update_clients', function(data) {
 	
-	if(!user.confirmed || game.state !== "game") return;
+	if(!user.confirmed) return;
 
 	if(game.server.testing) console.log("still updating");
 
 	game.packetsSentSinceUpdate = 0;
 
 	game.packets.push(data);
+
+	if(game.state !== "game") game.processUpdatePackets();
+
 		
 });
 

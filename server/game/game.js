@@ -50,7 +50,9 @@ function GridNode(data){
 function Game(width, height){
 	this.updated = {};
 
-	this.testing = true;
+	this.testing = false;
+
+	this.updating = false;
 
 	this.size = {width: width, height: width};
 	this.pixels = {width: width * 78, height: height * 78};
@@ -75,6 +77,8 @@ function Game(width, height){
 
 	this.powerStats = {};
 	
+	this.hasHost = false;
+
 	Object.defineProperty(this, 'grid', {value: buildGrid(width, height), enumerable: false});
 	Object.defineProperty(this, 'elephant', {value: {}, enumerable: false});
 	Object.defineProperty(this, 'objects', {value: [], enumerable: false});
@@ -116,6 +120,8 @@ Game.prototype.updateNode = function(data){
 }
 
 Game.prototype.update = function(io) {
+
+	this.updating = true;
 			
 	var now = new Date().getTime() / 1000;
 	this.currentSec = Math.floor(now - this.startsecond);
@@ -125,11 +131,11 @@ Game.prototype.update = function(io) {
 	});
 
 	var updatedGame = tools.buildUpdated(this);
-	console.log(updatedGame);
-	//if(Object.keys(updatedGame).length) console.log(updatedGame);
+	// console.log(updatedGame);
+	if(Object.keys(updatedGame).length) console.log(updatedGame);
 	io.sockets.emit('update_clients', {time: this.currentSec, update: updatedGame});
 	
-	setTimeout( this.update.bind(this, io) , 60);
+	setTimeout( this.update.bind(this, io) , 90);
 	
 };
 
@@ -150,10 +156,19 @@ Game.prototype.addUpdate = function(arg){
 	}
 }
 
-Game.prototype.start = function(io){
-	io.sockets.emit("startgame_client", {game: this, grid: this.grid, objects: this.objects});
+Game.prototype.start = function(socket){
+	socket.emit("startgame_client", {game: this, grid: this.grid, objects: this.objects});
+
 };
 
+
+Game.prototype.isStarted = function(){
+	return this.started;	
+};
+
+Game.prototype.send = function(socket){
+	socket.emit("send_game", {game: this, grid: this.grid, objects: this.objects});
+};
 
 Game.prototype.collide = function(agent){
 	if(agent.x + agent.width > this.pixels.width || agent.y + agent.height > this.pixels.height || agent.x < 0 || agent.y < 0) return true;
@@ -213,10 +228,7 @@ Game.prototype.forAllHardGridObjects = function(func){
 		for(var y = 0; y < this.grid[x].length; y++){
 			node = this.grid[x][y];
 			if(node.contains && node.contains.hard){
-
 				if(func(node.contains)) result = true;
-
-
 			}
 		}
 	}
@@ -376,7 +388,15 @@ Game.prototype.addPlayer = function(name, master){
 		
 	var allMax = true;
 	var aTeam = "";
-	
+
+	this.playersCount++;
+	this.addUpdate("playersCount");
+
+	var host = false;
+	if(Object.keys(this.players).length == 0){
+		host = true;
+	}
+
 	for(var tName in this.teams){
 		
 		var tLength = this.teams[tName].playersCount;
@@ -387,12 +407,13 @@ Game.prototype.addPlayer = function(name, master){
 		
 		if(tLength < this.currentTeamMax){
 			
-			newPlayer = new Player({name: name, team: tName, master: master})
+			newPlayer = new Player({name: name, team: tName, master: master, host: host})
 			newPlayer.addUpdate("all");
 			newPlayer.spawn();
 			this.players[name] = newPlayer;
 			this.teams[tName].playersCount++;
 			this.addUpdate("players");
+		
 			return newPlayer;
 			
 			break;
@@ -405,12 +426,13 @@ Game.prototype.addPlayer = function(name, master){
 		
 		this.currentTeamMax++;
 
-		newPlayer = new Player({name: name, team: aTeam})
+		newPlayer = new Player({name: name, team: aTeam, host:host})
 		newPlayer.addUpdate("all");
 		newPlayer.spawn();
 		this.players[name] = newPlayer;
 		this.teams[aTeam].playersCount++;
 		this.addUpdate("players");
+
 		return newPlayer;
 	}
 }

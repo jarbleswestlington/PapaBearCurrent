@@ -1,11 +1,106 @@
 body, canvas{
 	padding:0px;
 	margin:0px;
-	background:white;
-	overflow-y:hidden;
+	background:black !important;
 	font-family:Helvetica;
 
 }
+
+.mobile-warning{
+	font-weight:600;
+	font-size:25px;
+	color:white;
+	margin-top:30px;
+
+}
+
+.pointer{
+	cursor:pointer;
+}
+
+
+button{
+	background-color:white;
+	color:rgb(220, 100,100) !important;
+	width:100%;
+	position:relative;
+	top:-5px;
+	font-weight:600 !important;
+
+}
+
+.no-padding{
+	padding:0px !important;
+}
+
+.logo{
+	position:absolute;
+	bottom:-10px;
+	left:-3px;
+}
+
+.disclaimer{
+	font-size:14px;
+	color:#555;
+}
+input{
+	background-color: transparent;
+	border-right:0px;
+	border-top:0px;
+	border-left:0px;
+	width:100%;
+}
+
+#tag-container{
+	bottom:0px;
+	position:fixed;
+
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+    outline: none;
+}
+
+
+a{
+	color:rgb(220, 100,100) !important;
+}
+
+.text{	
+	color:white;
+	text-align:left;
+	font-size:20px;
+}
+
+
+.box{
+	border-radius:0px !important;
+}
+.bear{
+	margin-top:30px;
+	margin-bottom:30px;
+}
+
+p>.inner{
+
+}
+
+#name{
+		margin-top:10px;
+
+}
+
+#name > input{
+	font-weight:600;
+}
+
+#name > label{
+	font-weight:200;
+}
+
 canvas{
 	position:fixed;
 	top:0px;
@@ -24,4 +119,14 @@ canvas{
 }
 #chatInput{
 	width:100%;
+}
+
+#game-started{
+	background-color:rgb(220, 100,100);
+	color:black;
+	width:100%;
+	font-size:40px;
+	text-align:center;
+	font-weight:600;
+	display:none;
 }

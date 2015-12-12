@@ -18,12 +18,10 @@ document.body.appendChild(canvas);
 
 $(document).ready(function() {
 	game.state = 'loading';
-	
 	renderer.state = "loading";
 	
 	game.then = Date.now();
 	game.stateManager();
-
 });
 
 window.onbeforeunload = function (e) {

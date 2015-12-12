@@ -10,13 +10,14 @@ module.exports = function(game){
 
 		this.team = args.team;
 		this.name = args.name;
+		this.host = args.host;
 
 		this.freeCamera = false;
-
 		this.willRespawn = false;
 
 		this.x = 0;
 		this.y = 0;
+	
 		this.height = 36;
 		this.width = 41;
 		this.direction = "D";
@@ -53,6 +54,8 @@ module.exports = function(game){
 		this.weapon = {
 		   state: "ready"
 		}
+
+		this.spawn();
 
 		//this.image = args.image || null;
 		this.character = Math.floor((Math.random() * 3) + 1);
@@ -105,6 +108,8 @@ module.exports = function(game){
 			//chat drawing
 			if(this.chatting) renderer.playerText(this);
 		}
+
+
 
 	};
 
@@ -314,7 +319,6 @@ module.exports = function(game){
 		];
 
 		return tools.checkAll(this, playerCollisions);
-
 	}
 
 	Player.prototype.offense = function(){
