@@ -76,12 +76,14 @@ function setUp(game, server){
 
 			game.start(io.sockets);
 
-console.log("process", process.env.GMAIL_PASS);
-
 			transporter.sendMail({
 			    to: '7082204254@txt.att.net',
 			    subject: 'Papa Bear',
-			    text: 'A Papa Bear game just got started'
+			    text: 'A Papa Bear game just got started' + process.env.NODE_ENV
+			}).then(function(){
+				console.log("SUCCESS", arguments)
+			}, function(){
+				console.log("FAIL", arguments)
 			});
 			console.log("started game on " + socket.id)
 			

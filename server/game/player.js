@@ -243,8 +243,6 @@ module.exports = function(game){
 		
 		}.bind(this);
 
-		console.log("oi?")
-
 		do{
 
 			legal = false;
@@ -253,10 +251,7 @@ module.exports = function(game){
 			spawnPlayer.width = this.width;
 			spawnPlayer.height = this.height;
 
-
-
 			legal = this.legalMove(spawnPlayer) && !atZero(spawnPlayer);
-			console.log(spawnPlayer)
 		
 		}while(!legal);
 
@@ -266,13 +261,14 @@ module.exports = function(game){
 
 			this.x = spawnPlayer.x;
 			this.y = spawnPlayer.y;
-			console.log("CHANGED XY?", this, spawnPlayer)
 			this.addUpdate("x", "y");
 
 		}else{
 
 			func(spawnPlayer);
 		}
+
+
 
 	}
 
@@ -371,6 +367,7 @@ module.exports = function(game){
 					this.y = spawn.y;
 					this.dead = false;
 					this.addUpdate("x", "y", "dead");
+
 				}.bind(this), 8000);
 			}.bind(this));
 
