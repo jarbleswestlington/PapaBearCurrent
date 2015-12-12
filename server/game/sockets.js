@@ -16,8 +16,8 @@ var transporter = nodemailer.createTransport({
     }
 });
 
+console.log("GMAILPASS", process.env.GMAIL_PASS)
 
-// console.log("NON NESTED", GMAIL_PASS)
 var localio;
 var access = {};
 access.emit = function(name, data){
@@ -79,7 +79,7 @@ function setUp(game, server){
 			transporter.sendMail({
 			    to: '7082204254@txt.att.net',
 			    subject: 'Papa Bear',
-			    text: 'A Papa Bear game just got started' + process.env.NODE_ENV
+			    text: 'A Papa Bear game just got started' + (process.env.NODE_ENV || "dev")
 			}).then(function(){
 				console.log("SUCCESS", arguments)
 			}, function(){
