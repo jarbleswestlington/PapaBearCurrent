@@ -16,8 +16,6 @@ var transporter = nodemailer.createTransport({
     }
 });
 
-console.log("YAHOOPASS", process.env.YAHOO_PASS)
-
 var localio;
 var access = {};
 access.emit = function(name, data){
@@ -79,12 +77,9 @@ function setUp(game, server){
 			transporter.sendMail({
 			    to: '7082204254@txt.att.net',
 			    subject: 'Papa Bear',
-			    text: 'A Papa Bear game just got started' + (process.env.NODE_ENV || "dev")
-			}).then(function(){
-				console.log("SUCCESS", arguments)
-			}, function(){
-				console.log("FAIL", arguments)
-			});
+			    text: 'A Papa Bear game was started at ' + new Date().getTime()
+ + " " + (process.env.NODE_ENV || "dev")
+			})
 			console.log("started game on " + socket.id)
 			
 		});
