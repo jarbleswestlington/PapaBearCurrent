@@ -59,7 +59,7 @@ function Game(width, height){
 	this.pixels = {width: width * 78, height: height * 78};
 	this.teams = {};
 
-	this.timeLimit = 72;
+	this.timeLimit = 720;
 		
 	this.currentSec = 0;
 	
