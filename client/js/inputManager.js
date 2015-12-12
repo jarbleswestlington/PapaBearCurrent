@@ -175,7 +175,7 @@ inputManager.masterKeys = function(modifier){
 		if(this.pressable.enter){
 			this.pressable.enter = false;
 			if(game.state == "game"){
-				socket.emit("startgame_server", {});
+				// socket.emit("startgame_server", {});
 			}else{
 				socket.emit("startgame_server", {});
 			}
