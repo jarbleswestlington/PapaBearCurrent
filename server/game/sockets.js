@@ -5,8 +5,8 @@ var nodemailer = require('nodemailer');
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'pedigojon@gmail.com',
-        pass: process.env.GMAIL_PASS,
+        user: 'papabeargame@yahoo.com',
+        pass: process.env.YAHOO_PASS,
     }
 }, {
     // default values for sendMail method
@@ -16,7 +16,7 @@ var transporter = nodemailer.createTransport({
     }
 });
 
-console.log("GMAILPASS", process.env.GMAIL_PASS)
+console.log("YAHOOPASS", process.env.YAHOO_PASS)
 
 var localio;
 var access = {};
