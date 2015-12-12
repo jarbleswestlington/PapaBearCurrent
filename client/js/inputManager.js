@@ -30,6 +30,7 @@ inputManager.clear = function(){
 }
 
 inputManager.processInput = function(modifier){
+	if(!user.server) return;
 	this.check();
 	
 	if(13 in inputManager.keys){

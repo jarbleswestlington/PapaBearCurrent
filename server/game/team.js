@@ -108,6 +108,12 @@ module.exports = function(game, io){
 		else return false;
 	}
 
+	Team.prototype.reset = function(){
+		this.score = 0;
+		this.playersCount = 0;
+		this.updated = {};
+	}
+
 	return Team;
 };
 

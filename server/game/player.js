@@ -55,8 +55,6 @@ module.exports = function(game){
 		   state: "ready"
 		}
 
-		this.spawn();
-
 		//this.image = args.image || null;
 		this.character = Math.floor((Math.random() * 3) + 1);
 		this.draw = function(){
@@ -135,20 +133,20 @@ module.exports = function(game){
 
 		io.sockets.emit('play_sound', {sound: soundToPlay, coords: {x:this.x, y: this.y}, level: 15} );
 
-		//footprints
-		var coords = this.getFootCoordinates();
+		// //footprints
+		// var coords = this.getFootCoordinates();
 
-		var obj = {type: "footprint", img: "footprint", tag: "footprint", hard: false, x: coords.x, y: coords.y};
-		var newObj = new Obj(obj)
-		game.objects.push(newObj);
-		var index = game.objects.length-1;
+		// var obj = {type: "footprint", img: "footprint", tag: "footprint", hard: false, x: coords.x, y: coords.y};
+		// var newObj = new Obj(obj)
+		// game.objects.push(newObj);
+		// var index = game.objects.length-1;
 
-		io.sockets.emit('add_object', newObj);
+		// io.sockets.emit('add_object', newObj);
 
-		setTimeout(function(){
-			io.sockets.emit('remove_object', {index: index});
+		// setTimeout(function(){
+		// 	io.sockets.emit('remove_object', {index: index});
 
-		}, 15000)
+		// }, 15000)
 
 	};
 
@@ -214,6 +212,8 @@ module.exports = function(game){
 		}else{
 			this.dummy.x = this.x;
 			this.dummy.y = this.y;
+			this.addUpdate("x", "y");
+
 		}
 
 		this.defense();
@@ -222,8 +222,12 @@ module.exports = function(game){
 
 	Player.prototype.spawn = function(func){
 
+		var atZero = function(coords){
+			return coords.x == 0 && coords.y == 0;
+		}
+
 		var spawnCoords = {};
-		var free = true;
+		var legal = false;
 
 		var getXY = function(){
 
@@ -239,6 +243,8 @@ module.exports = function(game){
 		
 		}.bind(this);
 
+		console.log("oi?")
+
 		do{
 
 			legal = false;
@@ -247,7 +253,10 @@ module.exports = function(game){
 			spawnPlayer.width = this.width;
 			spawnPlayer.height = this.height;
 
-			legal = this.legalMove(spawnPlayer);
+
+
+			legal = this.legalMove(spawnPlayer) && !atZero(spawnPlayer);
+			console.log(spawnPlayer)
 		
 		}while(!legal);
 
@@ -257,6 +266,7 @@ module.exports = function(game){
 
 			this.x = spawnPlayer.x;
 			this.y = spawnPlayer.y;
+			console.log("CHANGED XY?", this, spawnPlayer)
 			this.addUpdate("x", "y");
 
 		}else{

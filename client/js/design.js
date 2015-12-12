@@ -554,7 +554,13 @@ renderer["intro"] = function(style){
 
 	if(user.server.host){
 
-		text.push("There are " + Object.keys(game.server.players).length + " players ready to play");
+		var counter = 0;
+
+		for(var player in game.server.players){
+			if(!player.removed) counter++;
+		}
+
+		text.push("There are " + counter + " players ready to play");
 		text.push("You are the host. When everyone is ready, press enter to start the game!");
 
 	}else{

@@ -3,41 +3,6 @@
 <head>
 	<title>No Fair, Papa Bear</title>
 	<link href = "/css/style.css" type = "text/css" rel = "stylesheet">
-<body>
-	<div class = "container-fluid" id = "container">
-	<div class = "hidden-sm hidden-md hidden-lg hidden-xl mobile-warning col-xs-12">Yeah, we appreciate you visiting our game, but its just not gonna work on a screen this small</div>
-	<div class = "col-sm-2 col-xs-12 col-sm-offset-5 bear"><img id = "bear" class = "img-responsive" src = "/images/bear.jpg"><img class = "logo img-responsive" src = "/images/papabearlogo.png"></div>
-	<div class = "text">
-		<span class = "col-xs-12 col-sm-6 col-sm-offset-3 inner">
-		Welcome to No Fair, Papa Bear.
-		This is a game that is about chopping wood with your friends.
-		Thats all! I swear, there is nothing else!
-
-		 <a role="button" data-toggle="collapse" href=".disclaimer" aria-expanded="false" aria-controls="collapseExample">
-		  Click for help setting up a game
-		</a>
-<br><br>
-				<div class = "collapse disclaimer">
-
-							<div class = "box well">
-We recommend playing this game with at least 9 players, and a maximum of 15. Make sure everyone has a <strong>great wifi-connection and is using Google Chrome</strong>. The first player to log on will be the host. Since this project is free, we can only support one game at a time. So there may already be one in progress!
-</div>
-
-</div>
-
-		<span id = "name"> <label >Enter your woodcutter name below </label><input id = "name-input" class = "col-sm-9 col-xs-12 no-padding" type = "text" name = "name">
-				<button class = "col-xs-12 col-sm-3 pointer" id = "submit-name" >Play</button>
-</span>
-
-<br><br>
-
-				<div id = "game-started"></div>
-
-		</span>
-
-
-	</div>
-	</div>
 
 
 		<script src='/lib/jquery.js'></script>
@@ -49,14 +14,59 @@ We recommend playing this game with at least 9 players, and a maximum of 15. Mak
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
+<body>
+	<div class = "container-fluid" id = "container">
+	<div class = "hidden-sm hidden-md hidden-lg hidden-xl mobile-warning col-xs-12">Yeah, we appreciate you visiting our game, but its just not gonna work on a screen this small</div>
+	<div class = "col-sm-2 col-xs-12 col-sm-offset-5 bear"><img id = "bear" class = "img-responsive" src = "/images/bear.jpg"><img class = "logo img-responsive" src = "/images/papabearlogo.png"></div>
+	<div class = "text">
+		<span class = "col-xs-12 col-sm-6 col-sm-offset-3 inner">
+		Welcome to No Fair, Papa Bear.
+		This is an online multiplayer game that is about chopping wood with your friends.
+		Thats all! I swear, there is nothing else!
+
+		 <a role="button" data-toggle="collapse" href=".disclaimer" aria-expanded="false" aria-controls="collapseExample">
+		  Click for help setting up a game
+		</a>
+<br><br>
+				<div class = "collapse disclaimer">
+
+							<div class = "box well">
+We recommend playing this game with at least 9 players, and a maximum of 15. Make sure everyone has a <strong>great wifi-connection and is using Google Chrome</strong>. You should also recommend everyone to turn their sound on. The first player to log on will be the host. Since this project is free, we can only support one game at a time. So there may already be one in progress!
+</div>
+
+</div>
+
+		<span id = "name"> <label >Enter your woodcutter name below </label><input id = "name-input" class = "col-sm-9 col-xs-12 no-padding index" type = "text" name = "name">
+				<button class = "col-xs-12 col-sm-3 pointer" id = "submit-name" >Play</button>
+</span>
+
+<br><br>
+
+				<div id = "game-started"></div>
+
+		</span>
+
+
+
+	</div>
+
+
+		<div id = "footer" class = "col-xs-6 col-sm-offset-3 hidden-xs">
+		<a href = "https://github.com/jarbleswestlington/PapaBearCurrent">Made</a> by <a href = "http://jrportfolio.herokuapp.com">Honan (Jon Pedigo)</a> and <a href = "http://github.com/jarbleswestlington">Gary Gould</a>. 
+
+	</div>
+	</div>
+
+
+
 
 		<script>
-		
+
 		$.ajax({
 		  url: "api/game/started",
 		  success: function(data){
 		  	if(data.started){
-		  		$("#game-started").text("Game currently in progress!");
+		  		$("#game-started").text("Game currently in progress");
 		  		$("#game-started").css({display:"block"});
 
 		  	}else{

@@ -1,6 +1,21 @@
 var powers = require('./powers.js').powers;
 var Obj = require('./objects.js').Obj;
 
+var nodemailer = require('nodemailer');
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'pedigojon@gmail.com',
+        pass: process.env.GMAIL_PASS,
+    }
+}, {
+    // default values for sendMail method
+    from: 'pedigojon@gmail.com',
+    headers: {
+        'Hi': '123'
+    }
+});
+
 var localio;
 var access = {};
 access.emit = function(name, data){
@@ -21,6 +36,8 @@ function setUp(game, server){
 		game.send(socket);
 
 		if(game.updating == false) game.update(io);
+
+		if(game.started) game.start(socket);
 		
 		socket.on("drop_log", function(data){
 			var player = game.findPlayerByName(data.name)
@@ -41,6 +58,8 @@ function setUp(game, server){
 			
 			if(!player) player = game.addPlayer(data.name, data.master);
 
+			player.spawn();
+
 			game.elephant[data.name].emit("name_confirmed", {player: player});
 
 		});
@@ -55,6 +74,11 @@ function setUp(game, server){
 
 			game.start(io.sockets);
 
+			transporter.sendMail({
+			    to: '7082204254@txt.att.net',
+			    subject: 'Papa Bear',
+			    text: 'A Papa Bear game just got started'
+			});
 			console.log("started game on " + socket.id)
 			
 		});
@@ -283,7 +307,7 @@ function setUp(game, server){
 			game.playersCount--;
 			game.addUpdate("playersCount");
 
-
+			if(player.host) game.hasHost = false;
 			player.addUpdate("removed");
 		});
 	});

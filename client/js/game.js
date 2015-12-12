@@ -1,9 +1,8 @@
 //setUp Game object;
 var game = {
-	
+	timeLimit:72,
 	connected:false,
 	gameState:"init",
-	timeLimit:720,
 	currentSec:0,
 	server:null,
 	saved:{
@@ -179,11 +178,13 @@ game.stateManager = function () {
 	    if(user.mode == "player"){	
 			// inputManager.processInput(delta/1000);
 			game.update(delta / 1000);	
-		} 
+		} else{
+			game.processUpdatePackets();
+
+		}
 				
 		renderer.state = "game";
 		
-		//endgame
 		if(game.timeLimit - game.currentSec <= 0){
 			game.state = "won";
 		}
@@ -193,6 +194,11 @@ game.stateManager = function () {
 	if(game.state == "won"){
 		
 		renderer.state = "score";
+
+		// if(!window.reload) window.reload = setTimeout(function(){
+		// 	window.location.href = "/";
+
+		// }, 15000)
 
 	}
 	

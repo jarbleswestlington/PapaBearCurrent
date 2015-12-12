@@ -4,6 +4,7 @@ var Note = require('./objects.js').Note;
 var tools = require('./tools.js');
 var Player = require('./player.js')(oneGame);
 
+
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -57,6 +58,8 @@ function Game(width, height){
 	this.size = {width: width, height: width};
 	this.pixels = {width: width * 78, height: height * 78};
 	this.teams = {};
+
+	this.timeLimit = 72;
 		
 	this.currentSec = 0;
 	
@@ -79,9 +82,9 @@ function Game(width, height){
 	
 	this.hasHost = false;
 
-	Object.defineProperty(this, 'grid', {value: buildGrid(width, height), enumerable: false});
-	Object.defineProperty(this, 'elephant', {value: {}, enumerable: false});
-	Object.defineProperty(this, 'objects', {value: [], enumerable: false});
+	Object.defineProperty(this, 'grid', {value: buildGrid(width, height), enumerable: false, configurable: true});
+	Object.defineProperty(this, 'elephant', {value: {}, enumerable: false, configurable: true});
+	Object.defineProperty(this, 'objects', {value: [], enumerable: false, configurable: true});
 
 	this.draw = function(){
 		//tiled background
@@ -124,7 +127,9 @@ Game.prototype.update = function(io) {
 	this.updating = true;
 			
 	var now = new Date().getTime() / 1000;
-	this.currentSec = Math.floor(now - this.startsecond);
+	if(this.startsecond) this.currentSec = Math.floor(now - this.startsecond);
+
+	if(this.currentSec > this.timeLimit) return this.end();
 
 	this.forAllPlayers(function(player){
 		player.update(io);
@@ -135,9 +140,38 @@ Game.prototype.update = function(io) {
 	if(Object.keys(updatedGame).length) console.log(updatedGame);
 	io.sockets.emit('update_clients', {time: this.currentSec, update: updatedGame});
 	
-	setTimeout( this.update.bind(this, io) , 90);
+	setTimeout( this.update.bind(this, io) , 60);
 	
 };
+
+Game.prototype.end = function(){
+	console.log('Game ending');
+	this.updated = {};
+	this.updating = false;
+	this.currentSec = 0;
+	this.playerCount = 0;
+	this.started = false;
+	this.currentTeamMax = 1;
+	this.packets = [];
+	this.players = {};
+	this.powerStats = {};
+	this.hasHost = false;
+	this.startsecond = null;
+	this.state = "init";
+
+	for(var name in this.teams){
+		this.teams[name].reset();
+	}
+
+	Object.defineProperty(this, 'elephant', {value: {}, enumerable: false, configurable: true});
+	Object.defineProperty(this, 'objects', {value: [], enumerable: false, configurable: true});
+
+	for(var socket in this.elephant){
+		this.elephant[socket].disconnect();
+	}
+
+	this.generate();
+}
 
 Game.prototype.addUpdate = function(arg){
 	if(arg == "all"){
@@ -157,8 +191,8 @@ Game.prototype.addUpdate = function(arg){
 }
 
 Game.prototype.start = function(socket){
-	socket.emit("startgame_client", {game: this, grid: this.grid, objects: this.objects});
 
+	socket.emit("startgame_client", {game: this, grid: this.grid, objects: this.objects});
 };
 
 
@@ -343,6 +377,10 @@ Game.prototype.generate = function(){
 			if(this.inTerritory("team", {x:x, y: y})){
 
 			}else if( this.inTerritory("boulder", {x:x, y:y}) ){
+
+			}else if( this.inTerritory("tree", {x:x, y:y}) ){
+
+				this.grid[x][y].contains = new Tree (x, y);
 				
 			}else if( this.inTerritory("forest", {x:x, y:y}) ){
 
@@ -393,8 +431,9 @@ Game.prototype.addPlayer = function(name, master){
 	this.addUpdate("playersCount");
 
 	var host = false;
-	if(Object.keys(this.players).length == 0){
+	if(!master && (Object.keys(this.players).length == 0 || !this.hasHost)){
 		host = true;
+		this.hasHost = true;
 	}
 
 	for(var tName in this.teams){

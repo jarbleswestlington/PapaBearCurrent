@@ -27,9 +27,12 @@ module.exports = function(game, io){
 	new Team("red", {x: 16, y: 43, width: 7, height: 5});
 	new Team("green", {x: 42, y: 21, width: 10, height: 8});
 	
+
 	game.defineTerritory("forest", {x: 0, y: 0, height: game.size.height, width: 5});
 	game.defineTerritory("forest", {x: 0, y: 0, height: 5, width: game.size.width});
 	
+	game.defineTerritory("tree", {x: 0, y: 0, height: 1, width: 1});
+
 	game.defineTerritory("boulder", {x: 27, y: 27, height: 5, width: 5});
 
 
@@ -40,7 +43,7 @@ module.exports = function(game, io){
 	 x: 2220,
 	 y: 2220,
 	 width: 169,
-	 height: 189, 
+	 height: 122, 
 	});
 	game.objects.push(boulder);
 

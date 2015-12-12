@@ -43,18 +43,18 @@ button{
 	font-size:14px;
 	color:#555;
 }
-input{
+input,.index{
 	background-color: transparent;
-	border-right:0px;
 	border-top:0px;
-	border-left:0px;
-	width:100%;
 }
 
-#tag-container{
-	bottom:0px;
+#footer{
+	color:#666;
+	bottom:4px;
 	position:fixed;
-
+	text-align:left;
+	font-size:15px;
+	margin-left:332.5;
 }
 
 input:focus,
@@ -80,7 +80,6 @@ a{
 	border-radius:0px !important;
 }
 .bear{
-	margin-top:30px;
 	margin-bottom:30px;
 }
 
@@ -119,9 +118,21 @@ canvas{
 }
 #chatInput{
 	width:100%;
+	background-color:transparent;
+	color:white;
+	border:none;
+	font-size:20px;
 }
 
+#footer{
+
+}
+
+
+
 #game-started{
+	margin-top:10px;
+	padding:10px;
 	background-color:rgb(220, 100,100);
 	color:black;
 	width:100%;

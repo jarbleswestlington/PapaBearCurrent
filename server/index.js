@@ -1,3 +1,4 @@
+var env = require('./env/index');
 
 var game = require('./game/game');
 
