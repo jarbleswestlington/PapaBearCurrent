@@ -3,14 +3,14 @@ var Obj = require('./objects.js').Obj;
 
 var nodemailer = require('nodemailer');
 var transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: 'yahoo',
     auth: {
         user: 'papabeargame@yahoo.com',
         pass: process.env.YAHOO_PASS,
     }
 }, {
     // default values for sendMail method
-    from: 'pedigojon@gmail.com',
+    from: 'papabeargame@yahoo.com',
     headers: {
         'Hi': '123'
     }
