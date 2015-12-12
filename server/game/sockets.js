@@ -16,6 +16,9 @@ var transporter = nodemailer.createTransport({
     }
 });
 
+
+console.log("NON NESTED", GMAIL_PASS)
+console.log("process", process.env.GMAIL_PASS);
 var localio;
 var access = {};
 access.emit = function(name, data){
