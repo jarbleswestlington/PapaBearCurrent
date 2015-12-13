@@ -35,7 +35,6 @@ module.exports = function(game, io){
 
 	game.defineTerritory("boulder", {x: 27, y: 27, height: 5, width: 5});
 
-
 	var boulder = new Obj({
 	 type: "boulder",
 	 tag: "boulder",

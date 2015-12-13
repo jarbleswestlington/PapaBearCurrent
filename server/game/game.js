@@ -3,7 +3,7 @@ var Tree = require('./objects.js').Tree;
 var Note = require('./objects.js').Note;
 var tools = require('./tools.js');
 var Player = require('./player.js')(oneGame);
-
+var Obj = require('./object.js').Obj;
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -159,12 +159,25 @@ Game.prototype.end = function(){
 	this.startsecond = null;
 	this.state = "init";
 
+
+
 	for(var name in this.teams){
 		this.teams[name].reset();
 	}
 
 	Object.defineProperty(this, 'elephant', {value: {}, enumerable: false, configurable: true});
 	Object.defineProperty(this, 'objects', {value: [], enumerable: false, configurable: true});
+
+	var boulder = new Obj({
+	 type: "boulder",
+	 tag: "boulder",
+	 hard: true,
+	 x: 2220,
+	 y: 2220,
+	 width: 169,
+	 height: 122, 
+	});
+	this.objects.push(boulder);
 
 	for(var socket in this.elephant){
 		this.elephant[socket].disconnect();
