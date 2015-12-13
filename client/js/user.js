@@ -411,6 +411,7 @@ user.move = function(modifier){
 		if(game.server.testing){
 
 			game.forAllPlayers(function(player){
+				console.log("1 player")
 				socket.emit('move_input', {direction: player.direction, name: player.name, amount: 1});
 				game.packetsSentSinceUpdate++;
 			});
