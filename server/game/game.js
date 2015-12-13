@@ -51,7 +51,7 @@ function GridNode(data){
 function Game(width, height){
 	this.updated = {};
 
-	this.testing = true;
+	this.testing = false;
 
 	this.updating = false;
 
