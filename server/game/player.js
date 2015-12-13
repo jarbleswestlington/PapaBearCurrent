@@ -222,12 +222,7 @@ module.exports = function(game){
 
 	Player.prototype.spawn = function(func){
 
-		var atZero = function(coords){
-			return coords.x == 0 && coords.y == 0;
-		}
-
 		var spawnCoords = {};
-		var legal = false;
 
 		var getXY = function(){
 
@@ -251,7 +246,7 @@ module.exports = function(game){
 			spawnPlayer.width = this.width;
 			spawnPlayer.height = this.height;
 
-			legal = this.legalMove(spawnPlayer) && !atZero(spawnPlayer);
+			legal = this.legalMove(spawnPlayer);
 		
 		}while(!legal);
 
@@ -365,9 +360,10 @@ module.exports = function(game){
 				setTimeout(function() { 
 					this.x = spawn.x;
 					this.y = spawn.y;
+					this.dummy.x = spawn.x;
+					this.dummy.y = spawn.y;
 					this.dead = false;
 					this.addUpdate("x", "y", "dead");
-
 				}.bind(this), 8000);
 			}.bind(this));
 
