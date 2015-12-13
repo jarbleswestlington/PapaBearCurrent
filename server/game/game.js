@@ -3,7 +3,7 @@ var Tree = require('./objects.js').Tree;
 var Note = require('./objects.js').Note;
 var tools = require('./tools.js');
 var Player = require('./player.js')(oneGame);
-var Obj = require('./object.js').Obj;
+var Obj = require('./objects.js').Obj;
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
