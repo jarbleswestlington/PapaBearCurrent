@@ -151,7 +151,7 @@ user.interactWBase = function(){
 			
 		game.forAllTeams(function(team){
 			
-			if(tools.checkCollision(this.server, team.base, 41, 36, 140, 84, -25, -25)){
+			if(tools.checkCollision(this.server, team.base, 41, 36, 140, 84, -35, -25)){
 		
 				if(this.server.team == team.name){
 
