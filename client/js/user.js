@@ -44,10 +44,10 @@ user.client.weapon.renderData = {
 	},
 
 	"attacking": {
-	    "U": {x: -42, y: 12, image: "swordU" },               
-	    "D": {x: 41, y: 12, image: "swordD" },
-	    "L": {x: 10, y: 38, image: "swordR" },
-	    "R": {x: 10, y: -42, image: "swordL"}
+	 "U": {x: -42, y: 12 - 56, image: "swordU2" },               
+	 "D": {x: 41 - 78, y: 12, image: "swordD2" },
+	 "L": {x: 10 -56, y: 38 - 78, image: "swordL2" },
+	 "R": {x: 10, y: -42, image: "swordR2"},
 	},
 
 	"blur": {

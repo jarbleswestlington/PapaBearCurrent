@@ -101,7 +101,7 @@ module.exports = function(game){
 			}	
 		
 		    var weapon = user.client.weapon;
-			if(this.weapon.state == "attacking") weapon.renderData.drawBlur(this, weapon.renderData.blur[this.direction]);
+			// if(this.weapon.state == "attacking") weapon.renderData.drawBlur(this, weapon.renderData.blur[this.direction]);
 		    if(weapon.renderData[this.weapon.state]) renderer.drawImageRelative(weapon.renderData[this.weapon.state][this.direction], this);
 			//chat drawing
 			if(this.chatting) renderer.playerText(this);
