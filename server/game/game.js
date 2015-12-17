@@ -254,7 +254,10 @@ Game.prototype.forAllRelevantHardGridObjects = function(func, coords){
 	for(var x = gridX; x < (gridX + 2); x++){
 		for(var y = gridY; y < (gridY + 2); y++){
 			
-			node = this.grid[x][y];
+			if(x >= this.size.width) return true;
+			if(y >= this.size.height) return true;
+
+			var node = this.grid[x][y];
 			if(node.contains && node.contains.hard){
 
 				if(func(node.contains)) result = true;
@@ -273,7 +276,7 @@ Game.prototype.forAllHardGridObjects = function(func){
 
 	for(var x = 0; x < this.grid.length; x++){
 		for(var y = 0; y < this.grid[x].length; y++){
-			node = this.grid[x][y];
+			var node = this.grid[x][y];
 			if(node.contains && node.contains.hard){
 				if(func(node.contains)) result = true;
 			}
