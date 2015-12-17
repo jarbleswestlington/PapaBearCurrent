@@ -124,14 +124,14 @@ module.exports = function(game){
 
 	function walkEffects(io){
 
-		//footsteps
-		var soundToPlay = "step1";
-		if(this.stepToggle){
-			this.stepToggle = false;
-			soundToPlay = "step2";
-		}else this.stepToggle = true;
+		// //footsteps
+		// var soundToPlay = "step1";
+		// if(this.stepToggle){
+		// 	this.stepToggle = false;
+		// 	soundToPlay = "step2";
+		// }else this.stepToggle = true;
 
-		io.sockets.emit('play_sound', {sound: soundToPlay, coords: {x:this.x, y: this.y}, level: 15} );
+		// io.sockets.emit('play_sound', {sound: soundToPlay, coords: {x:this.x, y: this.y}, level: 15} );
 
 		// //footprints
 		// var coords = this.getFootCoordinates();
